@@ -12,6 +12,7 @@ import type ms from 'ms'
     })],
     controllers: [AuthController],
     providers: [AuthService],
+    exports: [AuthService],
 })
 
 export class AuthModule {}
