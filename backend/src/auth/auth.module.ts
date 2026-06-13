@@ -1,18 +1,20 @@
-import { Module } from '@nestjs/common'
-import { AuthService} from './auth.service'
-import { AuthController} from './auth.controller'
-import { JwtModule } from '@nestjs/jwt'
-import type ms from 'ms'
+import { Module } from '@nestjs/common';
+import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { JwtStrategy } from './jwt.strategy';
 
 @Module({
-    imports: [
-        JwtModule.register({
-            secret: process.env.JWT_SECRET!,
-            signOptions: { expiresIn: process.env.JWT_EXPIRES_IN as ms.StringValue || '7d' },
-    })],
-    controllers: [AuthController],
-    providers: [AuthService],
-    exports: [AuthService],
+  imports: [
+    PassportModule,
+    JwtModule.register({
+      secret: process.env.JWT_SECRET || 'dev_super_secret_change_me',
+      signOptions: { expiresIn: '7d' },
+    }),
+  ],
+  controllers: [AuthController],
+  providers: [AuthService, JwtStrategy],
+  exports: [AuthService],
 })
-
 export class AuthModule {}
