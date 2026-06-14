@@ -25,6 +25,7 @@ model User {
   resumes      Resume[]
   jobs         Job[]
   applications  Application[]
+  aiRuns       AiRun[]
 }
 
 model Resume {
@@ -88,4 +89,27 @@ model Analysis {
   suggestions   Json?
 
   createdAt DateTime @default(now())
+}
+
+model AiRun {
+  id            String   @id @default(uuid())
+
+  userId        String?
+  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  endpoint      String
+  model         String
+  promptVersion String
+
+  tokensIn      Int      @default(0)
+  tokensOut     Int      @default(0)
+  totalTokens   Int      @default(0)
+
+  latencyMs     Int      @default(0)
+  retries       Int      @default(0)
+
+  status        String
+  errorType     String?
+
+  createdAt     DateTime @default(now())
 }

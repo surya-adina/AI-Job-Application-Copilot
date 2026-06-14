@@ -9,9 +9,10 @@ import { HealthController } from './health.controller';
 import { ResumesModule } from './resumes/resumes.module';
 import { JobsModule } from './jobs/jobs.module';
 import { ApplicationsModule } from './applications/applications.module';
+import { AnalysesModule } from './analyses/analyses.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, AuthModule, ResumesModule, JobsModule, ApplicationsModule],
+  imports: [PrismaModule, UsersModule, AuthModule, ResumesModule, JobsModule, ApplicationsModule, AnalysesModule],
   controllers: [AppController, AuthController, HealthController],
   providers: [AppService],
 })
