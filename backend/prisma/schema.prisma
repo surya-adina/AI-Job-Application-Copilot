@@ -7,9 +7,85 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum ApplicationStatus {
+  SAVED
+  APPLIED
+  INTERVIEWING
+  OFFER
+  REJECTED
+  WITHDRAWN
+}
+
 model User {
   id           String   @id @default(uuid())
   email        String   @unique
   passwordHash String
   createdAt    DateTime @default(now())
+
+  resumes      Resume[]
+  jobs         Job[]
+  applications  Application[]
+}
+
+model Resume {
+  id          String  @id @default(uuid())
+  userId      String
+  user         User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title       String
+  rawText     String  @db.Text
+
+  applications Application[]
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime  @default(now())
+}
+
+model Job {
+  id          String  @id @default(uuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  company   String?
+  title     String
+  jdText    String   @db.Text
+  sourceUrl String?
+
+  applications Application[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Application {
+  id       String @id @default(uuid())
+  userId   String
+  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  jobId    String
+  job      Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  resumeId String?
+  resume   Resume? @relation(fields: [resumeId], references: [id], onDelete: SetNull)
+
+  status   ApplicationStatus @default(SAVED)
+  notes    String? @db.Text
+
+  analysis Analysis?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Analysis {
+  id            String      @id @default(uuid())
+  applicationId String      @unique
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  score         Float
+  matchedSkills String[]
+  missingSkills String[]
+  strengths     String? @db.Text
+  weaknesses    String? @db.Text
+  suggestions   Json?
+
+  createdAt DateTime @default(now())
 }
