@@ -1,9 +1,13 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AiGatewayService } from '../ai-gateway/ai-gateway.service';
 
 @Injectable()
 export class AnalysesService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private aiGateway: AiGatewayService,
+  ) {}
 
   async createForApplication(userId: string, applicationId: string) {
     const application = await this.prisma.application.findFirst({
@@ -30,21 +34,21 @@ export class AnalysesService {
       throw new ConflictException('Analysis already exists for this application');
     }
 
+    const aiResult = await this.aiGateway.analyze({
+      resume_text: application.resume.rawText,
+      job_description: application.job.jdText,
+    });
+
     return this.prisma.analysis.create({
       data: {
         applicationId,
-        score: 78,
-        matchedSkills: ['React', 'Node.js', 'PostgreSQL', 'Prisma', 'NestJS'],
-        missingSkills: ['AWS', 'Docker', 'OpenTelemetry'],
-        strengths:
-          'Strong full-stack foundation with backend API, Prisma, and PostgreSQL experience.',
-        weaknesses:
-          'Limited visible production deployment, cloud infrastructure, and observability evidence.',
+        score: aiResult.score,
+        matchedSkills: aiResult.matched_skills,
+        missingSkills: aiResult.missing_skills,
+        strengths: aiResult.strengths.join('\n'),
+        weaknesses: aiResult.weaknesses.join('\n'),
         suggestions: {
-          resumeBullets: [
-            'Highlight production-style backend architecture using NestJS, Prisma, and PostgreSQL.',
-            'Add measurable AI infrastructure work such as eval metrics, latency tracking, and token cost logging.',
-          ],
+          recommendations: aiResult.recommendations,
         },
       },
     });
