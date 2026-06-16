@@ -7,13 +7,29 @@ type AnalyzeRequest = {
   job_description: string;
 };
 
-type AnalyzeResponse = {
+type AnalysisPayload = {
   score: number;
   matched_skills: string[];
   missing_skills: string[];
   strengths: string[];
   weaknesses: string[];
   recommendations: string[];
+};
+
+type AiRunMetadata = {
+  endpoint: string;
+  model: string;
+  prompt_version: string;
+  latency_ms: number;
+  tokens_in: number;
+  tokens_out: number;
+  total_tokens: number;
+  status: string;
+};
+
+export type AnalyzeResponse = {
+  analysis: AnalysisPayload;
+  metadata: AiRunMetadata;
 };
 
 @Injectable()

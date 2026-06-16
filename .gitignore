@@ -8,3 +8,9 @@
 # env
 **/.env
 **/.env.*
+
+# Python
+__pycache__/
+*.pyc
+ai-service/.venv/
+ai-service/.env

@@ -1,3 +1,5 @@
+import time
+
 from fastapi import FastAPI
 from pydantic import BaseModel, Field
 
@@ -9,7 +11,7 @@ class AnalyzeRequest(BaseModel):
     job_description: str = Field(..., min_length=50)
 
 
-class AnalyzeResponse(BaseModel):
+class AnalysisPayload(BaseModel):
     score: int
     matched_skills: list[str]
     missing_skills: list[str]
@@ -18,13 +20,32 @@ class AnalyzeResponse(BaseModel):
     recommendations: list[str]
 
 
+class AiRunMetadata(BaseModel):
+    endpoint: str
+    model: str
+    prompt_version: str
+    latency_ms: int
+    tokens_in: int
+    tokens_out: int
+    total_tokens: int
+    status: str
+
+
+class AnalyzeResponse(BaseModel):
+    analysis: AnalysisPayload
+    metadata: AiRunMetadata
+
+
 @app.get("/health")
 def health():
     return {"ok": True}
 
+
 @app.post("/analyze", response_model=AnalyzeResponse)
 def analyze(payload: AnalyzeRequest):
-    return AnalyzeResponse(
+    started_at = time.perf_counter()
+
+    analysis = AnalysisPayload(
         score=78,
         matched_skills=["React", "Node.js", "PostgreSQL", "Prisma"],
         missing_skills=["AWS", "Docker", "OpenTelemetry"],
@@ -41,3 +62,18 @@ def analyze(payload: AnalyzeRequest):
             "Highlight eval harness and token-cost tracking.",
         ],
     )
+
+    latency_ms = int((time.perf_counter() - started_at) * 1000)
+
+    metadata = AiRunMetadata(
+        endpoint="/analyze",
+        model="fake-python-analyzer-v0",
+        prompt_version="analysis-v0",
+        latency_ms=latency_ms,
+        tokens_in=0,
+        tokens_out=0,
+        total_tokens=0,
+        status="SUCCESS",
+    )
+
+    return AnalyzeResponse(analysis=analysis, metadata=metadata)

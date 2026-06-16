@@ -39,16 +39,31 @@ export class AnalysesService {
       job_description: application.job.jdText,
     });
 
+    await this.prisma.aiRun.create({
+      data: {
+        userId,
+        endpoint: aiResult.metadata.endpoint,
+        model: aiResult.metadata.model,
+        promptVersion: aiResult.metadata.prompt_version,
+        tokensIn: aiResult.metadata.tokens_in,
+        tokensOut: aiResult.metadata.tokens_out,
+        totalTokens: aiResult.metadata.total_tokens,
+        latencyMs: aiResult.metadata.latency_ms,
+        retries: 0,
+        status: aiResult.metadata.status,
+      },
+    });
+
     return this.prisma.analysis.create({
       data: {
         applicationId,
-        score: aiResult.score,
-        matchedSkills: aiResult.matched_skills,
-        missingSkills: aiResult.missing_skills,
-        strengths: aiResult.strengths.join('\n'),
-        weaknesses: aiResult.weaknesses.join('\n'),
+        score: aiResult.analysis.score,
+        matchedSkills: aiResult.analysis.matched_skills,
+        missingSkills: aiResult.analysis.missing_skills,
+        strengths: aiResult.analysis.strengths.join('\n'),
+        weaknesses: aiResult.analysis.weaknesses.join('\n'),
         suggestions: {
-          recommendations: aiResult.recommendations,
+          recommendations: aiResult.analysis.recommendations,
         },
       },
     });
