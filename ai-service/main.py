@@ -40,7 +40,7 @@ class AiRunMetadata(BaseModel):
     tokens_out: int
     total_tokens: int
     status: Literal["SUCCESS", "FAILED"]
-
+    error_type: str | None = None
 
 class AnalyzeResponse(BaseModel):
     analysis: AnalysisPayload
@@ -130,6 +130,7 @@ def analyze(payload: AnalyzeRequest):
             tokens_out=0,
             total_tokens=0,
             status="FAILED",
+            error_type="STRUCTURED_OUTPUT_ERROR",
         )
 
         raise HTTPException(
@@ -153,6 +154,7 @@ def analyze(payload: AnalyzeRequest):
             tokens_out=0,
             total_tokens=0,
             status="FAILED",
+            error_type=type(error).__name__,
         )
 
         raise HTTPException(

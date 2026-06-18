@@ -51,6 +51,7 @@ export class AnalysesService {
         latencyMs: aiResult.metadata.latency_ms,
         retries: 0,
         status: aiResult.metadata.status,
+        errorType: aiResult.metadata.error_type ?? null,
       },
     });
 

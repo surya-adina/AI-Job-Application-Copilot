@@ -25,6 +25,7 @@ type AiRunMetadata = {
   tokens_out: number;
   total_tokens: number;
   status: string;
+  error_type?: string | null;
 };
 
 export type AnalyzeResponse = {
