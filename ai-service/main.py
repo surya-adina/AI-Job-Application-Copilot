@@ -1,9 +1,20 @@
+import json
+import os
 import time
+from typing import Literal
 
-from fastapi import FastAPI
-from pydantic import BaseModel, Field
+from dotenv import load_dotenv
+from fastapi import FastAPI, HTTPException
+from openai import OpenAI
+from pydantic import BaseModel, Field, ValidationError
+
+load_dotenv()
 
 app = FastAPI(title="AI Job Application Copilot - AI Service")
+
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+PROMPT_VERSION = "analysis-v1"
 
 
 class AnalyzeRequest(BaseModel):
@@ -12,7 +23,7 @@ class AnalyzeRequest(BaseModel):
 
 
 class AnalysisPayload(BaseModel):
-    score: int
+    score: int = Field(..., ge=0, le=100)
     matched_skills: list[str]
     missing_skills: list[str]
     strengths: list[str]
@@ -28,7 +39,7 @@ class AiRunMetadata(BaseModel):
     tokens_in: int
     tokens_out: int
     total_tokens: int
-    status: str
+    status: Literal["SUCCESS", "FAILED"]
 
 
 class AnalyzeResponse(BaseModel):
@@ -45,35 +56,110 @@ def health():
 def analyze(payload: AnalyzeRequest):
     started_at = time.perf_counter()
 
-    analysis = AnalysisPayload(
-        score=78,
-        matched_skills=["React", "Node.js", "PostgreSQL", "Prisma"],
-        missing_skills=["AWS", "Docker", "OpenTelemetry"],
-        strengths=[
-            "Strong full-stack backend foundation.",
-            "Good experience with TypeScript, PostgreSQL, and structured APIs.",
-        ],
-        weaknesses=[
-            "Limited visible production deployment evidence.",
-            "Cloud and observability experience need stronger proof.",
-        ],
-        recommendations=[
-            "Add measurable AI observability metrics.",
-            "Highlight eval harness and token-cost tracking.",
-        ],
-    )
+    try:
+        response = client.responses.create(
+            model=OPENAI_MODEL,
+            input=[
+                {
+                    "role": "system",
+                    "content": (
+                        "You are an AI job-fit analysis engine. "
+                        "Analyze a resume against a job description. "
+                        "Return ONLY valid JSON matching the requested schema. "
+                        "Do not invent experience not present in the resume."
+                    ),
+                },
+                {
+                    "role": "user",
+                    "content": json.dumps(
+                        {
+                            "resume_text": payload.resume_text,
+                            "job_description": payload.job_description,
+                            "output_schema": {
+                                "score": "integer from 0 to 100",
+                                "matched_skills": "array of strings",
+                                "missing_skills": "array of strings",
+                                "strengths": "array of strings",
+                                "weaknesses": "array of strings",
+                                "recommendations": "array of strings",
+                            },
+                        }
+                    ),
+                },
+            ],
+            text={
+                "format": {
+                    "type": "json_object",
+                }
+            },
+        )
 
-    latency_ms = int((time.perf_counter() - started_at) * 1000)
+        latency_ms = int((time.perf_counter() - started_at) * 1000)
 
-    metadata = AiRunMetadata(
-        endpoint="/analyze",
-        model="fake-python-analyzer-v0",
-        prompt_version="analysis-v0",
-        latency_ms=latency_ms,
-        tokens_in=0,
-        tokens_out=0,
-        total_tokens=0,
-        status="SUCCESS",
-    )
+        raw_text = response.output_text
+        parsed = json.loads(raw_text)
+        analysis = AnalysisPayload(**parsed)
 
-    return AnalyzeResponse(analysis=analysis, metadata=metadata)
+        usage = response.usage
+        tokens_in = usage.input_tokens if usage else 0
+        tokens_out = usage.output_tokens if usage else 0
+        total_tokens = usage.total_tokens if usage else tokens_in + tokens_out
+
+        metadata = AiRunMetadata(
+            endpoint="/analyze",
+            model=OPENAI_MODEL,
+            prompt_version=PROMPT_VERSION,
+            latency_ms=latency_ms,
+            tokens_in=tokens_in,
+            tokens_out=tokens_out,
+            total_tokens=total_tokens,
+            status="SUCCESS",
+        )
+
+        return AnalyzeResponse(analysis=analysis, metadata=metadata)
+
+    except (json.JSONDecodeError, ValidationError) as error:
+        latency_ms = int((time.perf_counter() - started_at) * 1000)
+
+        metadata = AiRunMetadata(
+            endpoint="/analyze",
+            model=OPENAI_MODEL,
+            prompt_version=PROMPT_VERSION,
+            latency_ms=latency_ms,
+            tokens_in=0,
+            tokens_out=0,
+            total_tokens=0,
+            status="FAILED",
+        )
+
+        raise HTTPException(
+            status_code=502,
+            detail={
+                "message": "Model returned invalid structured output",
+                "error": str(error),
+                "metadata": metadata.model_dump(),
+            },
+        )
+
+    except Exception as error:
+        latency_ms = int((time.perf_counter() - started_at) * 1000)
+
+        metadata = AiRunMetadata(
+            endpoint="/analyze",
+            model=OPENAI_MODEL,
+            prompt_version=PROMPT_VERSION,
+            latency_ms=latency_ms,
+            tokens_in=0,
+            tokens_out=0,
+            total_tokens=0,
+            status="FAILED",
+        )
+
+        raise HTTPException(
+            status_code=500,
+            detail={
+                "message": "AI analysis failed",
+                "error": str(error),
+                "metadata": metadata.model_dump(),
+            },
+        )
