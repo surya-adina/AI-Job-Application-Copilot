@@ -40,6 +40,7 @@ class AiRunMetadata(BaseModel):
     total_tokens: int
     status: Literal["SUCCESS", "FAILED"]
     error_type: str | None = None
+    estimated_cost_usd: float | None = None
 
 class AnalyzeResponse(BaseModel):
     analysis: AnalysisPayload
@@ -103,6 +104,7 @@ def analyze(payload: AnalyzeRequest):
         tokens_in = usage.input_tokens if usage else 0
         tokens_out = usage.output_tokens if usage else 0
         total_tokens = usage.total_tokens if usage else tokens_in + tokens_out
+        estimated_cost_usd = (tokens_in * 0.150 / 1_000_000) + (tokens_out * 0.600 / 1_000_000)
 
         metadata = AiRunMetadata(
             endpoint="/analyze",
@@ -113,6 +115,7 @@ def analyze(payload: AnalyzeRequest):
             tokens_out=tokens_out,
             total_tokens=total_tokens,
             status="SUCCESS",
+            estimated_cost_usd=estimated_cost_usd,
         )
 
         return AnalyzeResponse(analysis=analysis, metadata=metadata)
@@ -130,6 +133,7 @@ def analyze(payload: AnalyzeRequest):
             total_tokens=0,
             status="FAILED",
             error_type="STRUCTURED_OUTPUT_ERROR",
+            estimated_cost_usd=estimated_cost_usd,
         )
 
         raise HTTPException(

@@ -105,6 +105,8 @@ model AiRun {
   tokensOut     Int      @default(0)
   totalTokens   Int      @default(0)
 
+  estimatedCostUsd Decimal? @db.Decimal(10, 6)
+  
   latencyMs     Int      @default(0)
   retries       Int      @default(0)
 

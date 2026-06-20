@@ -78,6 +78,7 @@ export class AnalysesService {
         latencyMs: matchReport.metadata.latency_ms,
         retries: 0,
         status: matchReport.metadata.status,
+        estimatedCostUsd: matchReport.metadata.estimated_cost_usd ?? null,
       },
     });
 
