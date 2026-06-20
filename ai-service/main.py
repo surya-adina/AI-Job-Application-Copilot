@@ -2,7 +2,6 @@ import json
 import os
 import time
 from typing import Literal
-
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from openai import OpenAI

@@ -34,37 +34,63 @@ export class AnalysesService {
       throw new ConflictException('Analysis already exists for this application');
     }
 
-    const aiResult = await this.aiGateway.analyze({
-      resume_text: application.resume.rawText,
-      job_description: application.job.jdText,
-    });
+    let matchReport;
+
+    try {
+      matchReport = await this.aiGateway.analyze({
+        resume_text: application.resume.rawText,
+        job_description: application.job.jdText,
+      });
+    } catch (error) {
+      await this.prisma.aiRun.create({
+        data: {
+          userId,
+          endpoint: '/analyze',
+          model: 'unknown',
+          promptVersion: 'unknown',
+          tokensIn: 0,
+          tokensOut: 0,
+          totalTokens: 0,
+          latencyMs: 0,
+          retries: 0,
+          status: 'FAILED',
+          errorType:
+          error instanceof Error && 'code' in error && error.code === 'ECONNREFUSED'
+            ? 'AI_SERVICE_UNAVAILABLE'
+            : error instanceof Error
+              ? error.name
+              : 'UNKNOWN_ERROR',
+        },
+      });
+
+      throw error;
+    }
 
     await this.prisma.aiRun.create({
       data: {
         userId,
-        endpoint: aiResult.metadata.endpoint,
-        model: aiResult.metadata.model,
-        promptVersion: aiResult.metadata.prompt_version,
-        tokensIn: aiResult.metadata.tokens_in,
-        tokensOut: aiResult.metadata.tokens_out,
-        totalTokens: aiResult.metadata.total_tokens,
-        latencyMs: aiResult.metadata.latency_ms,
+        endpoint: matchReport.metadata.endpoint,
+        model: matchReport.metadata.model,
+        promptVersion: matchReport.metadata.prompt_version,
+        tokensIn: matchReport.metadata.tokens_in,
+        tokensOut: matchReport.metadata.tokens_out,
+        totalTokens: matchReport.metadata.total_tokens,
+        latencyMs: matchReport.metadata.latency_ms,
         retries: 0,
-        status: aiResult.metadata.status,
-        errorType: aiResult.metadata.error_type ?? null,
+        status: matchReport.metadata.status,
       },
     });
 
     return this.prisma.analysis.create({
       data: {
         applicationId,
-        score: aiResult.analysis.score,
-        matchedSkills: aiResult.analysis.matched_skills,
-        missingSkills: aiResult.analysis.missing_skills,
-        strengths: aiResult.analysis.strengths.join('\n'),
-        weaknesses: aiResult.analysis.weaknesses.join('\n'),
+        score: matchReport.analysis.score,
+        matchedSkills: matchReport.analysis.matched_skills,
+        missingSkills: matchReport.analysis.missing_skills,
+        strengths: matchReport.analysis.strengths.join('\n'),
+        weaknesses: matchReport.analysis.weaknesses.join('\n'),
         suggestions: {
-          recommendations: aiResult.analysis.recommendations,
+          recommendations: matchReport.analysis.recommendations,
         },
       },
     });
