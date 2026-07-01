@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from openai import OpenAI
 from pydantic import BaseModel, Field, ValidationError
+from prompt_loader import load_prompt
 
 load_dotenv()
 
@@ -13,6 +14,7 @@ app = FastAPI(title="AI Job Application Copilot - AI Service")
 
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+PROMPT_NAME = "analysis_v1"
 PROMPT_VERSION = "analysis-v1"
 
 
@@ -57,17 +59,13 @@ def analyze(payload: AnalyzeRequest):
     started_at = time.perf_counter()
 
     try:
+        system_prompt = load_prompt(PROMPT_NAME)
         response = client.responses.create(
             model=OPENAI_MODEL,
             input=[
                 {
                     "role": "system",
-                    "content": (
-                        "You are an AI job-fit analysis engine. "
-                        "Analyze a resume against a job description. "
-                        "Return ONLY valid JSON matching the requested schema. "
-                        "Do not invent experience not present in the resume."
-                    ),
+                    "content": system_prompt,
                 },
                 {
                     "role": "user",
