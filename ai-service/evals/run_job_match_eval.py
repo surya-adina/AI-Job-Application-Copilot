@@ -22,7 +22,7 @@ def contains_expected_items(actual_items: list[str], expected_items: list[str]) 
     return hits / len(expected_items)
 
 
-def run_case(case: dict) -> dict:
+def run_case(case: dict, prompt_version: str) -> dict:
     started_at = time.perf_counter()
 
     response = requests.post(
@@ -30,6 +30,7 @@ def run_case(case: dict) -> dict:
         json={
             "resume_text": case["resume_text"],
             "job_description": case["job_description"],
+            "prompt_version": prompt_version,
         },
         timeout=30,
     )
@@ -86,20 +87,78 @@ def run_case(case: dict) -> dict:
         "prompt_version": metadata.get("prompt_version"),
     }
 
+def summarize_by_prompt(results: list[dict]) -> dict:
+    grouped: dict[str, list[dict]] = {}
+
+    for result in results:
+        prompt_version = result.get("prompt_version", "unknown")
+        grouped.setdefault(prompt_version, []).append(result)
+
+    summary = {}
+
+    for prompt_version, prompt_results in grouped.items():
+        total = len(prompt_results)
+        passed = sum(1 for result in prompt_results if result["passed"])
+
+        summary[prompt_version] = {
+            "passed": passed,
+            "total": total,
+            "pass_rate": passed / total if total else 0,
+            "avg_matched_skill_recall": sum(
+                result.get("matched_skill_recall", 0) for result in prompt_results
+            ) / total if total else 0,
+            "avg_missing_skill_recall": sum(
+                result.get("missing_skill_recall", 0) for result in prompt_results
+            ) / total if total else 0,
+            "avg_latency_ms": sum(
+                result.get("latency_ms", 0) for result in prompt_results
+            ) / total if total else 0,
+            "total_estimated_cost_usd": sum(
+                result.get("estimated_cost_usd") or 0 for result in prompt_results
+            ),
+        }
+
+    return summary
+
+def choose_best_prompt(summary_by_prompt: dict) -> str | None:
+    if not summary_by_prompt:
+        return None
+
+    ranked = sorted(
+        summary_by_prompt.items(),
+        key=lambda item: (
+            item[1]["pass_rate"],
+            item[1]["avg_missing_skill_recall"],
+            item[1]["avg_matched_skill_recall"],
+            -item[1]["avg_latency_ms"],
+            -item[1]["total_estimated_cost_usd"],
+        ),
+        reverse=True,
+    )
+
+    return ranked[0][0]
 
 def main():
     cases = json.loads(CASES_PATH.read_text())
 
-    results = [run_case(case) for case in cases]
+    prompt_versions = ["analysis_v1", "analysis_v2"]
+
+    results = []
+    for prompt_version in prompt_versions:
+        for case in cases:
+            results.append(run_case(case, prompt_version))
 
     passed_count = sum(1 for result in results if result["passed"])
     total_count = len(results)
-
+    by_prompt_version = summarize_by_prompt(results)
+    best_prompt_version = choose_best_prompt(by_prompt_version)
     report = {
         "summary": {
             "passed": passed_count,
             "total": total_count,
             "pass_rate": passed_count / total_count if total_count else 0,
+            "by_prompt_version": by_prompt_version,
+            "best_prompt_version": best_prompt_version,
         },
         "results": results,
     }
