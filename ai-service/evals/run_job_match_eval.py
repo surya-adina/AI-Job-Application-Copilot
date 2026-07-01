@@ -2,11 +2,11 @@ import json
 import time
 from pathlib import Path
 import requests
-
+from datetime import datetime, timezone
 
 SERVICE_URL = "http://localhost:8000/analyze"
 CASES_PATH = Path(__file__).with_name("job_match_cases.json")
-
+RESULTS_DIR = Path(__file__).parent / "results"
 
 def contains_expected_items(actual_items: list[str], expected_items: list[str]) -> float:
     if not expected_items:
@@ -95,17 +95,24 @@ def main():
     passed_count = sum(1 for result in results if result["passed"])
     total_count = len(results)
 
-    print(json.dumps(
-        {
-            "summary": {
-                "passed": passed_count,
-                "total": total_count,
-                "pass_rate": passed_count / total_count if total_count else 0,
-            },
-            "results": results,
+    report = {
+        "summary": {
+            "passed": passed_count,
+            "total": total_count,
+            "pass_rate": passed_count / total_count if total_count else 0,
         },
-        indent=2,
-    ))
+        "results": results,
+    }
+
+    RESULTS_DIR.mkdir(exist_ok=True)
+
+    timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
+    output_path = RESULTS_DIR / f"job_match_eval_{timestamp}.json"
+
+    output_path.write_text(json.dumps(report, indent=2))
+
+    print(json.dumps(report, indent=2))
+    print(f"\nSaved eval report to: {output_path}")
 
 
 if __name__ == "__main__":
