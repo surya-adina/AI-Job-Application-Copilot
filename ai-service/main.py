@@ -21,6 +21,7 @@ PROMPT_VERSION = "analysis-v1"
 class AnalyzeRequest(BaseModel):
     resume_text: str = Field(..., min_length=50)
     job_description: str = Field(..., min_length=50)
+    prompt_version: str = "analysis_v1"
 
 
 class AnalysisPayload(BaseModel):
@@ -59,7 +60,7 @@ def analyze(payload: AnalyzeRequest):
     started_at = time.perf_counter()
 
     try:
-        system_prompt = load_prompt(PROMPT_NAME)
+        system_prompt = load_prompt(payload.prompt_version)
         response = client.responses.create(
             model=OPENAI_MODEL,
             input=[
@@ -107,7 +108,7 @@ def analyze(payload: AnalyzeRequest):
         metadata = AiRunMetadata(
             endpoint="/analyze",
             model=OPENAI_MODEL,
-            prompt_version=PROMPT_VERSION,
+            prompt_version=payload.prompt_version,
             latency_ms=latency_ms,
             tokens_in=tokens_in,
             tokens_out=tokens_out,

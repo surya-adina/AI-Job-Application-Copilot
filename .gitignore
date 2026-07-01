@@ -15,3 +15,6 @@ __pycache__/
 ai-service/.venv/
 ai-service/.env
 ai-service/__pycache__
+
+# Generated evaluation reports
+ai-service/evals/results/*.json
