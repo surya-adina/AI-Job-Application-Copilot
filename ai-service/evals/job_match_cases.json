@@ -1,0 +1,37 @@
+[
+  {
+    "id": "backend_ai_engineer_strong_match",
+    "resume_text": "Software engineer with experience in Python, FastAPI, PostgreSQL, TypeScript, React, NestJS, Prisma, structured outputs, LLM evaluation, observability, prompt versioning, vector search, and AI infrastructure.",
+    "job_description": "We are hiring an Applied AI Engineer to build LLM systems with Python, FastAPI, structured outputs, evaluation pipelines, prompt versioning, observability, vector search, PostgreSQL, and production AI infrastructure.",
+    "expected_matched_skills": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "structured outputs",
+      "observability",
+      "prompt versioning",
+      "vector search"
+    ],
+    "expected_missing_skills": [
+      "production AI infrastructure"
+    ],
+    "min_score": 75
+  },
+  {
+    "id": "frontend_heavy_weak_ai_match",
+    "resume_text": "Frontend developer with experience in React, Next.js, Tailwind CSS, component libraries, responsive layouts, browser performance, and client-side state management.",
+    "job_description": "We are hiring an Applied AI Engineer to build LLM systems with Python, FastAPI, structured outputs, evaluation pipelines, prompt versioning, observability, vector search, PostgreSQL, and production AI infrastructure.",
+    "expected_matched_skills": [],
+    "expected_missing_skills": [
+      "Python",
+      "FastAPI",
+      "structured outputs",
+      "evaluation pipelines",
+      "prompt versioning",
+      "observability",
+      "vector search",
+      "PostgreSQL"
+    ],
+    "max_score": 45
+  }
+]
