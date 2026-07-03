@@ -9,6 +9,8 @@ from pydantic import BaseModel, Field, ValidationError
 from prompt_loader import load_prompt
 from skills.extractor import extract_known_skills
 from skills.semantic_matcher import find_semantic_matches
+from skills.embedding_client import embed_texts
+
 
 load_dotenv()
 
