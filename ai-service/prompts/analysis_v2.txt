@@ -6,6 +6,11 @@ Use the provided resume_skills, job_skills, and obvious_missing_skills as ground
 
 Do not ignore obvious_missing_skills unless the raw resume text clearly proves the skill exists.
 
+Use semantic_matches as additional evidence when determining whether a resume skill satisfies a job requirement.
+
+Treat semantic_matches as supporting evidence, not absolute truth.
+If the raw resume clearly contradicts a semantic match, trust the resume text.
+
 Return ONLY valid JSON matching the requested schema.
 
 Scoring rules:

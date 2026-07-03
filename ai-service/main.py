@@ -106,6 +106,7 @@ def analyze(payload: AnalyzeRequest):
                             "resume_skills": resume_skills,
                             "job_skills": job_skills,
                             "obvious_missing_skills": obvious_missing_skills,
+                            "semantic_matches": semantic_matches,
                             "output_schema": {
                                 "score": "integer from 0 to 100",
                                 "matched_skills": "array of strings",
