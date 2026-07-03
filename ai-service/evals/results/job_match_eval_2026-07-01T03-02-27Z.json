@@ -1,0 +1,33 @@
+{
+  "summary": {
+    "passed": 2,
+    "total": 2,
+    "pass_rate": 1.0
+  },
+  "results": [
+    {
+      "id": "backend_ai_engineer_strong_match",
+      "passed": true,
+      "score": 90,
+      "matched_skill_recall": 1.0,
+      "missing_skill_recall": 1.0,
+      "score_ok": true,
+      "latency_ms": 6617,
+      "estimated_cost_usd": 0.00013065,
+      "model": "gpt-4o-mini",
+      "prompt_version": "analysis-v1"
+    },
+    {
+      "id": "frontend_heavy_weak_ai_match",
+      "passed": true,
+      "score": 10,
+      "matched_skill_recall": 1.0,
+      "missing_skill_recall": 1.0,
+      "score_ok": true,
+      "latency_ms": 4309,
+      "estimated_cost_usd": 0.0001536,
+      "model": "gpt-4o-mini",
+      "prompt_version": "analysis-v1"
+    }
+  ]
+}
