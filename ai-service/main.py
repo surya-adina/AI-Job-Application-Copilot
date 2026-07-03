@@ -8,6 +8,7 @@ from openai import OpenAI
 from pydantic import BaseModel, Field, ValidationError
 from prompt_loader import load_prompt
 from skills.extractor import extract_known_skills
+from skills.semantic_matcher import find_semantic_matches
 
 load_dotenv()
 
@@ -50,6 +51,7 @@ class SkillEvidence(BaseModel):
     resume_skills: list[str]
     job_skills: list[str]
     obvious_missing_skills: list[str]
+    semantic_matches: list[dict]
 
 class AnalyzeResponse(BaseModel):
     analysis: AnalysisPayload
@@ -74,11 +76,16 @@ def analyze(payload: AnalyzeRequest):
         obvious_missing_skills = sorted(
             skill for skill in job_skills if skill not in resume_skills
         )
+        semantic_matches = find_semantic_matches(
+            resume_skills=resume_skills,
+            job_skills=job_skills,
+        )
         
         evidence = SkillEvidence(
             resume_skills=resume_skills,
             job_skills=job_skills,
             obvious_missing_skills=obvious_missing_skills,
+            semantic_matches=semantic_matches,
         )
 
         response = client.responses.create(
