@@ -62,6 +62,16 @@ def run_case(case: dict, prompt_version: str) -> dict:
     body = response.json()
     analysis = body["analysis"]
     metadata = body["metadata"]
+    evidence = body.get("evidence", {})
+    evidence_matched_skill_recall = contains_expected_items(
+        evidence.get("resume_skills", []),
+        case.get("expected_matched_skills", []),
+    )
+
+    evidence_missing_skill_recall = contains_expected_items(
+        evidence.get("obvious_missing_skills", []),
+        case.get("expected_missing_skills", []),
+    )
 
     matched_skill_recall = contains_expected_items(
         analysis["matched_skills"],
@@ -106,6 +116,8 @@ def run_case(case: dict, prompt_version: str) -> dict:
         "model": metadata.get("model"),
         "prompt_version": metadata.get("prompt_version"),
         "recommendation_quality": recommendation_quality,
+        "evidence_matched_skill_recall": evidence_matched_skill_recall,
+        "evidence_missing_skill_recall": evidence_missing_skill_recall,
     }
 
 def summarize_by_prompt(results: list[dict]) -> dict:
@@ -139,6 +151,12 @@ def summarize_by_prompt(results: list[dict]) -> dict:
             ),
             "avg_recommendation_quality": sum(
                 result.get("recommendation_quality", 0) for result in prompt_results
+            ) / total if total else 0,
+            "avg_evidence_matched_skill_recall": sum(
+                result.get("evidence_matched_skill_recall", 0) for result in prompt_results
+            ) / total if total else 0,
+            "avg_evidence_missing_skill_recall": sum(
+                result.get("evidence_missing_skill_recall", 0) for result in prompt_results
             ) / total if total else 0,
         }
 
