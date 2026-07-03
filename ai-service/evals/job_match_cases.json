@@ -15,6 +15,11 @@
     "expected_missing_skills": [
       "production AI infrastructure"
     ],
+    "expected_recommendation_keywords": [
+      "evaluation",
+      "production",
+      "observability"
+    ],
     "min_score": 75
   },
   {
@@ -31,6 +36,12 @@
       "observability",
       "vector search",
       "PostgreSQL"
+    ],
+    "expected_recommendation_keywords": [
+      "Python",
+      "FastAPI",
+      "vector",
+      "observability"
     ],
     "max_score": 45
   }

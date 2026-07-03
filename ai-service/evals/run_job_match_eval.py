@@ -7,6 +7,20 @@ from datetime import datetime, timezone
 SERVICE_URL = "http://localhost:8000/analyze"
 CASES_PATH = Path(__file__).with_name("job_match_cases.json")
 RESULTS_DIR = Path(__file__).parent / "results"
+REGISTRY_PATH = Path(__file__).parent.parent / "prompts" / "prompt_registry.json"
+
+def keyword_coverage(text_items: list[str], expected_keywords: list[str]) -> float:
+    if not expected_keywords:
+        return 1.0
+
+    combined_text = " ".join(text_items).lower()
+
+    hits = 0
+    for keyword in expected_keywords:
+        if keyword.lower() in combined_text:
+            hits += 1
+
+    return hits / len(expected_keywords)
 
 def contains_expected_items(actual_items: list[str], expected_items: list[str]) -> float:
     if not expected_items:
@@ -68,9 +82,15 @@ def run_case(case: dict, prompt_version: str) -> dict:
     if "max_score" in case:
         score_ok = score <= case["max_score"]
 
+    recommendation_quality = keyword_coverage(
+        analysis["recommendations"],
+        case.get("expected_recommendation_keywords", []),
+    )
+
     passed = (
         matched_skill_recall >= 0.7
         and missing_skill_recall >= 0.7
+        and recommendation_quality >= 0.6
         and score_ok
     )
 
@@ -85,6 +105,7 @@ def run_case(case: dict, prompt_version: str) -> dict:
         "estimated_cost_usd": metadata.get("estimated_cost_usd"),
         "model": metadata.get("model"),
         "prompt_version": metadata.get("prompt_version"),
+        "recommendation_quality": recommendation_quality,
     }
 
 def summarize_by_prompt(results: list[dict]) -> dict:
@@ -116,6 +137,9 @@ def summarize_by_prompt(results: list[dict]) -> dict:
             "total_estimated_cost_usd": sum(
                 result.get("estimated_cost_usd") or 0 for result in prompt_results
             ),
+            "avg_recommendation_quality": sum(
+                result.get("recommendation_quality", 0) for result in prompt_results
+            ) / total if total else 0,
         }
 
     return summary
@@ -140,7 +164,7 @@ def choose_best_prompt(summary_by_prompt: dict) -> str | None:
 
 def main():
     cases = json.loads(CASES_PATH.read_text())
-
+    prompt_registry = json.loads(REGISTRY_PATH.read_text())
     prompt_versions = ["analysis_v1", "analysis_v2"]
 
     results = []
@@ -160,6 +184,7 @@ def main():
             "by_prompt_version": by_prompt_version,
             "best_prompt_version": best_prompt_version,
         },
+        "prompt_registry": prompt_registry,
         "results": results,
     }
 

@@ -1,0 +1,12 @@
+{
+  "analysis_v1": {
+    "status": "baseline",
+    "description": "Initial job-fit analysis prompt with general instructions for structured JSON output.",
+    "intended_improvement": "Establish baseline structured resume-to-job analysis behavior."
+  },
+  "analysis_v2": {
+    "status": "candidate",
+    "description": "Stricter job-fit evaluation prompt with explicit scoring bands and skill matching rules.",
+    "intended_improvement": "Improve missing-skill detection, reduce hallucinated matches, and make scoring more consistent."
+  }
+}
