@@ -7,6 +7,7 @@ from fastapi import FastAPI, HTTPException
 from openai import OpenAI
 from pydantic import BaseModel, Field, ValidationError
 from prompt_loader import load_prompt
+from skills.extractor import extract_known_skills
 
 load_dotenv()
 
@@ -45,9 +46,15 @@ class AiRunMetadata(BaseModel):
     error_type: str | None = None
     estimated_cost_usd: float | None = None
 
+class SkillEvidence(BaseModel):
+    resume_skills: list[str]
+    job_skills: list[str]
+    obvious_missing_skills: list[str]
+
 class AnalyzeResponse(BaseModel):
     analysis: AnalysisPayload
     metadata: AiRunMetadata
+    evidence: SkillEvidence
 
 
 @app.get("/health")
@@ -61,6 +68,19 @@ def analyze(payload: AnalyzeRequest):
 
     try:
         system_prompt = load_prompt(payload.prompt_version)
+        resume_skills = extract_known_skills(payload.resume_text)
+        job_skills = extract_known_skills(payload.job_description)
+
+        obvious_missing_skills = sorted(
+            skill for skill in job_skills if skill not in resume_skills
+        )
+        
+        evidence = SkillEvidence(
+            resume_skills=resume_skills,
+            job_skills=job_skills,
+            obvious_missing_skills=obvious_missing_skills,
+        )
+
         response = client.responses.create(
             model=OPENAI_MODEL,
             input=[
@@ -74,6 +94,9 @@ def analyze(payload: AnalyzeRequest):
                         {
                             "resume_text": payload.resume_text,
                             "job_description": payload.job_description,
+                            "resume_skills": resume_skills,
+                            "job_skills": job_skills,
+                            "obvious_missing_skills": obvious_missing_skills,
                             "output_schema": {
                                 "score": "integer from 0 to 100",
                                 "matched_skills": "array of strings",
@@ -117,7 +140,11 @@ def analyze(payload: AnalyzeRequest):
             estimated_cost_usd=estimated_cost_usd,
         )
 
-        return AnalyzeResponse(analysis=analysis, metadata=metadata)
+        return AnalyzeResponse(
+            analysis=analysis,
+            metadata=metadata,
+            evidence=evidence,
+        )
 
     except (json.JSONDecodeError, ValidationError) as error:
         latency_ms = int((time.perf_counter() - started_at) * 1000)
