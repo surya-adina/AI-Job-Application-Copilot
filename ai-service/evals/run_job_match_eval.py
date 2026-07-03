@@ -63,6 +63,13 @@ def run_case(case: dict, prompt_version: str) -> dict:
     analysis = body["analysis"]
     metadata = body["metadata"]
     evidence = body.get("evidence", {})
+    semantic_matches = evidence.get("semantic_matches", [])
+
+    avg_semantic_similarity = (
+        sum(match.get("similarity", 0) for match in semantic_matches) / len(semantic_matches)
+        if semantic_matches
+        else 0
+    )
     evidence_matched_skill_recall = contains_expected_items(
         evidence.get("resume_skills", []),
         case.get("expected_matched_skills", []),
@@ -118,6 +125,8 @@ def run_case(case: dict, prompt_version: str) -> dict:
         "recommendation_quality": recommendation_quality,
         "evidence_matched_skill_recall": evidence_matched_skill_recall,
         "evidence_missing_skill_recall": evidence_missing_skill_recall,
+        "semantic_match_count": len(semantic_matches),
+        "avg_semantic_similarity": avg_semantic_similarity,
     }
 
 def summarize_by_prompt(results: list[dict]) -> dict:
@@ -157,6 +166,12 @@ def summarize_by_prompt(results: list[dict]) -> dict:
             ) / total if total else 0,
             "avg_evidence_missing_skill_recall": sum(
                 result.get("evidence_missing_skill_recall", 0) for result in prompt_results
+            ) / total if total else 0,
+            "avg_semantic_match_count": sum(
+                result.get("semantic_match_count", 0) for result in prompt_results
+            ) / total if total else 0,
+            "avg_semantic_similarity": sum(
+                result.get("avg_semantic_similarity", 0) for result in prompt_results
             ) / total if total else 0,
         }
 
