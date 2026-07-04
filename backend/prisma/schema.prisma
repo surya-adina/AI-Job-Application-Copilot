@@ -115,3 +115,9 @@ model AiRun {
 
   createdAt     DateTime @default(now())
 }
+
+model SkillEmbedding {
+  id         String   @id @default(uuid())
+  skill      String   @unique
+  createdAt  DateTime @default(now())
+}
