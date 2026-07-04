@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field, ValidationError
 from prompt_loader import load_prompt
 from skills.extractor import extract_known_skills
 from skills.semantic_matcher import find_semantic_matches
+from skills.job_requirements import extract_job_requirements
 
 router = APIRouter()
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
@@ -45,8 +46,10 @@ class AiRunMetadata(BaseModel):
 
 class SkillEvidence(BaseModel):
     resume_skills: list[str]
-    job_skills: list[str]
-    obvious_missing_skills: list[str]
+    required_skills: list[str]
+    preferred_skills: list[str]
+    missing_required_skills: list[str]
+    missing_preferred_skills: list[str]
     semantic_matches: list[dict]
 
 class AnalyzeResponse(BaseModel):
@@ -62,20 +65,32 @@ def analyze(payload: AnalyzeRequest):
     try:
         system_prompt = load_prompt(payload.prompt_version)
         resume_skills = extract_known_skills(payload.resume_text)
-        job_skills = extract_known_skills(payload.job_description)
+        job_requirements = extract_job_requirements(payload.job_description)
+        required_skills = job_requirements["required_skills"]
+        preferred_skills = job_requirements["preferred_skills"]
+        job_skills = sorted(set(required_skills + preferred_skills))
 
-        obvious_missing_skills = sorted(
-            skill for skill in job_skills if skill not in resume_skills
+        missing_required_skills = sorted(
+            skill for skill in required_skills
+            if skill not in resume_skills
         )
+
+        missing_preferred_skills = sorted(
+            skill for skill in preferred_skills
+            if skill not in resume_skills
+        )
+
         semantic_matches = find_semantic_matches(
             resume_skills=resume_skills,
             job_skills=job_skills,
         )
-        
+
         evidence = SkillEvidence(
             resume_skills=resume_skills,
-            job_skills=job_skills,
-            obvious_missing_skills=obvious_missing_skills,
+            required_skills=required_skills,
+            preferred_skills=preferred_skills,
+            missing_required_skills=missing_required_skills,
+            missing_preferred_skills=missing_preferred_skills,
             semantic_matches=semantic_matches,
         )
 
@@ -93,8 +108,10 @@ def analyze(payload: AnalyzeRequest):
                             "resume_text": payload.resume_text,
                             "job_description": payload.job_description,
                             "resume_skills": resume_skills,
-                            "job_skills": job_skills,
-                            "obvious_missing_skills": obvious_missing_skills,
+                            "required_skills": required_skills,
+                            "preferred_skills": preferred_skills,
+                            "missing_required_skills": missing_required_skills,
+                            "missing_preferred_skills": missing_preferred_skills,
                             "semantic_matches": semantic_matches,
                             "output_schema": {
                                 "score": "integer from 0 to 100",
