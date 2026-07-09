@@ -77,6 +77,7 @@ def review_resume(payload: ResumeReviewRequest):
                                     {
                                         "priority": "HIGH | MEDIUM | LOW",
                                         "title": "string",
+                                        "target_section": "string",
                                         "why": "string",
                                         "evidence": [
                                             "string"

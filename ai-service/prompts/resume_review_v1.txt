@@ -58,6 +58,7 @@ Return ONLY valid JSON matching this structure:
     {
       "priority": "HIGH | MEDIUM | LOW",
       "title": "short recommendation title",
+      "target_section": "most relevant resume section, such as Summary, Experience, Projects, Skills, or Education"
       "why": "why this recommendation matters for this job",
       "evidence": [
         "Evidence point from the resume, job description, analysis, or semantic evidence.",

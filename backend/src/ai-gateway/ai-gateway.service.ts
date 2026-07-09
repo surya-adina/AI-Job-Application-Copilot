@@ -34,12 +34,31 @@ export type AnalyzeResponse = {
   metadata: AiRunMetadata;
 };
 
+
 @Injectable()
 export class AiGatewayService {
   private readonly aiServiceUrl = 'http://localhost:8000';
 
   constructor(private httpService: HttpService) {}
+  async createResumeReview(input: {
+    resumeText: string;
+    jobDescription: string;
+    analysis: unknown;
+    evidence: unknown;
+  }) {
+    const response = await this.httpService.axiosRef.post(
+      `${this.aiServiceUrl}/resume-review`,
+      {
+        resume_text: input.resumeText,
+        job_description: input.jobDescription,
+        analysis: input.analysis,
+        evidence: input.evidence,
+        prompt_version: 'resume_review_v1',
+      },
+    );
 
+    return response.data;
+  }
   async analyze(input: AnalyzeRequest): Promise<AnalyzeResponse> {
     const response = await firstValueFrom(
       this.httpService.post<AnalyzeResponse>(
