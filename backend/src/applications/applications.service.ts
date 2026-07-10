@@ -134,4 +134,60 @@ export class ApplicationsService {
       where: { id },
     });
   }
+
+  async getWorkspace(applicationId: string, userId: string) {
+    const application = await this.prisma.application.findFirst({
+      where: {
+        id: applicationId,
+        userId,
+      },
+      include: {
+        resume: true,
+        job: true,
+        analysis: true,
+      },
+    });
+
+    if (!application) {
+      throw new NotFoundException('Application not found');
+    }
+
+    if (!application.resume || !application.job) {
+      throw new NotFoundException('Application is missing resume or job');
+    }
+
+
+    const analysisComplete = Boolean(application.analysis);
+
+    return {
+      application: {
+        id: application.id,
+        status: application.status,
+        notes: application.notes,
+        createdAt: application.createdAt,
+        company: application.job.company,
+        role: application.job.title,
+        resumeTitle: application.resume.title,
+      },
+      analysis: application.analysis
+        ? {
+            id: application.analysis.id,
+            score: application.analysis.score,
+            matchedSkills: application.analysis.matchedSkills,
+            missingSkills: application.analysis.missingSkills,
+            strengths: application.analysis.strengths,
+            weaknesses: application.analysis.weaknesses,
+            suggestions: application.analysis.suggestions,
+            createdAt: application.analysis.createdAt,
+          }
+        : null,
+      progress: {
+        resumeUploaded: true,
+        analysisComplete,
+        resumeReviewComplete: false,
+        coverLetterComplete: false,
+        interviewPrepComplete: false,
+      },
+    };
+  }
 }

@@ -14,6 +14,13 @@ import { ApplicationsService } from './applications.service';
 import { CreateApplicationDto } from './dto/create-application.dto';
 import { UpdateApplicationDto } from './dto/update-application.dto';
 
+type AuthenticatedRequest = {
+  user: {
+    sub: string;
+    email: string;
+  };
+};
+
 @Controller('applications')
 @UseGuards(JwtAuthGuard)
 export class ApplicationsController {
@@ -46,5 +53,13 @@ export class ApplicationsController {
   @Delete(':id')
   remove(@Req() req: any, @Param('id') id: string) {
     return this.applicationsService.remove(req.user.userId, id);
+  }
+
+  @Get(':id/workspace')
+  getWorkspace(
+    @Param('id') id: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.applicationsService.getWorkspace(id, req.user.sub);
   }
 }
