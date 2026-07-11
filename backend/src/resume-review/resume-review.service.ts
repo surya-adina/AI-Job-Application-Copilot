@@ -1,4 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AiGatewayService } from '../ai-gateway/ai-gateway.service';
 
@@ -19,6 +20,7 @@ export class ResumeReviewService {
         resume: true,
         job: true,
         analysis: true,
+        resumeReview: true,
       },
     });
 
@@ -34,11 +36,40 @@ export class ResumeReviewService {
       throw new NotFoundException('Run analysis before requesting resume review');
     }
 
-    return this.aiGateway.createResumeReview({
+    const review = await this.aiGateway.createResumeReview({
       resumeText: application.resume.rawText,
       jobDescription: application.job.jdText,
       analysis: application.analysis,
       evidence: {},
     });
+
+    const savedReview = await this.prisma.resumeReview.upsert({
+      where: {
+        applicationId,
+      },
+      update: {
+        summary: review.review.summary,
+        suggestions: review.review.suggestions as Prisma.InputJsonValue,
+        growthAreas: review.review.growth_areas,
+        warnings: review.review.warnings,
+      },
+      create: {
+        applicationId,
+        summary: review.review.summary,
+        suggestions: review.review.suggestions as Prisma.InputJsonValue,
+        growthAreas: review.review.growth_areas,
+        warnings: review.review.warnings,
+      },
+    });
+
+    return {
+      review: {
+        summary: savedReview.summary,
+        suggestions: savedReview.suggestions,
+        growth_areas: savedReview.growthAreas,
+        warnings: savedReview.warnings,
+      },
+      metadata: review.metadata,
+    };
   }
 }

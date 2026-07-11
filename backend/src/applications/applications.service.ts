@@ -145,6 +145,7 @@ export class ApplicationsService {
         resume: true,
         job: true,
         analysis: true,
+        resumeReview: true,
       },
     });
 
@@ -184,7 +185,7 @@ export class ApplicationsService {
       progress: {
         resumeUploaded: true,
         analysisComplete,
-        resumeReviewComplete: false,
+        resumeReviewComplete: Boolean(application.resumeReview),
         coverLetterComplete: false,
         interviewPrepComplete: false,
       },

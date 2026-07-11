@@ -71,6 +71,7 @@ model Application {
   notes    String? @db.Text
 
   analysis Analysis?
+  resumeReview ResumeReview?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -89,6 +90,21 @@ model Analysis {
   suggestions   Json?
 
   createdAt DateTime @default(now())
+}
+
+model ResumeReview {
+  id String @id @default(uuid())
+
+  applicationId String @unique
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  summary     String   @db.Text
+  suggestions Json
+  growthAreas String[] @default([])
+  warnings    String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model AiRun {
@@ -117,7 +133,8 @@ model AiRun {
 }
 
 model SkillEmbedding {
-  id         String   @id @default(uuid())
-  skill      String   @unique
-  createdAt  DateTime @default(now())
+  id        String   @id @default(uuid())
+  skill     String   @unique
+  embedding Unsupported("vector")?
+  createdAt DateTime @default(now())
 }
