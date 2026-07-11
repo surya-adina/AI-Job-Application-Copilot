@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { getWorkspace } from '@/lib/api/workspace';
 
 const application = {
   company: 'OpenAI',
@@ -6,14 +7,6 @@ const application = {
   status: 'In Progress',
   score: 84,
 };
-
-const progress = [
-  { label: 'Resume Uploaded', done: true },
-  { label: 'Analysis Complete', done: true },
-  { label: 'Resume Review Complete', done: true },
-  { label: 'Cover Letter', done: false },
-  { label: 'Interview Prep', done: false },
-];
 
 const actions = [
   {
@@ -54,7 +47,20 @@ export default async function ApplicationPage({
   params: Promise<{ applicationId: string }>;
 }) {
   const { applicationId } = await params;
+  const token = process.env.NEXT_PUBLIC_DEV_TOKEN;
 
+  if (!token) {
+    throw new Error('NEXT_PUBLIC_DEV_TOKEN is not configured');
+  }
+
+  const workspace = await getWorkspace(applicationId, token);
+  const progress = [
+  { label: 'Resume Uploaded', done: workspace.progress.resumeUploaded },
+  { label: 'Analysis Complete', done: workspace.progress.analysisComplete },
+  { label: 'Resume Review Complete', done: workspace.progress.resumeReviewComplete },
+  { label: 'Cover Letter', done: workspace.progress.coverLetterComplete },
+  { label: 'Interview Prep', done: workspace.progress.interviewPrepComplete },
+];
   return (
     <main className="min-h-screen bg-background px-6 py-10 text-foreground md:px-10">
       <section className="mx-auto max-w-6xl space-y-8">
@@ -64,14 +70,14 @@ export default async function ApplicationPage({
 
         <header className="flex flex-col gap-6 rounded-2xl border p-6 md:flex-row md:items-end md:justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">{application.company}</p>
-            <h1 className="mt-2 text-4xl font-bold">{application.role}</h1>
-            <p className="mt-3 text-muted-foreground">Status: {application.status}</p>
+            <p className="text-sm text-muted-foreground">{workspace.application.company}</p>
+            <h1 className="mt-2 text-4xl font-bold">{workspace.application.role}</h1>
+            <p className="mt-3 text-muted-foreground">Status: {workspace.application.status}</p>
           </div>
 
           <div className="text-left md:text-right">
             <p className="text-sm text-muted-foreground">Resume Match</p>
-            <p className="text-5xl font-bold text-cyan-500">{application.score}%</p>
+            <p className="text-5xl font-bold text-cyan-500">{workspace.analysis?.score ?? null}%</p>
             <p className="mt-2 text-sm text-muted-foreground">Strong required-skill match</p>
           </div>
         </header>

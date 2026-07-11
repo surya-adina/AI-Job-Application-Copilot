@@ -18,3 +18,4 @@ ai-service/__pycache__
 
 # Generated evaluation reports
 ai-service/evals/results/*.json
+.DS_Store
