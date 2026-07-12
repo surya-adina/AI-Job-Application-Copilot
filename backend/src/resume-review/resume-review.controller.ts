@@ -1,4 +1,4 @@
-import { Controller, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Controller, Param, Post, Req, UseGuards, Get } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { ResumeReviewService } from './resume-review.service';
 
@@ -12,13 +12,27 @@ type AuthenticatedRequest = {
 @Controller('applications/:applicationId/resume-review')
 @UseGuards(JwtAuthGuard)
 export class ResumeReviewController {
-  constructor(private readonly resumeReview: ResumeReviewService) {}
+  constructor(private readonly resumeReviewService: ResumeReviewService) {}
+
+  @Get()
+  getForApplication(
+    @Param('applicationId') applicationId: string,
+    @Req() req: AuthenticatedRequest,
+  ) {
+    return this.resumeReviewService.getForApplication(
+      applicationId,
+      req.user.sub,
+    );
+  }
 
   @Post()
   createForApplication(
     @Param('applicationId') applicationId: string,
     @Req() req: AuthenticatedRequest,
   ) {
-    return this.resumeReview.createForApplication(applicationId, req.user.sub);
+    return this.resumeReviewService.createForApplication(
+      applicationId,
+      req.user.sub,
+    );
   }
 }
