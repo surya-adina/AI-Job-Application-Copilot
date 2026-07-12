@@ -25,5 +25,5 @@ export type ResumeReviewReport = {
     total_tokens: number;
     status: 'SUCCESS' | 'FAILED';
     error_type: string | null;
-  };
+  } | null;
 };
