@@ -1,7 +1,7 @@
 'use client';
 import Link from 'next/link';
-import { useState } from 'react';
-import { createResumeReviewForApplication } from '@/lib/api/resume-review';
+import { useState, useEffect } from 'react';
+import { createResumeReviewForApplication, getResumeReviewForApplication } from '@/lib/api/resume-review';
 import type { ResumeReviewReport } from '@/types/resume-review';
 
 export default function ResumeReviewClient({
@@ -13,6 +13,29 @@ export default function ResumeReviewClient({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  useEffect(() => {
+    const token = process.env.NEXT_PUBLIC_DEV_TOKEN;
+
+    if (!token) {
+      setError('NEXT_PUBLIC_DEV_TOKEN is not configured');
+      return;
+    }
+    const devToken = token;
+    async function loadSavedReview() {
+      try {
+        const savedReview = await getResumeReviewForApplication(
+          applicationId,
+          devToken,
+        );
+
+        setReview(savedReview);
+      } catch {
+        // No saved review yet. User can generate one.
+      }
+    }
+
+    loadSavedReview();
+  }, [applicationId]);
   async function handleGenerateReview() {
     const token = process.env.NEXT_PUBLIC_DEV_TOKEN;
 
