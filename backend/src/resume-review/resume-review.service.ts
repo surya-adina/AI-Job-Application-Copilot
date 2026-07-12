@@ -10,6 +10,31 @@ export class ResumeReviewService {
     private readonly aiGateway: AiGatewayService,
   ) {}
 
+  async getForApplication(applicationId: string, userId: string) {
+    const savedReview = await this.prisma.resumeReview.findFirst({
+      where: {
+        applicationId,
+        application: {
+          userId,
+        },
+      },
+    });
+
+    if (!savedReview) {
+      throw new NotFoundException('Resume review not found');
+    }
+
+    return {
+      review: {
+        summary: savedReview.summary,
+        suggestions: savedReview.suggestions,
+        growth_areas: savedReview.growthAreas,
+        warnings: savedReview.warnings,
+      },
+      metadata: null,
+    };
+  }
+
   async createForApplication(applicationId: string, userId: string) {
     const application = await this.prisma.application.findFirst({
       where: {
