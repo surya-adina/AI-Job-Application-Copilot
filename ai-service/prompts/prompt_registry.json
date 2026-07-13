@@ -8,5 +8,15 @@
     "status": "candidate",
     "description": "Stricter job-fit evaluation prompt with explicit scoring bands and skill matching rules.",
     "intended_improvement": "Improve missing-skill detection, reduce hallucinated matches, and make scoring more consistent."
+  },
+  "resume_review_v1": {
+    "status": "active",
+    "description": "Resume review prompt for grounded, evidence-backed resume improvement suggestions.",
+    "intended_improvement": "Provide truthful resume guidance without inventing experience."
+  },
+  "cover_letter_v1": {
+    "status": "active",
+    "description": "Cover letter generation prompt using only the resume and job description.",
+    "intended_improvement": "Generate truthful, job-specific cover letters without fabricating experience."
   }
 }
