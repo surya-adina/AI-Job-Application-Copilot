@@ -59,6 +59,22 @@ export class AiGatewayService {
 
     return response.data;
   }
+
+  async createCoverLetter(payload: {
+    resumeText: string;
+    jobDescription: string;
+  }) {
+    const response = await this.httpService.axiosRef.post(
+      `${this.aiServiceUrl}/cover-letter`,
+      {
+        resume_text: payload.resumeText,
+        job_description: payload.jobDescription,
+      },
+    );
+
+    return response.data;
+  }
+
   async analyze(input: AnalyzeRequest): Promise<AnalyzeResponse> {
     const response = await firstValueFrom(
       this.httpService.post<AnalyzeResponse>(

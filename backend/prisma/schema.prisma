@@ -72,6 +72,7 @@ model Application {
 
   analysis Analysis?
   resumeReview ResumeReview?
+  coverLetter CoverLetter?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -102,6 +103,18 @@ model ResumeReview {
   suggestions Json
   growthAreas String[] @default([])
   warnings    String[] @default([])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model CoverLetter {
+  id String @id @default(uuid())
+
+  applicationId String @unique
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  content String @db.Text
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
