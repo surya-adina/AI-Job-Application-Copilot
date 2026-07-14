@@ -147,6 +147,7 @@ export class ApplicationsService {
         analysis: true,
         resumeReview: true,
         coverLetter: true,
+        interviewPrep: true,
       },
     });
 
@@ -187,8 +188,8 @@ export class ApplicationsService {
         resumeUploaded: true,
         analysisComplete,
         resumeReviewComplete: Boolean(application.resumeReview),
-        interviewPrepComplete: false,
         coverLetterComplete: Boolean(application.coverLetter),
+        interviewPrepComplete: Boolean(application.interviewPrep),
       },
     };
   }

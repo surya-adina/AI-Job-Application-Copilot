@@ -73,6 +73,7 @@ model Application {
   analysis Analysis?
   resumeReview ResumeReview?
   coverLetter CoverLetter?
+  interviewPrep InterviewPrep?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -115,6 +116,21 @@ model CoverLetter {
   application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   content String @db.Text
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model InterviewPrep {
+  id String @id @default(uuid())
+
+  applicationId String @unique
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  technicalQuestions  Json
+  behavioralQuestions Json
+  projectQuestions    Json
+  preparationTips     String[] @default([])
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

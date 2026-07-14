@@ -18,5 +18,10 @@
     "status": "active",
     "description": "Cover letter generation prompt using only the resume and job description.",
     "intended_improvement": "Generate truthful, job-specific cover letters without fabricating experience."
+  },
+  "interview_prep_v1": {
+    "status": "active",
+    "description": "Interview preparation prompt for technical, behavioral, and project-specific questions.",
+    "intended_improvement": "Generate grounded interview prep from resume and job description."
   }
 }
