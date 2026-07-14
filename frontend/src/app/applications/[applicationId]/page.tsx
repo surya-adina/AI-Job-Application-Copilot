@@ -1,13 +1,6 @@
 import Link from 'next/link';
 import { getWorkspace } from '@/lib/api/workspace';
 
-const application = {
-  company: 'OpenAI',
-  role: 'Applied AI Engineer',
-  status: 'In Progress',
-  score: 84,
-};
-
 const actions = [
   {
     title: 'View Resume Analysis',
@@ -22,10 +15,10 @@ const actions = [
     available: true,
   },
   {
-    title: 'Generate Cover Letter',
-    description: 'Create a tailored cover letter using the resume and job context.',
-    href: '#',
-    available: false,
+    title: 'View / Generate Cover Letter',
+    description: 'Create or view a tailored cover letter using the resume and job context.',
+    href: 'cover-letter',
+    available: true,
   },
   {
     title: 'Prepare for Interview',
