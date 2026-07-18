@@ -14,18 +14,11 @@ export default function ResumeReviewClient({
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const token = process.env.NEXT_PUBLIC_DEV_TOKEN;
 
-    if (!token) {
-      setError('NEXT_PUBLIC_DEV_TOKEN is not configured');
-      return;
-    }
-    const devToken = token;
     async function loadSavedReview() {
       try {
         const savedReview = await getResumeReviewForApplication(
           applicationId,
-          devToken,
         );
 
         setReview(savedReview);
@@ -37,20 +30,12 @@ export default function ResumeReviewClient({
     loadSavedReview();
   }, [applicationId]);
   async function handleGenerateReview() {
-    const token = process.env.NEXT_PUBLIC_DEV_TOKEN;
-
-    if (!token) {
-      setError('NEXT_PUBLIC_DEV_TOKEN is not configured');
-      return;
-    }
-
     try {
       setLoading(true);
       setError('');
 
       const result = await createResumeReviewForApplication(
         applicationId,
-        token,
       );
 
       setReview(result);

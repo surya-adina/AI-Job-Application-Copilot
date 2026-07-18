@@ -1,23 +1,37 @@
-import { apiGet, apiPost } from './client';
 import type { CoverLetterReport } from '@/types/cover-letter';
 
 export async function getCoverLetterForApplication(
   applicationId: string,
-  token: string,
-) {
-  return apiGet<CoverLetterReport>(
-    `/applications/${applicationId}/cover-letter`,
-    { token },
+): Promise<CoverLetterReport> {
+  const response = await fetch(
+    `/api/applications/${applicationId}/cover-letter`,
+    {
+      method: 'GET',
+      credentials: 'include',
+    },
   );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch cover letter');
+  }
+
+  return response.json();
 }
 
 export async function createCoverLetterForApplication(
   applicationId: string,
-  token: string,
-) {
-  return apiPost<CoverLetterReport>(
-    `/applications/${applicationId}/cover-letter`,
-    undefined,
-    { token },
+): Promise<CoverLetterReport> {
+  const response = await fetch(
+    `/api/applications/${applicationId}/cover-letter`,
+    {
+      method: 'POST',
+      credentials: 'include',
+    },
   );
+
+  if (!response.ok) {
+    throw new Error('Failed to create cover letter');
+  }
+
+  return response.json();
 }

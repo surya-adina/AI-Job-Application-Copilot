@@ -1,23 +1,37 @@
-import { apiGet, apiPost } from './client';
 import type { ResumeReviewReport } from '@/types/resume-review';
 
 export async function getResumeReviewForApplication(
   applicationId: string,
-  token: string,
-) {
-  return apiGet<ResumeReviewReport>(
-    `/applications/${applicationId}/resume-review`,
-    { token },
+): Promise<ResumeReviewReport> {
+  const response = await fetch(
+    `/api/applications/${applicationId}/resume-review`,
+    {
+      method: 'GET',
+      credentials: 'include',
+    },
   );
+
+  if (!response.ok) {
+    throw new Error('Failed to fetch resume review');
+  }
+
+  return response.json();
 }
 
 export async function createResumeReviewForApplication(
   applicationId: string,
-  token: string,
-) {
-  return apiPost<ResumeReviewReport>(
-    `/applications/${applicationId}/resume-review`,
-    undefined,
-    { token },
+): Promise<ResumeReviewReport> {
+  const response = await fetch(
+    `/api/applications/${applicationId}/resume-review`,
+    {
+      method: 'POST',
+      credentials: 'include',
+    },
   );
+
+  if (!response.ok) {
+    throw new Error('Failed to create resume review');
+  }
+
+  return response.json();
 }

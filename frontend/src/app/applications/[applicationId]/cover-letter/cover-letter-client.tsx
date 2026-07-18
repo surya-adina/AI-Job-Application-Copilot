@@ -20,20 +20,11 @@ export default function CoverLetterClient({
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const token = process.env.NEXT_PUBLIC_DEV_TOKEN;
-
-    if (!token) {
-      setError('NEXT_PUBLIC_DEV_TOKEN is not configured');
-      return;
-    }
-
-    const devToken = token;
 
     async function loadSavedCoverLetter() {
       try {
         const savedCoverLetter = await getCoverLetterForApplication(
           applicationId,
-          devToken,
         );
 
         setCoverLetter(savedCoverLetter);
@@ -46,20 +37,12 @@ export default function CoverLetterClient({
   }, [applicationId]);
 
   async function handleGenerateCoverLetter() {
-    const token = process.env.NEXT_PUBLIC_DEV_TOKEN;
-
-    if (!token) {
-      setError('NEXT_PUBLIC_DEV_TOKEN is not configured');
-      return;
-    }
-
     try {
       setLoading(true);
       setError('');
 
       const result = await createCoverLetterForApplication(
         applicationId,
-        token,
       );
 
       setCoverLetter(result);

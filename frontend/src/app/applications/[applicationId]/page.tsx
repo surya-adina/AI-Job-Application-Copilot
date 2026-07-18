@@ -1,5 +1,8 @@
 import Link from 'next/link';
 import { getWorkspace } from '@/lib/api/workspace';
+import { redirect } from 'next/navigation';
+import { getAuthToken } from '@/lib/auth/server';
+
 
 const actions = [
   {
@@ -40,10 +43,10 @@ export default async function ApplicationPage({
   params: Promise<{ applicationId: string }>;
 }) {
   const { applicationId } = await params;
-  const token = process.env.NEXT_PUBLIC_DEV_TOKEN;
+  const token = await getAuthToken();
 
   if (!token) {
-    throw new Error('NEXT_PUBLIC_DEV_TOKEN is not configured');
+    redirect('/login');
   }
 
   const workspace = await getWorkspace(applicationId, token);
