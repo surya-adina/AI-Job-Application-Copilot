@@ -7,18 +7,27 @@ type JwtPayload = {
   email: string;
 };
 
+function getJwtSecret(): string {
+  const secret = process.env.JWT_SECRET;
+
+  if (!secret) {
+    throw new Error('JWT_SECRET is not configured');
+  }
+
+  return secret;
+}
+
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor() {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: process.env.JWT_SECRET || 'dev_super_secret_change_me',
+      secretOrKey: getJwtSecret(),
     });
   }
 
   async validate(payload: JwtPayload) {
-    // Whatever you return here becomes req.user
     return { userId: payload.sub, email: payload.email };
   }
 }
