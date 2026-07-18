@@ -31,11 +31,6 @@ const actions = [
   },
 ];
 
-const activity = [
-  'Resume analysis completed',
-  'Resume review generated',
-  'Application workspace created',
-];
 
 export default async function ApplicationPage({
   params,
@@ -50,6 +45,13 @@ export default async function ApplicationPage({
   }
 
   const workspace = await getWorkspace(applicationId, token);
+
+  const createdDate = new Intl.DateTimeFormat('en-US', {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  }).format(new Date(workspace.application.createdAt));
+
   const progress = [
   { label: 'Resume Uploaded', done: workspace.progress.resumeUploaded },
   { label: 'Analysis Complete', done: workspace.progress.analysisComplete },
@@ -135,14 +137,40 @@ export default async function ApplicationPage({
         </section>
 
         <section className="rounded-2xl border p-6">
-          <h2 className="text-xl font-semibold">Recent Activity</h2>
+          <h2 className="text-xl font-semibold">Application Details</h2>
 
-          <div className="mt-5 space-y-3">
-            {activity.map((item) => (
-              <div key={item} className="rounded-xl bg-cyan-500/5 px-4 py-3 text-sm text-muted-foreground">
-                {item}
-              </div>
-            ))}
+          <div className="mt-5 grid gap-4 md:grid-cols-2">
+            <div className="rounded-xl bg-cyan-500/5 px-4 py-3">
+              <p className="text-sm text-muted-foreground">Company</p>
+              <p className="mt-1 font-medium">{workspace.application.company}</p>
+            </div>
+
+            <div className="rounded-xl bg-cyan-500/5 px-4 py-3">
+              <p className="text-sm text-muted-foreground">Role</p>
+              <p className="mt-1 font-medium">{workspace.application.role}</p>
+            </div>
+
+            <div className="rounded-xl bg-cyan-500/5 px-4 py-3">
+              <p className="text-sm text-muted-foreground">Resume</p>
+              <p className="mt-1 font-medium">{workspace.application.resumeTitle}</p>
+            </div>
+
+            <div className="rounded-xl bg-cyan-500/5 px-4 py-3">
+              <p className="text-sm text-muted-foreground">Created</p>
+              <p className="mt-1 font-medium">{createdDate}</p>
+            </div>
+
+            <div className="rounded-xl bg-cyan-500/5 px-4 py-3">
+              <p className="text-sm text-muted-foreground">Status</p>
+              <p className="mt-1 font-medium">{workspace.application.status}</p>
+            </div>
+
+            <div className="rounded-xl bg-cyan-500/5 px-4 py-3">
+              <p className="text-sm text-muted-foreground">Notes</p>
+              <p className="mt-1 font-medium">
+                {workspace.application.notes ?? 'No notes added'}
+              </p>
+            </div>
           </div>
         </section>
       </section>
