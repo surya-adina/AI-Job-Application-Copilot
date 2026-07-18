@@ -14,9 +14,10 @@ import { AiGatewayModule } from './ai-gateway/ai-gateway.module';
 import { ResumeReviewModule } from './resume-review/resume-review.module';
 import { CoverLetterModule } from './cover-letter/cover-letter.module';
 import { InterviewPrepModule } from './interview-prep/interview-prep.module';
+import { HealthModule } from './health/health.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, AuthModule, ResumesModule, JobsModule, ApplicationsModule, AnalysesModule, AiGatewayModule, ResumeReviewModule, CoverLetterModule, InterviewPrepModule],
+  imports: [PrismaModule, UsersModule, AuthModule, ResumesModule, JobsModule, ApplicationsModule, AnalysesModule, AiGatewayModule, ResumeReviewModule, CoverLetterModule, InterviewPrepModule, HealthModule],
   controllers: [AppController, AuthController, HealthController],
   providers: [AppService],
 })
