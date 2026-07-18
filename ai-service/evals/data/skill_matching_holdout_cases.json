@@ -1,0 +1,74 @@
+[
+  {
+    "id": "ai_platform_partial_match",
+    "resume_text": "Backend engineer with experience building APIs using Python, FastAPI, PostgreSQL, Docker, OpenAI APIs, and observability tooling.",
+    "job_description": "Required Qualifications: Python, FastAPI, PostgreSQL, Docker, LLM APIs. Preferred Qualifications: AWS, Kubernetes, RAG, Vector Search.",
+    "expected_required_matches": ["Python", "FastAPI", "PostgreSQL", "Docker", "LLM"],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": ["AWS", "Kubernetes", "RAG", "Vector Search"]
+  },
+  {
+    "id": "frontend_role_strong_match",
+    "resume_text": "Frontend developer experienced with React, Next.js, TypeScript, JavaScript, and UI component systems.",
+    "job_description": "Required Qualifications: React, Next.js, TypeScript. Preferred Qualifications: Node.js, PostgreSQL, Docker.",
+    "expected_required_matches": ["React", "Next.js", "TypeScript"],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": ["Node.js", "PostgreSQL", "Docker"]
+  },
+  {
+    "id": "cloud_gap_case",
+    "resume_text": "Software engineer with Python, FastAPI, PostgreSQL, Redis, and Docker experience.",
+    "job_description": "Required Qualifications: Python, FastAPI, PostgreSQL, Redis. Preferred Qualifications: AWS, Kubernetes, Observability.",
+    "expected_required_matches": ["Python", "FastAPI", "PostgreSQL", "Redis"],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": ["AWS", "Kubernetes", "Observability"]
+  },
+  {
+    "id": "semantic_alias_case",
+    "resume_text": "Built services with TS, Node, Postgres, containers, and OpenAI API integrations.",
+    "job_description": "Required Qualifications: TypeScript, Node.js, PostgreSQL, Docker, LLM APIs.",
+    "expected_required_matches": ["TypeScript", "Node.js", "PostgreSQL", "Docker", "LLM"],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": []
+  },
+  {
+    "id": "rag_gap_case",
+    "resume_text": "AI engineer with experience in Python, embeddings, vector search, prompt engineering, and OpenAI APIs.",
+    "job_description": "Required Qualifications: Python, LLM APIs, Prompt Engineering, Embeddings, Vector Search, RAG.",
+    "expected_required_matches": ["Python", "LLM", "Prompt Engineering", "Embeddings", "Vector Search"],
+    "expected_required_missing": ["RAG"],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": []
+  },
+  {
+    "id": "negated_cloud_experience_case",
+    "resume_text": "Backend engineer with Python, FastAPI, PostgreSQL, and Docker experience. No professional experience with AWS or Kubernetes.",
+    "job_description": "Required Qualifications: Python, FastAPI, PostgreSQL, Docker. Preferred Qualifications: AWS, Kubernetes.",
+    "expected_required_matches": ["Python", "FastAPI", "PostgreSQL", "Docker"],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": ["AWS", "Kubernetes"]
+  },
+  {
+    "id": "learning_not_experience_case",
+    "resume_text": "Software engineer experienced with React, TypeScript, and Node.js. Currently learning Docker and Kubernetes through tutorials.",
+    "job_description": "Required Qualifications: React, TypeScript, Node.js, Docker. Preferred Qualifications: Kubernetes.",
+    "expected_required_matches": ["React", "TypeScript", "Node.js"],
+    "expected_required_missing": ["Docker"],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": ["Kubernetes"]
+  },
+  {
+    "id": "job_mentions_skills_resume_does_not",
+    "resume_text": "Frontend developer focused on React, Next.js, TypeScript, accessibility, and UI performance.",
+    "job_description": "Required Qualifications: React, Next.js, TypeScript. Preferred Qualifications: PostgreSQL, Docker, AWS, Redis.",
+    "expected_required_matches": ["React", "Next.js", "TypeScript"],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": ["PostgreSQL", "Docker", "AWS", "Redis"]
+  }
+]

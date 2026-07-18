@@ -64,6 +64,11 @@ def create_interview_prep(request: InterviewPrepRequest):
             temperature=0.2,
         )
 
+        usage = response.usage
+        tokens_in = usage.input_tokens if usage else None
+        tokens_out = usage.output_tokens if usage else None
+        total_tokens = usage.total_tokens if usage else None
+
         parsed = parse_json_output(response.output_text)
         latency_ms = int((time.time() - start_time) * 1000)
 
@@ -75,6 +80,9 @@ def create_interview_prep(request: InterviewPrepRequest):
                 "prompt_version": "interview_prep_v1",
                 "latency_ms": latency_ms,
                 "status": "SUCCESS",
+                "tokens_in": tokens_in,
+                "tokens_out": tokens_out,
+                "total_tokens": total_tokens,
             },
         }
 

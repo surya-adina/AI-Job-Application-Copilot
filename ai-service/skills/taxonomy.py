@@ -26,4 +26,21 @@ KNOWN_SKILLS = {
     "prompt versioning": "Prompt Versioning",
     "evaluation": "Evaluation",
     "observability": "Observability",
+    "openai apis": "LLM",
+    "openai api": "LLM",
+    "llm api": "LLM",
+    "llm apis": "LLM",
+
+    "prompt engineering": "Prompt Engineering",
+    "prompt engineer": "Prompt Engineering",
+
+    "node": "Node.js",
+    "nodejs": "Node.js",
+    "node.js": "Node.js",
+
+    "ts": "TypeScript",
+
+    "containerized services": "Docker",
+    "containerized applications": "Docker",
+    "containers": "Docker",
 }

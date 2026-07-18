@@ -22,9 +22,9 @@ const actions = [
   },
   {
     title: 'Prepare for Interview',
-    description: 'Generate technical and behavioral questions for this role.',
-    href: '#',
-    available: false,
+    description: 'Generate technical, behavioral, and project-specific questions for this role.',
+    href: 'interview-prep',
+    available: true,
   },
 ];
 
