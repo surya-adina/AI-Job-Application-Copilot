@@ -1,10 +1,7 @@
 import { NextResponse } from 'next/server';
 import { getAuthToken } from '@/lib/auth/server';
 
-const API_BASE =
-  process.env.BACKEND_API_URL ??
-  process.env.NEXT_PUBLIC_API_URL ??
-  'http://localhost:4000';
+const API_BASE = process.env.BACKEND_API_URL ?? 'http://localhost:4000';
 
 type RouteContext = {
   params: Promise<{
