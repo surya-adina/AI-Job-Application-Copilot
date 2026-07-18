@@ -1,0 +1,29 @@
+[
+  {
+    "id": "ai_backend_strong_match",
+    "resume_text": "Software engineer with experience in Python, FastAPI, PostgreSQL, Docker, OpenAI APIs, prompt engineering, evaluation pipelines, observability, and vector search.",
+    "job_description": "Required Qualifications: Python, FastAPI, PostgreSQL, Docker, LLM APIs, Prompt Engineering, AI Evaluation. Preferred Qualifications: AWS, Kubernetes, pgvector, Vector Search, RAG, Production AI Infrastructure, Observability.",
+    "expected_required_matches": ["Python", "FastAPI", "PostgreSQL", "Docker", "LLM", "Prompt Engineering", "Evaluation"],
+    "expected_required_missing": [],
+    "expected_preferred_matches": ["Vector Search", "Observability"],
+    "expected_preferred_missing": ["AWS", "Kubernetes", "pgvector", "RAG"]
+  },
+  {
+    "id": "frontend_gap_backend_role",
+    "resume_text": "Frontend engineer with experience in React, Next.js, TypeScript, JavaScript, Tailwind CSS, and UI component development.",
+    "job_description": "Required Qualifications: Python, FastAPI, PostgreSQL, Docker. Preferred Qualifications: AWS, Kubernetes, Redis.",
+    "expected_required_matches": [],
+    "expected_required_missing": ["Python", "FastAPI", "PostgreSQL", "Docker"],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": ["AWS", "Kubernetes", "Redis"]
+  },
+  {
+    "id": "alias_match_case",
+    "resume_text": "Built backend systems using Postgres, Node, TS, containerized services, and OpenAI APIs.",
+    "job_description": "Required Qualifications: PostgreSQL, Node.js, TypeScript, Docker, LLM APIs.",
+    "expected_required_matches": ["PostgreSQL", "Node.js", "TypeScript", "Docker", "LLM"],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": []
+  }
+]
