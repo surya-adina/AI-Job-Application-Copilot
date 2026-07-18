@@ -6,8 +6,8 @@ import { useRouter } from 'next/navigation';
 export default function LoginForm() {
   const router = useRouter();
 
-  const [email, setEmail] = useState('jon@gmail.com');
-  const [password, setPassword] = useState('Password123!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -61,6 +61,7 @@ export default function LoginForm() {
               onChange={(event) => setEmail(event.target.value)}
               className="mt-2 w-full rounded-xl border bg-background px-4 py-3 outline-none focus:border-cyan-500"
               type="email"
+              required
             />
           </div>
 
@@ -71,6 +72,7 @@ export default function LoginForm() {
               onChange={(event) => setPassword(event.target.value)}
               className="mt-2 w-full rounded-xl border bg-background px-4 py-3 outline-none focus:border-cyan-500"
               type="password"
+              required
             />
           </div>
 
