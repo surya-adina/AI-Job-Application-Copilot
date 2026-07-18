@@ -3,6 +3,9 @@ import time
 import urllib.request
 from pathlib import Path
 
+GPT_4O_MINI_INPUT_COST_PER_1M = 0.15
+GPT_4O_MINI_OUTPUT_COST_PER_1M = 0.60
+
 API_BASE = "http://localhost:8000"
 RESULTS_PATH = Path("evals/results/ai_endpoint_metrics.json")
 
@@ -90,6 +93,14 @@ def post_json(path, payload):
 
     return json.loads(body), elapsed_ms
 
+def estimate_cost(tokens_in, tokens_out):
+    if tokens_in is None or tokens_out is None:
+        return None
+
+    input_cost = (tokens_in / 1_000_000) * GPT_4O_MINI_INPUT_COST_PER_1M
+    output_cost = (tokens_out / 1_000_000) * GPT_4O_MINI_OUTPUT_COST_PER_1M
+
+    return round(input_cost + output_cost, 6)
 
 def main():
     results = []
@@ -115,6 +126,10 @@ def main():
                     "total_tokens": metadata.get("total_tokens"),
                     "tokens_in": metadata.get("tokens_in"),
                     "tokens_out": metadata.get("tokens_out"),
+                    "estimated_cost_usd": estimate_cost(
+                        metadata.get("tokens_in"),
+                        metadata.get("tokens_out"),
+                    ),
                 }
             )
 

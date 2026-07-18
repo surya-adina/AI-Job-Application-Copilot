@@ -86,6 +86,11 @@ def create_cover_letter(request: CoverLetterRequest):
 
     latency_ms = int((time.time() - start_time) * 1000)
 
+    usage = response.usage
+    tokens_in = usage.input_tokens if usage else None
+    tokens_out = usage.output_tokens if usage else None
+    total_tokens = usage.total_tokens if usage else None
+    
     return {
         "content": content,
         "metadata": {
@@ -94,5 +99,8 @@ def create_cover_letter(request: CoverLetterRequest):
             "prompt_version": "cover_letter_v1",
             "latency_ms": latency_ms,
             "status": "SUCCESS",
+            "tokens_in": tokens_in,
+            "tokens_out": tokens_out,
+            "total_tokens": total_tokens,
         },
     }
