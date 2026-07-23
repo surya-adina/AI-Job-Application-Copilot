@@ -1,4 +1,17 @@
-import { Body, Controller, Delete, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Post,
+  Req,
+  UploadedFile,
+  UseGuards,
+  UseInterceptors,
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { memoryStorage } from 'multer';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { CreateResumeDto } from './dto/create-resume.dto';
 import { ResumesService } from './resumes.service';
@@ -11,6 +24,23 @@ export class ResumesController {
   @Post()
   create(@Req() req: any, @Body() dto: CreateResumeDto) {
     return this.resumesService.create(req.user.userId, dto);
+  }
+
+  @Post('upload')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: memoryStorage(),
+      limits: {
+        fileSize: 5 * 1024 * 1024,
+      },
+    }),
+  )
+  upload(
+    @Req() req: any,
+    @UploadedFile() file: Express.Multer.File,
+    @Body('title') title?: string,
+  ) {
+    return this.resumesService.upload(req.user.userId, file, title);
   }
 
   @Get()

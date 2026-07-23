@@ -16,7 +16,7 @@ import { UpdateApplicationDto } from './dto/update-application.dto';
 
 type AuthenticatedRequest = {
   user: {
-    sub: string;
+    userId: string;
     email: string;
   };
 };
@@ -60,6 +60,6 @@ export class ApplicationsController {
     @Param('id') id: string,
     @Req() req: AuthenticatedRequest,
   ) {
-    return this.applicationsService.getWorkspace(id, req.user.sub);
+    return this.applicationsService.getWorkspace(id, req.user.userId);
   }
 }

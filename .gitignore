@@ -8,14 +8,19 @@
 # env
 **/.env
 **/.env.*
+!**/.env.example
 
 # Python
 __pycache__/
 *.pyc
 ai-service/.venv/
-ai-service/.env
 ai-service/__pycache__
 
 # Generated evaluation reports
 ai-service/evals/results/*.json
+
+# OS
 .DS_Store
+
+# Data
+/data

@@ -5,7 +5,6 @@ import { PrismaModule } from 'prisma/prisma.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
 import { AuthController } from './auth/auth.controller';
-import { HealthController } from './health.controller';
 import { ResumesModule } from './resumes/resumes.module';
 import { JobsModule } from './jobs/jobs.module';
 import { ApplicationsModule } from './applications/applications.module';
@@ -18,7 +17,7 @@ import { HealthModule } from './health/health.module';
 
 @Module({
   imports: [PrismaModule, UsersModule, AuthModule, ResumesModule, JobsModule, ApplicationsModule, AnalysesModule, AiGatewayModule, ResumeReviewModule, CoverLetterModule, InterviewPrepModule, HealthModule],
-  controllers: [AppController, AuthController, HealthController],
+  controllers: [AppController, AuthController],
   providers: [AppService],
 })
 export class AppModule {}
