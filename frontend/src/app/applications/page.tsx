@@ -22,7 +22,19 @@ export default async function ApplicationsPage() {
 
             <h1 className="mt-2 text-4xl font-bold">Job Applications</h1>
           </div>
+          <Link
+            href="/applications/new"
+            className="rounded-xl bg-foreground px-5 py-3 text-sm font-semibold text-background transition hover:opacity-90"
+          >
+            New Application
+          </Link>
 
+          <Link
+            href="/resumes"
+            className="rounded-xl border px-5 py-3 text-sm font-semibold transition hover:bg-muted"
+          >
+            Saved Resumes
+          </Link>
           <LogoutButton />
         </div>
 
