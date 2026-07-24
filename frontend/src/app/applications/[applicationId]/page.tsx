@@ -3,6 +3,7 @@ import { getWorkspace } from '@/lib/api/workspace';
 import { redirect } from 'next/navigation';
 import { getAuthToken } from '@/lib/auth/server';
 import { LogoutButton } from '@/components/auth/logout-button';
+import { ApplicationStatusSelect } from './application-status-select';
 
 const actions = [
   {
@@ -76,7 +77,6 @@ export default async function ApplicationPage({
           <div>
             <p className="text-sm text-muted-foreground">{workspace.application.company}</p>
             <h1 className="mt-2 text-4xl font-bold">{workspace.application.role}</h1>
-            <p className="mt-3 text-muted-foreground">Status: {workspace.application.status}</p>
           </div>
 
           <div className="text-left md:text-right">
@@ -161,8 +161,10 @@ export default async function ApplicationPage({
             </div>
 
             <div className="rounded-xl bg-cyan-500/5 px-4 py-3">
-              <p className="text-sm text-muted-foreground">Status</p>
-              <p className="mt-1 font-medium">{workspace.application.status}</p>
+              <ApplicationStatusSelect
+                applicationId={workspace.application.id}
+                currentStatus={workspace.application.status}
+              />
             </div>
 
             <div className="rounded-xl bg-cyan-500/5 px-4 py-3">

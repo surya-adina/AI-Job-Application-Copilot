@@ -4,6 +4,13 @@ import { getAuthToken } from '@/lib/auth/server';
 import { getApplications } from '@/lib/api/applications';
 import { LogoutButton } from '@/components/auth/logout-button';
 
+function formatStatus(status: string) {
+  return status
+    .toLowerCase()
+    .replace('_', ' ')
+    .replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
 export default async function ApplicationsPage() {
   const token = await getAuthToken();
 
@@ -60,10 +67,14 @@ export default async function ApplicationsPage() {
                       {application.job.title}
                     </p>
 
+                    <span className="rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
+                      {formatStatus(application.status)}
+                    </span>
+                    
+                  </div> 
                     <p className="mt-3 text-sm text-muted-foreground">
                       Resume: {application.resume.title}
                     </p>
-                  </div>
 
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground">
