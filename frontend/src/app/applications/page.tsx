@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getAuthToken } from '@/lib/auth/server';
 import { getApplications } from '@/lib/api/applications';
 import { LogoutButton } from '@/components/auth/logout-button';
+import { DeleteApplicationButton } from './delete-application-button';
 
 function formatStatus(status: string) {
   return status
@@ -70,11 +71,17 @@ export default async function ApplicationsPage() {
                     <span className="rounded-full border px-3 py-1 text-xs font-medium text-muted-foreground">
                       {formatStatus(application.status)}
                     </span>
-                    
+
                   </div> 
-                    <p className="mt-3 text-sm text-muted-foreground">
-                      Resume: {application.resume.title}
-                    </p>
+                  <p className="mt-3 text-sm text-muted-foreground">
+                    Resume: {application.resume.title}
+                  </p>
+
+                  <DeleteApplicationButton
+                    applicationId={application.id}
+                    company={application.job.company}
+                    role={application.job.title}
+                  />
 
                   <div className="text-right">
                     <p className="text-sm text-muted-foreground">

@@ -32,3 +32,24 @@ export async function PATCH(request: Request, { params }: RouteParams) {
 
   return NextResponse.json(data, { status: response.status });
 }
+
+export async function DELETE(_request: Request, { params }: RouteParams) {
+  const token = await getAuthToken();
+
+  if (!token) {
+    return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
+  }
+
+  const { applicationId } = await params;
+
+  const response = await fetch(`${API_BASE}/applications/${applicationId}`, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  });
+
+  const data = await response.json();
+
+  return NextResponse.json(data, { status: response.status });
+}
