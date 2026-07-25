@@ -108,7 +108,12 @@ export default async function ResumesPage() {
                 >
                   <div className="flex items-start justify-between gap-4">
                     <div>
-                      <h2 className="text-xl font-semibold">{resume.title}</h2>
+                      <Link
+                        href={`/resumes/${resume.id}`}
+                        className="text-xl font-semibold hover:underline"
+                      >
+                        {resume.title}
+                      </Link>
                       <p className="mt-1 text-sm text-muted-foreground">
                         Added {createdDate}
                       </p>
