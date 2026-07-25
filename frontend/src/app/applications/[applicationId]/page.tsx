@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation';
 import { getAuthToken } from '@/lib/auth/server';
 import { LogoutButton } from '@/components/auth/logout-button';
 import { ApplicationStatusSelect } from './application-status-select';
+import { ApplicationNotesEditor } from './application-notes-editor';
 
 const actions = [
   {
@@ -167,11 +168,11 @@ export default async function ApplicationPage({
               />
             </div>
 
-            <div className="rounded-xl bg-cyan-500/5 px-4 py-3">
-              <p className="text-sm text-muted-foreground">Notes</p>
-              <p className="mt-1 font-medium">
-                {workspace.application.notes ?? 'No notes added'}
-              </p>
+            <div className="rounded-xl bg-cyan-500/5 px-4 py-3 md:col-span-2">
+              <ApplicationNotesEditor
+                applicationId={workspace.application.id}
+                initialNotes={workspace.application.notes}
+              />
             </div>
           </div>
         </section>
