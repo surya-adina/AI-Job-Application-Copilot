@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getAuthToken } from '@/lib/auth/server';
 import { LogoutButton } from '@/components/auth/logout-button';
+import { DeleteResumeButton } from './delete-resume-button';
 
 const API_BASE = process.env.BACKEND_API_URL ?? 'http://localhost:4000';
 
@@ -105,17 +106,20 @@ export default async function ResumesPage() {
                   key={resume.id}
                   className="rounded-2xl border bg-card p-6 shadow-sm"
                 >
-                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                  <div className="flex items-start justify-between gap-4">
                     <div>
                       <h2 className="text-xl font-semibold">{resume.title}</h2>
                       <p className="mt-1 text-sm text-muted-foreground">
                         Added {createdDate}
                       </p>
-                      <p className="mt-4 line-clamp-3 text-sm text-muted-foreground">
-                        {resume.rawText}
-                      </p>
                     </div>
+
+                    <DeleteResumeButton resumeId={resume.id} title={resume.title} />
                   </div>
+
+                  <p className="mt-4 line-clamp-3 text-sm text-muted-foreground">
+                    {resume.rawText}
+                  </p>
                 </article>
               );
             })}
