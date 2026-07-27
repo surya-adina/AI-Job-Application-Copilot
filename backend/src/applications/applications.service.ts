@@ -170,7 +170,9 @@ export class ApplicationsService {
         createdAt: application.createdAt,
         company: application.job.company,
         role: application.job.title,
-        resumeTitle: application.resume.title,
+        resumeTitle: application.resume.title ?? null,
+        jobDescription: application.job.jdText,
+        sourceUrl: application.job.sourceUrl,
       },
       analysis: application.analysis
         ? {

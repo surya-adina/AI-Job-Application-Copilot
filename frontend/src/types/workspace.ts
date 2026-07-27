@@ -7,6 +7,8 @@ export type ApplicationWorkspace = {
     notes: string | null;
     createdAt: string;
     resumeTitle: string;
+    jobDescription: string;
+sourceUrl: string | null;
   };
 
   analysis: {

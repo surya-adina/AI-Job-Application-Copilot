@@ -139,7 +139,31 @@ export default async function ApplicationPage({
 
         <section className="rounded-2xl border p-6">
           <h2 className="text-xl font-semibold">Application Details</h2>
+          <section className="rounded-2xl border p-6">
+            <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
+              <div>
+                <h2 className="text-xl font-semibold">Job Description</h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  The job posting used for this application analysis.
+                </p>
+              </div>
 
+              {workspace.application.sourceUrl ? (
+                <a
+                  href={workspace.application.sourceUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-sm font-medium text-cyan-500 hover:underline"
+                >
+                  Open job posting
+                </a>
+              ) : null}
+            </div>
+
+            <pre className="mt-5 max-h-[480px] overflow-auto whitespace-pre-wrap rounded-xl border bg-background p-5 text-sm leading-7 text-muted-foreground">
+              {workspace.application.jobDescription}
+            </pre>
+          </section>
           <div className="mt-5 grid gap-4 md:grid-cols-2">
             <div className="rounded-xl bg-cyan-500/5 px-4 py-3">
               <p className="text-sm text-muted-foreground">Company</p>
