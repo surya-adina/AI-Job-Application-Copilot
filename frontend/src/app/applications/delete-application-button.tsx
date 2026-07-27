@@ -40,6 +40,7 @@ export function DeleteApplicationButton({
         throw new Error(data?.message ?? 'Failed to delete application');
       }
 
+      router.push('/applications');
       router.refresh();
     } catch (err) {
       setError(
