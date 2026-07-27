@@ -42,19 +42,15 @@ export default async function ApplicationAnalysisPage({
   }
 
   const strengths = analysis.matchedSkills.slice(0, 4);
-  const missingSkills = analysis.missingSkills;
-  const recommendations = analysis.suggestions?.recommendations ?? [];
+  const missingSkills = analysis.missingSkills ?? [];
 
-  const priorities = recommendations.slice(0, 3).map((recommendation, index) => ({
+  const priorities = missingSkills.slice(0, 3).map((skill, index) => ({
     rank: index + 1,
     impact: Math.max(5 - index, 3),
-    title: `Priority ${index + 1}`,
-    why: analysis.weaknesses,
-    evidence:
-      missingSkills.length > 0
-        ? missingSkills.slice(0, 4)
-        : ['No major missing skills found in the saved analysis.'],
-    action: recommendation,
+    title: `Add evidence for ${skill}`,
+    why: `The job appears to value ${skill}, but this skill was not found in the saved resume analysis.`,
+    evidence: [`Missing skill from analysis: ${skill}`],
+    action: `If you genuinely have experience with ${skill}, add a concrete example in your Skills, Projects, or Experience section. If not, treat this as a growth area instead of adding it to the resume.`,
   }));
 
   return (
@@ -148,14 +144,20 @@ export default async function ApplicationAnalysisPage({
             </p>
 
             <div className="mt-4 space-y-3">
-              {missingSkills.map((skill) => (
-                <div
-                  key={skill}
-                  className="rounded-xl bg-amber-500/10 px-4 py-3 text-amber-300"
-                >
-                  • {skill}
+              {missingSkills.length > 0 ? (
+                missingSkills.map((skill) => (
+                  <div
+                    key={skill}
+                    className="rounded-xl bg-amber-500/10 px-4 py-3 text-amber-300"
+                  >
+                    • {skill}
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-xl bg-emerald-500/10 px-4 py-3 text-emerald-300">
+                  No major missing skills found in this analysis.
                 </div>
-              ))}
+              )}
             </div>
           </section>
         </div>
@@ -169,54 +171,66 @@ export default async function ApplicationAnalysisPage({
           </div>
 
           <div className="mt-6 space-y-5">
-            {priorities.map((item) => (
-              <article
-                key={item.rank}
-                className="rounded-2xl border border-slate-800 bg-slate-950 p-5"
-              >
-                <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                  <div className="flex gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cyan-500/10 text-lg font-bold text-cyan-300">
-                      {item.rank}
+            {priorities.length === 0 ? (
+              <div className="rounded-2xl border border-emerald-500/20 bg-emerald-500/10 p-5">
+                <h3 className="text-lg font-semibold text-emerald-300">
+                  No major resume gaps found
+                </h3>
+                <p className="mt-2 text-sm leading-6 text-slate-400">
+                  The saved analysis did not identify major missing skills for this role.
+                  Focus on keeping the resume truthful, clear, and specific to the role.
+                </p>
+              </div>
+            ) : (
+              priorities.map((item) => (
+                <article
+                  key={item.rank}
+                  className="rounded-2xl border border-slate-800 bg-slate-950 p-5"
+                >
+                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+                    <div className="flex gap-4">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-cyan-500/10 text-lg font-bold text-cyan-300">
+                        {item.rank}
+                      </div>
+
+                      <div>
+                        <h3 className="text-lg font-semibold">{item.title}</h3>
+                        <p className="mt-2 text-sm leading-6 text-slate-400">
+                          {item.why}
+                        </p>
+                      </div>
                     </div>
 
-                    <div>
-                      <h3 className="text-lg font-semibold">{item.title}</h3>
-                      <p className="mt-2 text-sm leading-6 text-slate-400">
-                        {item.why}
+                    <div className="shrink-0 rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">
+                      Impact {'★'.repeat(item.impact)}
+                      <span className="text-slate-700">
+                        {'★'.repeat(5 - item.impact)}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="mt-5 grid gap-4 md:grid-cols-2">
+                    <div className="rounded-xl bg-slate-900 p-4">
+                      <p className="text-sm font-medium text-slate-300">
+                        Evidence
+                      </p>
+                      <ul className="mt-3 space-y-2 text-sm text-slate-400">
+                        {item.evidence.map((point) => (
+                          <li key={point}>• {point}</li>
+                        ))}
+                      </ul>
+                    </div>
+
+                    <div className="rounded-xl bg-slate-900 p-4">
+                      <p className="text-sm font-medium text-slate-300">Action</p>
+                      <p className="mt-3 text-sm leading-6 text-slate-400">
+                        {item.action}
                       </p>
                     </div>
                   </div>
-
-                  <div className="shrink-0 rounded-full border border-slate-700 px-3 py-1 text-xs text-slate-300">
-                    Impact {'★'.repeat(item.impact)}
-                    <span className="text-slate-700">
-                      {'★'.repeat(5 - item.impact)}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="mt-5 grid gap-4 md:grid-cols-2">
-                  <div className="rounded-xl bg-slate-900 p-4">
-                    <p className="text-sm font-medium text-slate-300">
-                      Evidence
-                    </p>
-                    <ul className="mt-3 space-y-2 text-sm text-slate-400">
-                      {item.evidence.map((point) => (
-                        <li key={point}>• {point}</li>
-                      ))}
-                    </ul>
-                  </div>
-
-                  <div className="rounded-xl bg-slate-900 p-4">
-                    <p className="text-sm font-medium text-slate-300">Action</p>
-                    <p className="mt-3 text-sm leading-6 text-slate-400">
-                      {item.action}
-                    </p>
-                  </div>
-                </div>
-              </article>
-            ))}
+                </article>
+              ))
+            )}
           </div>
         </section>
       </section>

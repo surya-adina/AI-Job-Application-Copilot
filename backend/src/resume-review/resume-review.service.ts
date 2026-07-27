@@ -64,8 +64,21 @@ export class ResumeReviewService {
     const review = await this.aiGateway.createResumeReview({
       resumeText: application.resume.rawText,
       jobDescription: application.job.jdText,
-      analysis: application.analysis,
-      evidence: {},
+      analysis: {
+        score: application.analysis.score,
+        matchedSkills: application.analysis.matchedSkills,
+        missingSkills: application.analysis.missingSkills,
+        strengths: application.analysis.strengths,
+        weaknesses: application.analysis.weaknesses,
+        suggestions: application.analysis.suggestions,
+      },
+      evidence: {
+        matchedSkills: application.analysis.matchedSkills,
+        missingSkills: application.analysis.missingSkills,
+        strengths: application.analysis.strengths,
+        weaknesses: application.analysis.weaknesses,
+        score: application.analysis.score,
+      },
     });
 
     const savedReview = await this.prisma.resumeReview.upsert({

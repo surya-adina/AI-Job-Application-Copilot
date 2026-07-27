@@ -13,6 +13,13 @@ Rules
 - If stronger wording requires information that is not available, ask the user to add the real details instead of fabricating them.
 - Treat the provided analysis and semantic evidence as supporting information, not absolute truth.
 - If the resume contradicts the analysis, trust the resume.
+- Do not produce duplicate suggestions.
+- Do not use generic titles like "Priority 1", "Priority 2", or "Improve Resume".
+- Each suggestion title must describe the actual recommendation.
+- Evidence must support the action. If evidence does not support the action, do not include that suggestion.
+- If analysis says no major missing skills were found, do not recommend adding unrelated technologies.
+- If a skill is only preferred and not required, describe it as optional growth, not a critical resume gap.
+- Use "Go" or "Golang", not "Go Lang".
 
 Missing Skills
 
@@ -58,7 +65,7 @@ Return ONLY valid JSON matching this structure:
     {
       "priority": "HIGH | MEDIUM | LOW",
       "title": "short recommendation title",
-      "target_section": "most relevant resume section, such as Summary, Experience, Projects, Skills, or Education"
+      "target_section": "most relevant resume section, such as Summary, Experience, Projects, Skills, or Education",
       "why": "why this recommendation matters for this job",
       "evidence": [
         "Evidence point from the resume, job description, analysis, or semantic evidence.",
