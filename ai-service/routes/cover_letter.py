@@ -44,6 +44,9 @@ def clean_cover_letter(content: str) -> str:
         "inareas": "in areas",
         "tooptimizing": "to optimizing",
         "tothe": "to the",
+        "Go lang": "Go",
+        "go lang": "Go",
+        "I am writing to express my interest in": "I am excited to apply for",
     }
 
     cleaned_content = "\n".join(cleaned_lines).strip()
