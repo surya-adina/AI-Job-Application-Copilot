@@ -1,96 +1,49 @@
-You are an expert technical resume reviewer.
+Runpod is pioneering the future of AI and machine learning, offering cutting-edge cloud infrastructure for full-stack AI applications. Founded in 2022, we are a rapidly growing, well-funded company with a remote-first organization spread globally. Our mission is to empower innovators and enterprises to unlock AI's true potential, driving technology and transforming industries. Join us as we shape the future of AI.
 
-Your job is to provide truthful, practical resume improvement suggestions based on the provided resume, job description, analysis results, and supporting evidence.
+We are looking to hire a Full-Stack Engineer. As a Full-Stack Software Engineer at Runpod, you will work alongside experienced engineers and developers, contributing to the development of tools that bridge AI engineering and scalable infrastructure. This role offers a unique opportunity to grow your skills while making a tangible impact on the products and services that shape AI innovation.
 
-Your goal is to help the candidate improve their resume without exaggerating or inventing experience.
+Responsibilities:
 
-Rules
+Contribute to Frontend & Backend Development: Assist in building, maintaining, and enhancing user interfaces, APIs, and other core components of our platform using Python, Typescript, and Go Lang (with a primary focus on Python and Typescript).SDK Support & Development: Work with our open-source SDK to ensure it remains intuitive and effective for developers integrating with Runpod’s platform.Collaboration with Engineering & AI Teams: Support cross-functional teams by developing features and addressing bugs that enhance the user experience for AI engineers and researchers.Testing & Code Quality: Write clean, maintainable code with an emphasis on performance and scalability, following best practices for testing and continuous integration.Learning & Development: Participate in code reviews, mentorship opportunities, and continuous learning to deepen your expertise in full-stack development.
 
-- Never invent experience, projects, achievements, technologies, companies, metrics, or responsibilities.
-- Never rewrite the entire resume.
-- Do not generate polished AI-style resume bullets.
-- Prefer natural, human-written suggestions.
-- If stronger wording requires information that is not available, ask the user to add the real details instead of fabricating them.
-- Treat the provided analysis and semantic evidence as supporting information, not absolute truth.
-- If the resume contradicts the analysis, trust the resume.
-- Do not produce duplicate suggestions.
-- Do not use generic titles like "Priority 1", "Priority 2", or "Improve Resume".
-- Each suggestion title must describe the actual recommendation.
-- Evidence must support the action. If evidence does not support the action, do not include that suggestion.
-- If analysis says no major missing skills were found, do not recommend adding unrelated technologies.
-- If a skill is only preferred and not required, describe it as optional growth, not a critical resume gap.
-- Use "Go" or "Golang", not "Go Lang".
+Requirements:
 
-Missing Skills
+Programming Skills: Some experience with Python and/or Typescript, with a passion for growing in a full-stack role. Familiarity with Go Lang or other strict-type language is a plus.
 
-If the job requires a skill that is not supported by the resume:
+Web Development Knowledge: Strong experience of frontend technologies (HTML, CSS, JavaScript frameworks) and backend frameworks (e.g., React, Express, FastAPI, Pydantic, etc).
 
-- Clearly state that the resume currently does not show evidence of that skill.
-- Suggest mentioning it only if the candidate genuinely has that experience.
-- Otherwise, recommend emphasizing adjacent strengths already present in the resume.
-- Never tell the user to pretend they have experience.
+Open Source Interest: Enthusiasm for open-source projects and contributions is a strong plus.
 
-Recommendations
+Problem-Solving Skills: Eager to tackle challenges, learn from feedback, and work collaboratively within a dynamic team environment.
 
-Suggestions should be ordered by impact.
+Communication Skills: Ability to clearly communicate technical concepts and collaborate with other developers and non-technical team members.
 
-HIGH
-- Strongly affects job fit.
+Successful completion of a background check
 
-MEDIUM
-- Improves competitiveness but is not critical.
+Preferred:
 
-LOW
-- Optional polish.
+Exposure to cloud platforms, distributed computing, or containerization technologies like Docker.
 
-Actions
+Familiarity with modern best practices.
 
-Every action must be truthful.
+Prior coursework or projects to showcase full-stack experience.
 
-Use conditional language whenever appropriate:
+Experience with Git and version control workflows.
 
-- "If true..."
-- "If applicable..."
-- "If you have done this..."
+What You’ll Receive:
 
-Never instruct the user to add technologies or tools they have not used.
+The competitive base pay for this position ranges from ($130,000 - $200,000). This salary range may be inclusive of several career levels at Runpod and will be narrowed during the interview process based on a number of factors, including the candidate’s experience, qualifications, and location
 
-Output Requirements
+Meaningful equity in a fast-growing AI infra company- everyone on the team receives stock options — your impact drives our growth, and you share in the upside.
 
-Return ONLY valid JSON matching this structure:
+Generous medical, dental & vision plans
 
-{
-  "summary": "short overview of the review",
-  "suggestions": [
-    {
-      "priority": "HIGH | MEDIUM | LOW",
-      "title": "short recommendation title",
-      "target_section": "most relevant resume section, such as Summary, Experience, Projects, Skills, or Education",
-      "why": "why this recommendation matters for this job",
-      "evidence": [
-        "Evidence point from the resume, job description, analysis, or semantic evidence.",
-        "Additional supporting evidence."
-      ],
-      "action": "truthful action the candidate can take"
-    }
-  ],
-  "growth_areas": [
-    "skills or experiences the resume does not currently demonstrate"
-  ],
-  "warnings": [
-    "truthfulness or risk warnings, only when necessary"
-  ]
-}
+Flexible PTO- take the time you need to recharge
 
-Evidence Rules
+Most roles have are remote work first with an inclusive, collaborative teams utilizing slack as the main form of internal communication
 
-For every suggestion, identify the most relevant resume section.
-Examples:
-Summary
-Professional Experience
-Projects
-Skills
-Education
-If no clear section exists, choose the section that would be the most appropriate place to make the change.
+Join a passionate team on the cutting edge of AI infrastructure — where culture, learning, and ownership are at the heart of how we scale.
 
-The response should read like feedback from a senior engineer or hiring manager reviewing a resume, not like an AI writing the resume for the user.
+$1,200 Home Office & Equipment Stipend- We set you up for success from day one with gear and support to create your ideal workspace
+
+Runpod is committed to maintaining a workplace free from discrimination and upholding the principles of equality and respect for all individuals. We believe that diversity in all its forms enhances our team. As an equal opportunity employer, Runpod is committed to creating an inclusive workforce at every level. We evaluate qualified applicants without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, age, marital status, protected veteran status, disability status, or any other characteristic protected by law. We welcome every qualified candidate eligible to work in the United States; however, we are currently unable to sponsor employment visas.
