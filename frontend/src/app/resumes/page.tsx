@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import { getAuthToken } from '@/lib/auth/server';
 import { LogoutButton } from '@/components/auth/logout-button';
 import { DeleteResumeButton } from './delete-resume-button';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 
 const API_BASE = process.env.BACKEND_API_URL ?? 'http://localhost:4000';
 
@@ -47,7 +48,10 @@ export default async function ResumesPage() {
           >
             ← Back to Applications
           </Link>
-          <LogoutButton />
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <LogoutButton />
+          </div>
         </div>
 
         <section className="rounded-3xl border bg-card p-8 shadow-sm">

@@ -4,6 +4,7 @@ import { getAuthToken } from '@/lib/auth/server';
 import { getApplications } from '@/lib/api/applications';
 import { LogoutButton } from '@/components/auth/logout-button';
 import { DeleteApplicationButton } from './delete-application-button';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 
 function formatStatus(status: string) {
   return status
@@ -30,6 +31,14 @@ export default async function ApplicationsPage() {
 
             <h1 className="mt-2 text-4xl font-bold">Job Applications</h1>
           </div>
+          <ThemeToggle />
+          <Link
+            href="/resumes"
+            className="rounded-xl border px-5 py-3 text-sm font-semibold transition hover:bg-muted"
+          >
+            Saved Resumes
+          </Link>
+          
           <Link
             href="/applications/new"
             className="rounded-xl bg-foreground px-5 py-3 text-sm font-semibold text-background transition hover:opacity-90"
@@ -37,12 +46,7 @@ export default async function ApplicationsPage() {
             New Application
           </Link>
 
-          <Link
-            href="/resumes"
-            className="rounded-xl border px-5 py-3 text-sm font-semibold transition hover:bg-muted"
-          >
-            Saved Resumes
-          </Link>
+          
           <LogoutButton />
         </div>
 

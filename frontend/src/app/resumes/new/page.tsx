@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { redirect } from 'next/navigation';
 import { getAuthToken } from '@/lib/auth/server';
 import { NewResumeForm } from './new-resume-form';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 
 export default async function NewResumePage() {
   const token = await getAuthToken();
@@ -19,7 +20,7 @@ export default async function NewResumePage() {
         >
           ← Back to Resumes
         </Link>
-
+        <ThemeToggle />
         <section className="rounded-3xl border bg-card p-8 shadow-sm">
           <p className="text-sm font-medium text-muted-foreground">
             Resume Library

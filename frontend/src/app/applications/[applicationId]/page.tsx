@@ -5,6 +5,7 @@ import { getAuthToken } from '@/lib/auth/server';
 import { LogoutButton } from '@/components/auth/logout-button';
 import { ApplicationStatusSelect } from './application-status-select';
 import { ApplicationNotesEditor } from './application-notes-editor';
+import { ThemeToggle } from '@/components/theme/theme-toggle';
 
 const actions = [
   {
@@ -71,8 +72,10 @@ export default async function ApplicationPage({
           >
             ← Back to Applications
           </Link>
-
-          <LogoutButton />
+          <div className="flex items-center gap-3">
+            <ThemeToggle />
+            <LogoutButton />
+          </div>
         </div>
         <header className="flex flex-col gap-6 rounded-2xl border p-6 md:flex-row md:items-end md:justify-between">
           <div>
