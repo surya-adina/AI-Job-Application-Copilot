@@ -62,6 +62,7 @@ def create_interview_prep(request: InterviewPrepRequest):
             model="gpt-4o-mini",
             input=prompt,
             temperature=0.2,
+            max_output_tokens=900,
             text={
                 "format": {
                     "type": "json_object",

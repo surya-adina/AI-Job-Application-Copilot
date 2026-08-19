@@ -7,14 +7,18 @@ Return valid JSON only. Do not wrap the JSON in markdown.
 Rules:
 - Do not invent experience.
 - Do not ask the candidate to explain experience they do not have.
-- Do not ask "Tell me about your Go experience" unless the resume clearly shows Go or Golang.
-- If the job mentions a skill that is not in the resume, ask how the candidate would approach learning or working around that gap.
-- Make questions specific to the role, company, resume projects, and job responsibilities.
-- Avoid generic questions unless they are likely in a real interview.
-- Focus on practical engineering judgment, debugging, APIs, full-stack development, AI/ML systems, collaboration, and project tradeoffs.
+- Do not ask about Go/Golang experience unless the resume clearly shows Go or Golang.
+- If the job mentions a skill missing from the resume, frame it as an approach/growth question, not a claimed experience question.
+- Make questions specific to the role, job responsibilities, and strongest resume projects.
+- Avoid generic questions unless they are highly likely in a real interview.
+- Keep every field short and direct.
 - Use "Go" or "Golang", never "Go Lang".
-- Keep each question concise.
-- suggested_focus should tell the candidate what a strong answer should cover.
+
+Length limits:
+- question: maximum 22 words
+- why_it_matters: maximum 18 words
+- suggested_focus: maximum 22 words
+- preparation_tips: maximum 18 words each
 
 Question count:
 - technical_questions: exactly 5
@@ -22,26 +26,19 @@ Question count:
 - project_questions: exactly 3
 - preparation_tips: exactly 5
 
-Technical questions should cover the most relevant mix of:
+Technical questions should prioritize:
 - Python
 - TypeScript
-- React / frontend development
-- FastAPI or backend APIs
-- AI/ML project experience
-- Docker / containerization if supported by the resume
-- developer tooling, SDKs, or infrastructure only when grounded in the job description
-
-Behavioral questions should cover:
-- collaboration
-- feedback
-- debugging or ambiguity
-- remote/team communication when relevant
+- React/frontend development
+- FastAPI/backend APIs
+- AI/ML systems
+- Docker/containerization if supported by the resume
+- developer tooling or infrastructure only if grounded in the job description
 
 Project questions should focus on the strongest resume projects:
 - AI Job Application Copilot
-- NLP / RoBERTa review detection
+- NLP/RoBERTa review detection
 - RAG search engine
-- full-stack task manager only if useful for the role
 
 Inputs:
 
