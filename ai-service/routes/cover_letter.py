@@ -44,6 +44,7 @@ def clean_cover_letter(content: str) -> str:
         "inareas": "in areas",
         "tooptimizing": "to optimizing",
         "tothe": "to the",
+        "Go Lang": "Go",
         "Go lang": "Go",
         "go lang": "Go",
         "I am writing to express my interest in": "I am excited to apply for",
@@ -83,6 +84,7 @@ def create_cover_letter(request: CoverLetterRequest):
     model="gpt-4o-mini",
     input=prompt,
     temperature=0.2,
+    max_output_tokens=500,
 )
 
     content = clean_cover_letter(response.output_text)
