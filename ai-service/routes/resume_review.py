@@ -193,6 +193,8 @@ def review_resume(payload: ResumeReviewRequest):
                     "content": build_resume_review_user_prompt(payload),
                 },
             ],
+            temperature=0.2,
+            max_output_tokens=850,
             text={"format": {"type": "json_object"}},
         )
 
