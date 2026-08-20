@@ -57,10 +57,63 @@ class AnalyzeResponse(BaseModel):
     metadata: AiRunMetadata
     evidence: SkillEvidence
 
+def build_recommendations(
+    missing_required_skills: list[str],
+    missing_preferred_skills: list[str],
+) -> list[str]:
+    recommendations = []
+
+    for skill in missing_required_skills[:3]:
+        recommendations.append(
+            f"If you genuinely have experience with {skill}, add a concrete example in your Skills, Projects, or Experience section. If not, treat it as a required gap."
+        )
+
+    remaining_slots = 3 - len(recommendations)
+
+    if remaining_slots > 0:
+        for skill in missing_preferred_skills[:remaining_slots]:
+            recommendations.append(
+                f"If applicable, mention {skill} with a specific project or work example. If you have not used it, do not add it."
+            )
+
+    return recommendations
+
+
+def clean_analysis_output(
+    analysis: AnalysisPayload,
+    missing_required_skills: list[str],
+    missing_preferred_skills: list[str],
+) -> AnalysisPayload:
+    deterministic_missing_skills = sorted(
+        set(missing_required_skills + missing_preferred_skills)
+    )
+
+    cleaned_recommendations = build_recommendations(
+        missing_required_skills=missing_required_skills,
+        missing_preferred_skills=missing_preferred_skills,
+    )
+
+    cleaned_weaknesses = analysis.weaknesses[:3]
+
+    if not deterministic_missing_skills:
+        cleaned_weaknesses = [
+            "No major skill gaps were detected by the saved skill analysis."
+        ]
+        cleaned_recommendations = []
+
+    return AnalysisPayload(
+        score=analysis.score,
+        matched_skills=sorted(set(analysis.matched_skills))[:8],
+        missing_skills=deterministic_missing_skills[:8],
+        strengths=analysis.strengths[:3],
+        weaknesses=cleaned_weaknesses,
+        recommendations=cleaned_recommendations,
+    )
 
 @router.post("/analyze", response_model=AnalyzeResponse)
 def analyze(payload: AnalyzeRequest):
     started_at = time.perf_counter()
+    estimated_cost_usd = None
 
     try:
         system_prompt = load_prompt(payload.prompt_version)
@@ -125,6 +178,8 @@ def analyze(payload: AnalyzeRequest):
                     ),
                 },
             ],
+            temperature=0.2,
+            max_output_tokens=650,
             text={
                 "format": {
                     "type": "json_object",
@@ -137,6 +192,11 @@ def analyze(payload: AnalyzeRequest):
         raw_text = response.output_text
         parsed = json.loads(raw_text)
         analysis = AnalysisPayload(**parsed)
+        analysis = clean_analysis_output(
+            analysis=analysis,
+            missing_required_skills=missing_required_skills,
+            missing_preferred_skills=missing_preferred_skills,
+)
 
         usage = response.usage
         tokens_in = usage.input_tokens if usage else 0
