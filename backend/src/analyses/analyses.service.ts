@@ -30,10 +30,6 @@ export class AnalysesService {
       throw new ConflictException('Application must have a resume before analysis');
     }
 
-    if (application.analysis) {
-      throw new ConflictException('Analysis already exists for this application');
-    }
-
     let matchReport;
 
     try {
@@ -82,17 +78,25 @@ export class AnalysesService {
       },
     });
 
-    return this.prisma.analysis.create({
-      data: {
+    const analysisData = {
+      score: matchReport.analysis.score,
+      matchedSkills: matchReport.analysis.matched_skills,
+      missingSkills: matchReport.analysis.missing_skills,
+      strengths: matchReport.analysis.strengths.join('\n'),
+      weaknesses: matchReport.analysis.weaknesses.join('\n'),
+      suggestions: {
+        recommendations: matchReport.analysis.recommendations,
+      },
+    };
+
+    return this.prisma.analysis.upsert({
+      where: {
         applicationId,
-        score: matchReport.analysis.score,
-        matchedSkills: matchReport.analysis.matched_skills,
-        missingSkills: matchReport.analysis.missing_skills,
-        strengths: matchReport.analysis.strengths.join('\n'),
-        weaknesses: matchReport.analysis.weaknesses.join('\n'),
-        suggestions: {
-          recommendations: matchReport.analysis.recommendations,
-        },
+      },
+      update: analysisData,
+      create: {
+        applicationId,
+        ...analysisData,
       },
     });
   }
