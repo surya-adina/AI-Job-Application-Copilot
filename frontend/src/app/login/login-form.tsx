@@ -1,4 +1,5 @@
 'use client';
+import Link from 'next/link';
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -43,9 +44,12 @@ export default function LoginForm() {
   return (
     <main className="flex min-h-screen items-center justify-center bg-background px-6 text-foreground">
       <section className="w-full max-w-md rounded-2xl border p-8 shadow-sm">
-        <p className="text-sm font-medium text-cyan-500">
+        <Link
+          href="/"
+          className="text-cyan-500 transition hover:text-cyan-400"
+        >
           AI Job Application Copilot
-        </p>
+        </Link>
 
         <h1 className="mt-3 text-3xl font-bold">Sign in</h1>
 
@@ -88,6 +92,12 @@ export default function LoginForm() {
           >
             {loading ? 'Signing in...' : 'Sign in'}
           </button>
+          <p className="mt-6 text-center text-sm text-muted-foreground">
+            Don't have an account?{' '}
+            <Link href="/register" className="font-medium text-cyan-500 hover:text-cyan-400">
+              Sign up
+            </Link>
+          </p>
         </form>
       </section>
     </main>

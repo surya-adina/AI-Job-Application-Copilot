@@ -5,22 +5,22 @@ const differentiators = [
   {
     title: 'Job-specific analysis',
     description:
-      'Compares your resume against required and preferred qualifications instead of giving generic advice.',
+      'Compare your resume against a selected job description and see matched skills, gaps, and fit signals.',
   },
   {
-    title: 'Explainable recommendations',
+    title: 'Resume review',
     description:
-      'Every suggestion includes the reasoning and supporting evidence behind it.',
+      'Get targeted suggestions to improve your resume for a specific role.',
   },
   {
-    title: 'Prioritized improvements',
+    title: 'Cover letter support',
     description:
-      'Focus on the highest-impact changes before applying.',
+      'Generate a tailored cover letter using your saved resume and job context.',
   },
   {
-    title: 'Progress tracking',
+    title: 'Interview prep',
     description:
-      'Compare resume versions and measure how your match improves over time.',
+      'Create role-specific technical, behavioral, and project-based interview questions.',
   },
 ];
 
@@ -31,18 +31,17 @@ const workflow = [
   },
   {
     title: 'Add job',
-    description:
-      'Paste the job description and separate required vs preferred qualifications.',
+    description: 'Paste the job description for the role you want to apply to.',
   },
   {
-    title: 'Review guidance',
+    title: 'Run analysis',
     description:
-      'Get prioritized, evidence-backed suggestions for improving fit.',
+      'Review your match score, matched skills, missing skills, and resume guidance.',
   },
   {
-    title: 'Apply smarter',
+    title: 'Prepare application',
     description:
-      'Use the review to improve your resume and track applications.',
+      'Use resume review, cover letter, and interview prep tools before applying.',
   },
 ];
 
@@ -53,26 +52,23 @@ export default function Home() {
         <div className="mb-20 flex items-start justify-between gap-6">
           <div>
             <p className="text-sm font-medium text-cyan-500">
-              AI Job Application Copilot
+              • Resume analysis        • Cover letters        • Interview prep
             </p>
 
             <h1 className="mt-4 text-5xl font-bold tracking-tight">
-              Turn job descriptions into
-              <br />
-              actionable resume guidance.
+              AI Job Application Copilot
             </h1>
 
-            <p className="mt-6 max-w-2xl text-lg text-muted-foreground">
-              Analyze resume fit, highlight skill gaps,
-              and get evidence-backed resume review suggestions.
+            <p className="mt-6 max-w-2xl text-2xl font-semibold text-muted-foreground">
+              Manage job applications with AI-powered guidance.
             </p>
 
-            <div className="mt-8">
+            <div className="mt-8 flex flex-wrap gap-4">
               <Link
-                href="/analysis/demo"
+                href="/register"
                 className="inline-flex rounded-xl bg-cyan-500 px-6 py-3 font-semibold text-white transition hover:bg-cyan-400"
               >
-                View Demo
+                Get Started
               </Link>
             </div>
           </div>
@@ -81,7 +77,7 @@ export default function Home() {
         </div>
 
         <section>
-          <h2 className="text-3xl font-bold">Why this?</h2>
+          <h2 className="text-3xl font-bold">What it does</h2>
 
           <div className="mt-8 grid gap-6 md:grid-cols-4">
             {differentiators.map((item, index) => (

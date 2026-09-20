@@ -7,9 +7,12 @@ export default function RegisterPage() {
       <div className="mx-auto flex min-h-[70vh] max-w-md flex-col justify-center">
         <div className="rounded-3xl border bg-card p-8 shadow-sm">
           <div className="mb-8">
-            <p className="text-sm font-medium text-muted-foreground">
+            <Link
+              href="/"
+              className="text-cyan-500 transition hover:text-cyan-400"
+            >
               AI Job Application Copilot
-            </p>
+            </Link>
             <h1 className="mt-2 text-3xl font-bold">Create your account</h1>
             <p className="mt-3 text-sm text-muted-foreground">
               Save resumes, create job applications, and generate AI-powered
