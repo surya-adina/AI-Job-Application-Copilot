@@ -37,7 +37,7 @@ export type AnalyzeResponse = {
 
 @Injectable()
 export class AiGatewayService {
-  private readonly aiServiceUrl = 'http://localhost:8000';
+  private readonly aiServiceUrl = process.env.AI_SERVICE_URL ?? 'http://localhost:8000';
 
   constructor(private httpService: HttpService) {}
   async createResumeReview(input: {
