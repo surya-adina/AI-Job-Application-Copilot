@@ -8,10 +8,6 @@ from openai import OpenAI
 from pydantic import BaseModel, Field, ValidationError
 
 from prompt_loader import load_prompt
-from skills.extractor import extract_known_skills
-from skills.job_requirements import extract_job_requirements
-from skills.llm_job_requirements import extract_job_requirements_llm
-from skills.semantic_matcher import find_semantic_matches
 
 router = APIRouter()
 
@@ -49,12 +45,12 @@ class AiRunMetadata(BaseModel):
 
 
 class SkillEvidence(BaseModel):
-    resume_skills: list[str]
-    required_skills: list[str]
-    preferred_skills: list[str]
-    missing_required_skills: list[str]
-    missing_preferred_skills: list[str]
-    semantic_matches: list[dict]
+    resume_skills: list[str] = Field(default_factory=list)
+    required_skills: list[str] = Field(default_factory=list)
+    preferred_skills: list[str] = Field(default_factory=list)
+    missing_required_skills: list[str] = Field(default_factory=list)
+    missing_preferred_skills: list[str] = Field(default_factory=list)
+    semantic_matches: list[dict] = Field(default_factory=list)
 
 
 class AnalyzeResponse(BaseModel):
@@ -65,7 +61,7 @@ class AnalyzeResponse(BaseModel):
 
 def dedupe(items: list[str]) -> list[str]:
     seen = set()
-    cleaned = []
+    result = []
 
     for item in items:
         value = item.strip()
@@ -79,29 +75,20 @@ def dedupe(items: list[str]) -> list[str]:
             continue
 
         seen.add(key)
-        cleaned.append(value)
+        result.append(value)
 
-    return cleaned
+    return result
 
 
 def clean_analysis(analysis: AnalysisPayload) -> AnalysisPayload:
-    score = max(0, min(100, analysis.score))
-
     return AnalysisPayload(
-        score=score,
+        score=max(0, min(100, analysis.score)),
         matched_skills=dedupe(analysis.matched_skills)[:10],
         missing_skills=dedupe(analysis.missing_skills)[:8],
         strengths=dedupe(analysis.strengths)[:3],
         weaknesses=dedupe(analysis.weaknesses)[:3],
         recommendations=dedupe(analysis.recommendations)[:3],
     )
-
-
-def get_job_requirements(job_description: str) -> dict[str, list[str]]:
-    try:
-        return extract_job_requirements_llm(job_description)
-    except Exception:
-        return extract_job_requirements(job_description)
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)
@@ -111,18 +98,6 @@ def analyze(payload: AnalyzeRequest):
 
     try:
         system_prompt = load_prompt(payload.prompt_version)
-
-        resume_skills = extract_known_skills(payload.resume_text)
-        job_requirements = get_job_requirements(payload.job_description)
-
-        required_skills = job_requirements.get("required_skills", [])
-        preferred_skills = job_requirements.get("preferred_skills", [])
-        job_skills = sorted(set(required_skills + preferred_skills))
-
-        semantic_matches = find_semantic_matches(
-            resume_skills=resume_skills,
-            job_skills=job_skills,
-        )
 
         response = client.responses.create(
             model=OPENAI_MODEL,
@@ -137,22 +112,13 @@ def analyze(payload: AnalyzeRequest):
                         {
                             "resume_text": payload.resume_text,
                             "job_description": payload.job_description,
-                            "extracted_resume_skills_hint": resume_skills,
-                            "extracted_required_skills_hint": required_skills,
-                            "extracted_preferred_skills_hint": preferred_skills,
-                            "semantic_matches_hint": semantic_matches,
-                            "important_instruction": (
-                                "The extracted lists are only hints. "
-                                "Use the full resume and full job description as the source of truth. "
-                                "Do not mark something missing if the resume shows equivalent evidence with different wording."
-                            ),
                             "output_schema": {
                                 "score": "integer from 0 to 100",
-                                "matched_skills": "array of strings supported by resume evidence",
-                                "missing_skills": "array of important gaps not supported by resume evidence",
-                                "strengths": "array of concise strengths",
-                                "weaknesses": "array of concise weaknesses",
-                                "recommendations": "array of concise recommendations",
+                                "matched_skills": "array of strings",
+                                "missing_skills": "array of strings",
+                                "strengths": "array of strings",
+                                "weaknesses": "array of strings",
+                                "recommendations": "array of strings",
                             },
                         }
                     ),
@@ -179,8 +145,7 @@ def analyze(payload: AnalyzeRequest):
 
         estimated_cost_usd = (
             tokens_in * 0.150 / 1_000_000
-        ) + (
-            tokens_out * 0.600 / 1_000_000
+            + tokens_out * 0.600 / 1_000_000
         )
 
         metadata = AiRunMetadata(
@@ -195,67 +160,46 @@ def analyze(payload: AnalyzeRequest):
             estimated_cost_usd=estimated_cost_usd,
         )
 
-        evidence = SkillEvidence(
-            resume_skills=resume_skills,
-            required_skills=required_skills,
-            preferred_skills=preferred_skills,
-            missing_required_skills=[],
-            missing_preferred_skills=[],
-            semantic_matches=semantic_matches,
-        )
-
         return AnalyzeResponse(
             analysis=analysis,
             metadata=metadata,
-            evidence=evidence,
+            evidence=SkillEvidence(),
         )
 
     except (json.JSONDecodeError, ValidationError) as error:
         latency_ms = int((time.perf_counter() - started_at) * 1000)
-
-        metadata = AiRunMetadata(
-            endpoint="/analyze",
-            model=OPENAI_MODEL,
-            prompt_version=PROMPT_VERSION,
-            latency_ms=latency_ms,
-            tokens_in=0,
-            tokens_out=0,
-            total_tokens=0,
-            status="FAILED",
-            error_type="STRUCTURED_OUTPUT_ERROR",
-            estimated_cost_usd=estimated_cost_usd,
-        )
 
         raise HTTPException(
             status_code=502,
             detail={
                 "message": "Model returned invalid structured output",
                 "error": str(error),
-                "metadata": metadata.model_dump(),
+                "metadata": {
+                    "endpoint": "/analyze",
+                    "model": OPENAI_MODEL,
+                    "prompt_version": payload.prompt_version,
+                    "latency_ms": latency_ms,
+                    "status": "FAILED",
+                    "error_type": "STRUCTURED_OUTPUT_ERROR",
+                },
             },
         )
 
     except Exception as error:
         latency_ms = int((time.perf_counter() - started_at) * 1000)
 
-        metadata = AiRunMetadata(
-            endpoint="/analyze",
-            model=OPENAI_MODEL,
-            prompt_version=PROMPT_VERSION,
-            latency_ms=latency_ms,
-            tokens_in=0,
-            tokens_out=0,
-            total_tokens=0,
-            status="FAILED",
-            error_type=type(error).__name__,
-            estimated_cost_usd=estimated_cost_usd,
-        )
-
         raise HTTPException(
             status_code=500,
             detail={
                 "message": "AI analysis failed",
                 "error": str(error),
-                "metadata": metadata.model_dump(),
+                "metadata": {
+                    "endpoint": "/analyze",
+                    "model": OPENAI_MODEL,
+                    "prompt_version": payload.prompt_version,
+                    "latency_ms": latency_ms,
+                    "status": "FAILED",
+                    "error_type": type(error).__name__,
+                },
             },
         )

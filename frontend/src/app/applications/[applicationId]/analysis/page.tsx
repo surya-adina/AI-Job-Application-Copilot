@@ -65,7 +65,7 @@ export default async function ApplicationAnalysisPage({
       impact: Math.max(5 - index, 3),
       title: `Address ${skill}`,
       why: `${skill} was identified as a gap in the saved analysis.`,
-      evidence: [`Missing skill from analysis: ${skill}`],
+      evidence: [`Identified gap: ${skill}`],
       action: recommendation,
     };
   });
@@ -236,7 +236,7 @@ export default async function ApplicationAnalysisPage({
                   <div className="mt-5 grid gap-4 md:grid-cols-2">
                     <div className="rounded-xl bg-slate-900 p-4">
                       <p className="text-sm font-medium text-slate-300">
-                        Evidence
+                        Gap
                       </p>
                       <ul className="mt-3 space-y-2 text-sm text-slate-400">
                         {item.evidence.map((point) => (
