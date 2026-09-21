@@ -1,21 +1,23 @@
 import json
-import re
 import os
 import time
 from typing import Literal
+
 from fastapi import APIRouter, HTTPException
 from openai import OpenAI
 from pydantic import BaseModel, Field, ValidationError
+
 from prompt_loader import load_prompt
 from skills.extractor import extract_known_skills
-from skills.semantic_matcher import find_semantic_matches
 from skills.job_requirements import extract_job_requirements
+from skills.llm_job_requirements import extract_job_requirements_llm
+from skills.semantic_matcher import find_semantic_matches
 
 router = APIRouter()
+
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-PROMPT_NAME = "analysis_v1"
-PROMPT_VERSION = "analysis-v1"
+PROMPT_VERSION = "analysis_v1"
 
 
 class AnalyzeRequest(BaseModel):
@@ -45,6 +47,7 @@ class AiRunMetadata(BaseModel):
     error_type: str | None = None
     estimated_cost_usd: float | None = None
 
+
 class SkillEvidence(BaseModel):
     resume_skills: list[str]
     required_skills: list[str]
@@ -53,89 +56,53 @@ class SkillEvidence(BaseModel):
     missing_preferred_skills: list[str]
     semantic_matches: list[dict]
 
+
 class AnalyzeResponse(BaseModel):
     analysis: AnalysisPayload
     metadata: AiRunMetadata
     evidence: SkillEvidence
 
-def build_recommendations(
-    missing_required_skills: list[str],
-    missing_preferred_skills: list[str],
-) -> list[str]:
-    recommendations = []
 
-    for skill in missing_required_skills[:3]:
-        recommendations.append(
-            f"{skill} appears to be a required gap for this role. Add it if you can support it with real project, coursework, or work experience."
-        )
+def dedupe(items: list[str]) -> list[str]:
+    seen = set()
+    cleaned = []
 
-    remaining_slots = 3 - len(recommendations)
+    for item in items:
+        value = item.strip()
 
-    if remaining_slots > 0:
-        for skill in missing_preferred_skills[:remaining_slots]:
-            recommendations.append(
-                f"{skill} appears to be a preferred gap. Mention it only if you have real experience or a relevant project."
-            )
+        if not value:
+            continue
 
-    return recommendations
+        key = value.lower()
+
+        if key in seen:
+            continue
+
+        seen.add(key)
+        cleaned.append(value)
+
+    return cleaned
 
 
-def clean_analysis_output(
-    analysis: AnalysisPayload,
-    missing_required_skills: list[str],
-    missing_preferred_skills: list[str],
-) -> AnalysisPayload:
-    deterministic_missing_skills = list(
-        dict.fromkeys(missing_required_skills + missing_preferred_skills)
-    )
- 
-    cleaned_recommendations = build_recommendations(
-        missing_required_skills=missing_required_skills,
-        missing_preferred_skills=missing_preferred_skills,
-    )
-
-    cleaned_weaknesses = analysis.weaknesses[:3]
-
-    if not deterministic_missing_skills:
-        cleaned_weaknesses = [
-            "No major skill gaps were detected by the saved skill analysis."
-        ]
-        cleaned_recommendations = []
+def clean_analysis(analysis: AnalysisPayload) -> AnalysisPayload:
+    score = max(0, min(100, analysis.score))
 
     return AnalysisPayload(
-        score=analysis.score,
-        matched_skills=sorted(set(analysis.matched_skills))[:8],
-        missing_skills=deterministic_missing_skills[:8],
-        strengths=analysis.strengths[:3],
-        weaknesses=cleaned_weaknesses,
-        recommendations=cleaned_recommendations,
+        score=score,
+        matched_skills=dedupe(analysis.matched_skills)[:10],
+        missing_skills=dedupe(analysis.missing_skills)[:8],
+        strengths=dedupe(analysis.strengths)[:3],
+        weaknesses=dedupe(analysis.weaknesses)[:3],
+        recommendations=dedupe(analysis.recommendations)[:3],
     )
 
-def remove_satisfied_or_group_gaps(
-    job_description: str,
-    resume_skills: list[str],
-    missing_skills: list[str],
-) -> list[str]:
-    resume_skill_set = set(resume_skills)
-    missing_skill_set = set(missing_skills)
 
-    chunks = re.split(r"[\n.!?]+", job_description)
+def get_job_requirements(job_description: str) -> dict[str, list[str]]:
+    try:
+        return extract_job_requirements_llm(job_description)
+    except Exception:
+        return extract_job_requirements(job_description)
 
-    for chunk in chunks:
-        lowered = chunk.lower()
-
-        if " or " not in lowered:
-            continue
-
-        chunk_skills = extract_known_skills(chunk)
-
-        if len(chunk_skills) < 2:
-            continue
-
-        if resume_skill_set.intersection(chunk_skills):
-            missing_skill_set.difference_update(chunk_skills)
-
-    return sorted(missing_skill_set)
 
 @router.post("/analyze", response_model=AnalyzeResponse)
 def analyze(payload: AnalyzeRequest):
@@ -144,46 +111,17 @@ def analyze(payload: AnalyzeRequest):
 
     try:
         system_prompt = load_prompt(payload.prompt_version)
+
         resume_skills = extract_known_skills(payload.resume_text)
-        job_requirements = extract_job_requirements(payload.job_description)
-        required_skills = job_requirements["required_skills"]
-        preferred_skills = job_requirements["preferred_skills"]
+        job_requirements = get_job_requirements(payload.job_description)
+
+        required_skills = job_requirements.get("required_skills", [])
+        preferred_skills = job_requirements.get("preferred_skills", [])
         job_skills = sorted(set(required_skills + preferred_skills))
-
-        missing_required_skills = sorted(
-            skill for skill in required_skills
-            if skill not in resume_skills
-        )
-
-        missing_preferred_skills = sorted(
-            skill for skill in preferred_skills
-            if skill not in resume_skills
-        )
-
-        missing_required_skills = remove_satisfied_or_group_gaps(
-            job_description=payload.job_description,
-            resume_skills=resume_skills,
-            missing_skills=missing_required_skills,
-        )
-
-        missing_preferred_skills = remove_satisfied_or_group_gaps(
-            job_description=payload.job_description,
-            resume_skills=resume_skills,
-            missing_skills=missing_preferred_skills,
-        )
 
         semantic_matches = find_semantic_matches(
             resume_skills=resume_skills,
             job_skills=job_skills,
-        )
-
-        evidence = SkillEvidence(
-            resume_skills=resume_skills,
-            required_skills=required_skills,
-            preferred_skills=preferred_skills,
-            missing_required_skills=missing_required_skills,
-            missing_preferred_skills=missing_preferred_skills,
-            semantic_matches=semantic_matches,
         )
 
         response = client.responses.create(
@@ -199,26 +137,29 @@ def analyze(payload: AnalyzeRequest):
                         {
                             "resume_text": payload.resume_text,
                             "job_description": payload.job_description,
-                            "resume_skills": resume_skills,
-                            "required_skills": required_skills,
-                            "preferred_skills": preferred_skills,
-                            "missing_required_skills": missing_required_skills,
-                            "missing_preferred_skills": missing_preferred_skills,
-                            "semantic_matches": semantic_matches,
+                            "extracted_resume_skills_hint": resume_skills,
+                            "extracted_required_skills_hint": required_skills,
+                            "extracted_preferred_skills_hint": preferred_skills,
+                            "semantic_matches_hint": semantic_matches,
+                            "important_instruction": (
+                                "The extracted lists are only hints. "
+                                "Use the full resume and full job description as the source of truth. "
+                                "Do not mark something missing if the resume shows equivalent evidence with different wording."
+                            ),
                             "output_schema": {
                                 "score": "integer from 0 to 100",
-                                "matched_skills": "array of strings",
-                                "missing_skills": "array of strings",
-                                "strengths": "array of strings",
-                                "weaknesses": "array of strings",
-                                "recommendations": "array of strings",
+                                "matched_skills": "array of strings supported by resume evidence",
+                                "missing_skills": "array of important gaps not supported by resume evidence",
+                                "strengths": "array of concise strengths",
+                                "weaknesses": "array of concise weaknesses",
+                                "recommendations": "array of concise recommendations",
                             },
                         }
                     ),
                 },
             ],
             temperature=0.2,
-            max_output_tokens=650,
+            max_output_tokens=850,
             text={
                 "format": {
                     "type": "json_object",
@@ -228,20 +169,19 @@ def analyze(payload: AnalyzeRequest):
 
         latency_ms = int((time.perf_counter() - started_at) * 1000)
 
-        raw_text = response.output_text
-        parsed = json.loads(raw_text)
-        analysis = AnalysisPayload(**parsed)
-        analysis = clean_analysis_output(
-            analysis=analysis,
-            missing_required_skills=missing_required_skills,
-            missing_preferred_skills=missing_preferred_skills,
-)
+        parsed = json.loads(response.output_text)
+        analysis = clean_analysis(AnalysisPayload(**parsed))
 
         usage = response.usage
         tokens_in = usage.input_tokens if usage else 0
         tokens_out = usage.output_tokens if usage else 0
         total_tokens = usage.total_tokens if usage else tokens_in + tokens_out
-        estimated_cost_usd = (tokens_in * 0.150 / 1_000_000) + (tokens_out * 0.600 / 1_000_000)
+
+        estimated_cost_usd = (
+            tokens_in * 0.150 / 1_000_000
+        ) + (
+            tokens_out * 0.600 / 1_000_000
+        )
 
         metadata = AiRunMetadata(
             endpoint="/analyze",
@@ -253,6 +193,15 @@ def analyze(payload: AnalyzeRequest):
             total_tokens=total_tokens,
             status="SUCCESS",
             estimated_cost_usd=estimated_cost_usd,
+        )
+
+        evidence = SkillEvidence(
+            resume_skills=resume_skills,
+            required_skills=required_skills,
+            preferred_skills=preferred_skills,
+            missing_required_skills=[],
+            missing_preferred_skills=[],
+            semantic_matches=semantic_matches,
         )
 
         return AnalyzeResponse(
@@ -299,6 +248,7 @@ def analyze(payload: AnalyzeRequest):
             total_tokens=0,
             status="FAILED",
             error_type=type(error).__name__,
+            estimated_cost_usd=estimated_cost_usd,
         )
 
         raise HTTPException(

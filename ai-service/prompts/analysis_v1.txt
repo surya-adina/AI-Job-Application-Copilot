@@ -4,25 +4,74 @@ Analyze a resume against a job description.
 
 Return only valid JSON matching the requested schema.
 
+Use the full resume and full job description as the source of truth.
+Extracted skills are hints only. They are not the final judge.
+
 Rules:
 - Do not invent experience that is not present in the resume.
-- Be conservative when assigning scores.
-- matched_skills must only include skills supported by the resume.
-- missing_skills must only include skills from missing_required_skills and missing_preferred_skills.
-- Do not create missing skills from vague preferences, culture fit, or assumptions.
-- Do not recommend adding unsupported experience.
-- If there are no missing skills, recommendations must be an empty array.
-- Required skill gaps should affect the score more than preferred skill gaps.
-- Preferred skills and plus skills should be treated as lower priority.
-- Use "Go" or "Golang", never "Go Lang".
-- Keep strengths, weaknesses, and recommendations concise.
+- Do not mark a requirement as missing just because the wording is different.
+- Treat equivalent resume evidence as matched.
+- matched_skills must only include skills or qualifications supported by the resume.
+- missing_skills must only include important job requirements not supported by the resume.
+- Missing skills must be specific and useful, not vague.
+- Do not include salary, benefits, interview process, or company marketing as gaps.
+- Do not include US citizen, permanent resident, location, or work authorization as skill gaps.
+- Do not give 100 unless all must-have requirements and most nice-to-have qualifications are clearly supported.
+- Do not heavily penalize missing nice-to-have qualifications.
 
-Output limits:
-- matched_skills: maximum 8 items
-- missing_skills: maximum 8 items
-- strengths: maximum 3 items
-- weaknesses: maximum 3 items
-- recommendations: maximum 3 items
+Equivalence rules:
+- MS Computer Science or BS Computer Science supports Computer Science Degree.
+- Data Structures, Algorithms, LeetCode, or 350+ problems solved supports CS Fundamentals.
+- Machine learning, AI projects, RAG, LLM, YOLO, RoBERTa, Hugging Face, or PyTorch supports AI/ML Experience.
+- YOLO, YOLOv7, object detection, image detection, or vision models supports Computer Vision.
+- Full-stack projects with frontend and backend support Full Stack Development.
+- FastAPI, Flask, Node.js, NestJS, Express, REST APIs, PostgreSQL, Prisma, or backend services support Backend Development.
+- MySQL, PostgreSQL, SQL, database models, or query work support relational database experience.
+- Software Engineer Intern, AI/ML Research Intern, Research Intern, or any role title containing Intern supports Internship Experience.
+- Internship Experience and Production Codebase Experience are different. Do not mark internship missing if intern roles exist.
+- Claude Code, Codex, Cursor, or similar tools support Agentic Coding Tools.
+- LLM apps, OpenAI APIs, RAG systems, or AI projects support AI familiarity, but they do not automatically prove AI-augmented delivery workflow unless the resume says the candidate uses AI tools for coding, debugging, testing, or code review.
+- Personal projects can support technical skill, but they do not automatically prove startup experience, production company experience, incident response, or production operations.
+SQL, MySQL, PostgreSQL, database models, or database-backed projects support basic relational database familiarity and basic query writing.
+
+Do not mark basic MySQL query writing as missing if the resume lists SQL or MySQL.
+
+However, basic SQL/MySQL familiarity is different from production-scale MySQL query optimization. If the job emphasizes production-scale data or query optimization and the resume does not show query tuning, indexes, EXPLAIN plans, or production database optimization, use "Production-Scale MySQL Query Optimization" as a gap.
+
+Building AI/ML apps, RAG systems, or LLM-powered applications does not automatically support AI-Augmented Delivery.
+
+Only mark AI-Augmented Delivery as matched if the resume says the candidate uses AI tools for coding, debugging, testing, code review, or software delivery workflow.
+
+If the resume only shows AI/ML projects, but not AI-assisted coding workflow, mark "AI-Augmented Delivery Workflow" as a missing or weaker area.
+
+Backend / infrastructure role rules:
+- Do not mark generic Backend Development as missing if the resume has backend APIs, backend frameworks, or full-stack backend projects.
+- If the job emphasizes production systems, logs, service status, Linux shell, hosting infrastructure, incident response, or production-scale data, use specific gaps such as:
+  - Linux Production Systems
+  - Production Troubleshooting
+  - Service Logs and Monitoring
+  - Hosting Infrastructure
+  - Incident Response
+  - Production-Scale MySQL Query Optimization
+  - Production Backend Experience
+- For hosting, infrastructure, platform, or operations-heavy backend roles, missing Linux production systems and incident response are meaningful gaps.
+- Do not replace these with vague gaps like Backend Development Experience.
+If the job mentions Linux services, reading logs, checking service status, troubleshooting production issues, hosting infrastructure, or incident response, and the resume does not show those directly, include the specific gaps:
+- Linux Production Systems
+- Service Logs and Troubleshooting
+- Incident Response
+- Hosting Infrastructure
+Score calibration:
+- 90–100: Resume clearly satisfies nearly all required and preferred qualifications.
+- 80–89: Resume satisfies most required qualifications and several preferred qualifications, with only minor gaps.
+- 70–79: Resume satisfies many required qualifications but has clear production, infrastructure, domain, or workflow gaps.
+- 60–69: Resume has several required gaps or weak evidence for core role expectations.
+- Below 60: Resume misses multiple core requirements.
+
+For new-grad or junior backend roles:
+- A strong CS degree, DSA evidence, backend/full-stack projects, AI/ML projects, SQL, Git, and internships should usually score at least 70.
+- If the role is infrastructure or production-ops heavy and the resume lacks Linux production systems, incident response, service logs, and production troubleshooting, the score should usually be 70–75, not 80+.
+- Missing startup experience, fast-paced team experience, or domain-specific industry experience should reduce the score, but should not alone push the score below 70.
 
 Output JSON:
 {

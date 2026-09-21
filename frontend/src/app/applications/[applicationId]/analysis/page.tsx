@@ -2,7 +2,10 @@ import Link from 'next/link';
 import { getWorkspace } from '@/lib/api/workspace';
 import { redirect } from 'next/navigation';
 import { getAuthToken } from '@/lib/auth/server';
+import { RegenerateAnalysisButton } from './regenerate-analysis-button';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export default async function ApplicationAnalysisPage({
   params,
@@ -29,6 +32,7 @@ export default async function ApplicationAnalysisPage({
           >
             ← Back to Application
           </Link>
+          <RegenerateAnalysisButton applicationId={applicationId} />
 
           <div className="rounded-3xl border border-slate-800 bg-slate-900 p-8">
             <h1 className="text-2xl font-semibold">No analysis yet</h1>
@@ -41,30 +45,44 @@ export default async function ApplicationAnalysisPage({
     );
   }
 
-  const strengths = analysis.matchedSkills.slice(0, 4);
+  const strengths = analysis.strengths
+    ? analysis.strengths.split('\n').map((item) => item.trim()).filter(Boolean)
+    : [];
+
   const missingSkills = analysis.missingSkills ?? [];
 
-  const priorities = missingSkills.slice(0, 3).map((skill, index) => ({
-    rank: index + 1,
-    impact: Math.max(5 - index, 3),
-    title: `Add evidence for ${skill}`,
-    why: `The job appears to value ${skill}, but this skill was not found in the saved resume analysis.`,
-    evidence: [`Missing skill from analysis: ${skill}`],
-    action: `If you genuinely have experience with ${skill}, add a concrete example in your Skills, Projects, or Experience section. If not, treat this as a growth area instead of adding it to the resume.`,
-  }));
+  const recommendations = Array.isArray(
+    analysis.suggestions?.recommendations,
+  )
+    ? analysis.suggestions.recommendations
+    : [];
+
+  const priorities = recommendations.slice(0, 3).map((recommendation, index) => {
+    const skill = missingSkills[index] ?? 'this skill';
+
+    return {
+      rank: index + 1,
+      impact: Math.max(5 - index, 3),
+      title: `Address ${skill}`,
+      why: `${skill} was identified as a gap in the saved analysis.`,
+      evidence: [`Missing skill from analysis: ${skill}`],
+      action: recommendation,
+    };
+  });
 
   return (
     <main className="min-h-screen bg-slate-950 px-6 py-10 text-slate-100 md:px-10">
       <section className="mx-auto max-w-6xl space-y-8">
-        <div className="mb-2">
+        <div className="flex items-center justify-between">
           <Link
             href={`/applications/${applicationId}`}
-            className="inline-flex text-sm font-medium text-cyan-500 hover:underline"
+            className="text-sm font-medium text-cyan-500 hover:underline"
           >
             ← Back to Application
           </Link>
-        </div>
 
+          <RegenerateAnalysisButton applicationId={applicationId} />
+        </div>
         <header className="pt-2">
           <p className="text-sm font-medium text-cyan-400">
             AI Job Application Copilot
@@ -108,14 +126,20 @@ export default async function ApplicationAnalysisPage({
           <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6">
             <h2 className="text-xl font-semibold">Strengths</h2>
             <div className="mt-4 space-y-3">
-              {strengths.map((skill) => (
-                <div
-                  key={skill}
-                  className="rounded-xl bg-emerald-500/10 px-4 py-3 text-emerald-300"
-                >
-                  ✓ {skill}
+              {strengths.length > 0 ? (
+                strengths.map((strength) => (
+                  <div
+                    key={strength}
+                    className="rounded-xl bg-emerald-500/10 px-4 py-3 text-emerald-300"
+                  >
+                    ✓ {strength}
+                  </div>
+                ))
+              ) : (
+                <div className="rounded-xl bg-slate-800 px-4 py-3 text-slate-300">
+                  No strengths found for this analysis.
                 </div>
-              ))}
+              )}
             </div>
           </section>
 

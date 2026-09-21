@@ -71,7 +71,7 @@ KNOWN_SKILLS = {
     "ai infrastructure": "AI Infrastructure",
     "ai infra": "AI Infrastructure",
 
-        "c#": "C#",
+    "c#": "C#",
     "csharp": "C#",
     "c sharp": "C#",
 
@@ -114,7 +114,7 @@ KNOWN_SKILLS = {
     "application monitoring": "Application Monitoring",
     "kpi tracking": "KPI Tracking",
 
-        "ml": "Machine Learning",
+    "ml": "Machine Learning",
     "ai/ml": "Machine Learning",
     "ai ml": "Machine Learning",
     "ai and ml": "Machine Learning",
@@ -124,4 +124,25 @@ KNOWN_SKILLS = {
     "llm-based": "Generative AI",
     "large language model": "Generative AI",
     "large language models": "Generative AI",
+
+        "data structures": "Data Structures",
+    "algorithms": "Algorithms",
+    "data structures and algorithms": "Data Structures & Algorithms",
+    "dsa": "Data Structures & Algorithms",
+
+    "system design": "System Design",
+
+    "cursor": "Cursor",
+    "claude code": "Claude Code",
+    "codex": "Codex",
+    "agentic coding tools": "Agentic Coding Tools",
+    "ai-first development": "AI-First Development",
+
+    "full stack": "Full Stack",
+    "across the stack": "Full Stack",
+
+    "computer vision": "Computer Vision",
+    "production codebase": "Production Codebase",
+    "startup": "Startup Experience",
+    "fast-paced": "Fast-Paced Environment",
 }

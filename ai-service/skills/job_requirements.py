@@ -14,6 +14,10 @@ REQUIRED_HEADINGS = {
     "required experience and competencies",
     "required experience",
     "competencies",
+    "must-have qualifications",
+    "must have qualifications",
+    "what we're looking for",
+    "what we are looking for",
 }
 
 PREFERRED_HEADINGS = {
@@ -26,6 +30,8 @@ PREFERRED_HEADINGS = {
     "nice to have",
     "good to have",
     "bonus qualifications",
+    "nice-to-have qualifications",
+    "nice to have qualifications",
 }
 
 GENERAL_HEADINGS = {
