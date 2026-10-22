@@ -14,9 +14,21 @@ WEAK_CONTEXT_PHRASES = [
 ]
 
 
+SENTENCE_BOUNDARY = re.compile(r"[.!?;\n•]\s")
+
+
+def hedge_window(text: str, start_index: int) -> str:
+    """Up to 80 characters before start_index, cut at the last sentence boundary
+    so a hedge in the previous sentence does not apply to this one."""
+    window = text[max(0, start_index - 80) : start_index]
+    boundaries = list(SENTENCE_BOUNDARY.finditer(window))
+    if boundaries:
+        window = window[boundaries[-1].end() :]
+    return window.lower()
+
+
 def has_weak_context(text: str, start_index: int) -> bool:
-    window_start = max(0, start_index - 80)
-    context_window = text[window_start:start_index].lower()
+    context_window = hedge_window(text, start_index)
 
     return any(phrase in context_window for phrase in WEAK_CONTEXT_PHRASES)
 

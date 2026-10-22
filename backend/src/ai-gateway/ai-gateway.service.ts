@@ -78,6 +78,7 @@ export type ResumeReviewResponse = {
       why: string;
       evidence: string[];
       action: string;
+      unsupported_skills: string[];
     }[];
     growth_areas: string[];
     warnings: string[];
@@ -89,7 +90,14 @@ export type ResumeReviewResponse = {
 export class AiGatewayService {
   private readonly aiServiceUrl = process.env.AI_SERVICE_URL ?? 'http://localhost:8000';
 
-  constructor(private httpService: HttpService) {}
+  constructor(private httpService: HttpService) {
+    // The ai-service rejects requests without the shared token. Read it per
+    // request: backend/.env is loaded by Prisma Client, not at module init.
+    this.httpService.axiosRef.interceptors.request.use((config) => {
+      config.headers.set('X-Service-Token', process.env.AI_SERVICE_TOKEN ?? '');
+      return config;
+    });
+  }
   async createResumeReview(input: {
     resumeText: string;
     jobDescription: string;

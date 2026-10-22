@@ -29,7 +29,7 @@ flowchart LR
 |---|---|---|
 | `frontend/` | Next.js 16, React 19, Tailwind CSS 4 | UI. Server-side route handlers call the API, so the JWT stays in an HTTP-only cookie. |
 | `backend/` | NestJS 11, Prisma 6, Passport JWT | Auth, ownership checks, persistence, and logging every AI call to the `AiRun` table. |
-| `ai-service/` | FastAPI, Pydantic, OpenAI SDK, psycopg | Prompts, structured LLM calls, skill matching and verification, evals. |
+| `ai-service/` | FastAPI, Pydantic, OpenAI SDK, psycopg | Prompts, structured LLM calls, typed tools, skill matching and claim verification, evals. Only the backend can call it (shared-secret header). |
 | Database | PostgreSQL with pgvector | App data, AI run logs, and skill embeddings behind an HNSW index. |
 
 ## 🤖 How the AI layer works
@@ -69,6 +69,11 @@ Verification did not beat LLM-only on holdout, so the default stays `SKILL_MATCH
 
 **Prerequisites:** Node.js 20+, Python 3.12+, Docker, an OpenAI API key.
 
+Generate one shared secret for the backend and AI service (both `.env` files use it as `AI_SERVICE_TOKEN`):
+```bash
+openssl rand -hex 32
+```
+
 **1. Database (PostgreSQL with pgvector):**
 ```bash
 docker run -d --name ajc-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=ajc \
@@ -78,7 +83,7 @@ docker run -d --name ajc-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=a
 **2. Backend (http://localhost:4000):**
 ```bash
 cd backend
-cp .env.example .env            # set JWT_SECRET
+cp .env.example .env            # set JWT_SECRET and AI_SERVICE_TOKEN
 npm install
 npx prisma migrate deploy       # also enables the vector extension
 npm run start:dev
@@ -87,7 +92,7 @@ npm run start:dev
 **3. AI service (http://localhost:8000):**
 ```bash
 cd ai-service
-cp .env.example .env            # set OPENAI_API_KEY
+cp .env.example .env            # set OPENAI_API_KEY and the same AI_SERVICE_TOKEN
 python3 -m venv .venv
 .venv/bin/pip install -r requirements-dev.txt
 .venv/bin/uvicorn main:app --reload --port 8000

@@ -43,5 +43,10 @@
     "status": "active",
     "description": "Per-skill comparison: each job skill with priority, whether the resume shows it, and a verbatim resume quote as evidence.",
     "intended_improvement": "Give the deterministic verifier checkable claims (exact quotes) instead of free-form matched/missing lists."
+  },
+  "draft_section_v1": {
+    "status": "active",
+    "description": "Drafts one application section (cover letter paragraph, resume bullet, summary, interview answer) from numbered resume evidence, listing each factual claim with the evidence ids that support it.",
+    "intended_improvement": "Make every drafted claim traceable to resume chunks so verify_claims can check it."
   }
 }

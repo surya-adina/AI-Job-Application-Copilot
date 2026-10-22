@@ -1,0 +1,490 @@
+{
+  "resumes": {
+    "R1": "Backend Engineer, Northwind Logistics (2023-Present)\n- Built FastAPI microservices handling 2M requests/day for shipment tracking.\n- Designed PostgreSQL schemas and cut p95 query latency by 40% with indexing.\n- Containerized services with Docker and deployed to AWS ECS via GitHub Actions.\n- Mentored 2 junior engineers on code review practices.\nJunior Developer, Bright Apps (2021-2023)\n- Developed React + TypeScript dashboards for internal analytics used by 150 staff.\n- Wrote REST APIs in Node.js/Express with Jest unit tests.\nCurrently learning Kubernetes through tutorials.",
+    "R2": "Data Analyst, Fresh Foods Co (2022-Present)\n- Wrote SQL in Snowflake to build weekly revenue reports for 12 regional managers.\n- Built Tableau dashboards that replaced 30 manual spreadsheets.\n- Ran A/B tests on checkout flow, improving conversion by 3.5%.\n- Automated data pulls with Python and pandas, saving 6 hours per week.\nNo professional experience with dbt.",
+    "R3": "ML Engineer, VisionWorks (2021-Present)\n- Trained image classification models in PyTorch, reaching 94% top-1 accuracy.\n- Served models with FastAPI behind an internal gateway.\n- Tracked experiments in MLflow across 3 research teams.\n- Fine-tuned BERT models with Hugging Face for support ticket routing."
+  },
+  "cases": [
+    {
+      "id": "fastapi_scale",
+      "resume": "R1",
+      "claim": {
+        "text": "Built FastAPI microservices that handle 2M requests per day.",
+        "evidence": [
+          "Built FastAPI microservices handling 2M requests/day for shipment tracking."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "pg_latency",
+      "resume": "R1",
+      "claim": {
+        "text": "Reduced PostgreSQL p95 latency by 40% through indexing.",
+        "evidence": [
+          "Designed PostgreSQL schemas and cut p95 query latency by 40% with indexing."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "pg_inflated_metric",
+      "resume": "R1",
+      "claim": {
+        "text": "Reduced PostgreSQL latency by 60%.",
+        "evidence": [
+          "Designed PostgreSQL schemas and cut p95 query latency by 40% with indexing."
+        ]
+      },
+      "supported": false,
+      "kind": "inflated_number"
+    },
+    {
+      "id": "ecs_deploy",
+      "resume": "R1",
+      "claim": {
+        "text": "Deployed containerized services to AWS ECS.",
+        "evidence": [
+          "Containerized services with Docker and deployed to AWS ECS via GitHub Actions."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "k8s_from_learning",
+      "resume": "R1",
+      "claim": {
+        "text": "Operated Kubernetes clusters in production.",
+        "evidence": [
+          "Kubernetes through tutorials"
+        ]
+      },
+      "supported": false,
+      "kind": "hedged_source"
+    },
+    {
+      "id": "mentoring",
+      "resume": "R1",
+      "claim": {
+        "text": "Mentored 2 junior engineers.",
+        "evidence": [
+          "Mentored 2 junior engineers on code review practices."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "team_size_invented",
+      "resume": "R1",
+      "claim": {
+        "text": "Led a team of 5 engineers.",
+        "evidence": [
+          "Mentored 2 junior engineers on code review practices."
+        ]
+      },
+      "supported": false,
+      "kind": "inflated_number"
+    },
+    {
+      "id": "dashboards_users",
+      "resume": "R1",
+      "claim": {
+        "text": "Built React and TypeScript dashboards used by 150 staff.",
+        "evidence": [
+          "Developed React + TypeScript dashboards for internal analytics used by 150 staff."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "vue_swap",
+      "resume": "R1",
+      "claim": {
+        "text": "Built Vue.js dashboards for analytics.",
+        "evidence": [
+          "Developed React + TypeScript dashboards for internal analytics used by 150 staff."
+        ]
+      },
+      "supported": false,
+      "kind": "wrong_skill"
+    },
+    {
+      "id": "jest_tests",
+      "resume": "R1",
+      "claim": {
+        "text": "Wrote unit tests with Jest for Node.js APIs.",
+        "evidence": [
+          "Wrote REST APIs in Node.js/Express with Jest unit tests."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "cicd_from_actions",
+      "resume": "R1",
+      "claim": {
+        "text": "Set up CI/CD with GitHub Actions.",
+        "evidence": [
+          "Containerized services with Docker and deployed to AWS ECS via GitHub Actions."
+        ]
+      },
+      "supported": true,
+      "kind": "implied_skill"
+    },
+    {
+      "id": "hipaa_invented",
+      "resume": "R1",
+      "claim": {
+        "text": "Built secure, HIPAA-compliant APIs.",
+        "evidence": [
+          "Wrote REST APIs in Node.js/Express with Jest unit tests."
+        ]
+      },
+      "supported": false,
+      "kind": "wrong_skill"
+    },
+    {
+      "id": "fault_tolerant_invented",
+      "resume": "R1",
+      "claim": {
+        "text": "Designed highly scalable, fault-tolerant microservices.",
+        "evidence": [
+          "Built FastAPI microservices handling 2M requests/day for shipment tracking."
+        ]
+      },
+      "supported": false,
+      "kind": "invented_quality"
+    },
+    {
+      "id": "years_inflated",
+      "resume": "R1",
+      "claim": {
+        "text": "Has 5 years of backend experience.",
+        "evidence": [
+          "Backend Engineer, Northwind Logistics (2023-Present)"
+        ]
+      },
+      "supported": false,
+      "kind": "inflated_number"
+    },
+    {
+      "id": "pg_and_docker",
+      "resume": "R1",
+      "claim": {
+        "text": "Worked with PostgreSQL and Docker.",
+        "evidence": [
+          "Designed PostgreSQL schemas and cut p95 query latency by 40% with indexing.",
+          "Containerized services with Docker and deployed to AWS ECS via GitHub Actions."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "go_invented",
+      "resume": "R1",
+      "claim": {
+        "text": "Shipped Go services.",
+        "evidence": [
+          "Built FastAPI microservices handling 2M requests/day for shipment tracking."
+        ]
+      },
+      "supported": false,
+      "kind": "wrong_skill"
+    },
+    {
+      "id": "express_apis",
+      "resume": "R1",
+      "claim": {
+        "text": "Built APIs with Express.",
+        "evidence": [
+          "Wrote REST APIs in Node.js/Express with Jest unit tests."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "indexing",
+      "resume": "R1",
+      "claim": {
+        "text": "Improved query performance with indexing.",
+        "evidence": [
+          "Designed PostgreSQL schemas and cut p95 query latency by 40% with indexing."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "ml_invented",
+      "resume": "R1",
+      "claim": {
+        "text": "Built a recommendation engine using machine learning.",
+        "evidence": [
+          "Built FastAPI microservices handling 2M requests/day for shipment tracking."
+        ]
+      },
+      "supported": false,
+      "kind": "wrong_skill"
+    },
+    {
+      "id": "paraphrased_quote",
+      "resume": "R1",
+      "claim": {
+        "text": "Built FastAPI microservices handling 2M requests/day.",
+        "evidence": [
+          "Built FastAPI microservices handling 2 million requests/day"
+        ]
+      },
+      "supported": true,
+      "kind": "paraphrased_quote"
+    },
+    {
+      "id": "tableau_spreadsheets",
+      "resume": "R2",
+      "claim": {
+        "text": "Built Tableau dashboards that replaced 30 spreadsheets.",
+        "evidence": [
+          "Built Tableau dashboards that replaced 30 manual spreadsheets."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "ab_conversion",
+      "resume": "R2",
+      "claim": {
+        "text": "Improved checkout conversion by 3.5% through A/B testing.",
+        "evidence": [
+          "Ran A/B tests on checkout flow, improving conversion by 3.5%."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "ab_inflated",
+      "resume": "R2",
+      "claim": {
+        "text": "Improved conversion by 35%.",
+        "evidence": [
+          "Ran A/B tests on checkout flow, improving conversion by 3.5%."
+        ]
+      },
+      "supported": false,
+      "kind": "inflated_number"
+    },
+    {
+      "id": "python_hours",
+      "resume": "R2",
+      "claim": {
+        "text": "Automated reporting with Python, saving 6 hours a week.",
+        "evidence": [
+          "Automated data pulls with Python and pandas, saving 6 hours per week."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "dbt_from_negation",
+      "resume": "R2",
+      "claim": {
+        "text": "Built dbt models for the analytics team.",
+        "evidence": [
+          "dbt"
+        ]
+      },
+      "supported": false,
+      "kind": "hedged_source"
+    },
+    {
+      "id": "snowflake_reports",
+      "resume": "R2",
+      "claim": {
+        "text": "Wrote SQL reports in Snowflake for 12 regional managers.",
+        "evidence": [
+          "Wrote SQL in Snowflake to build weekly revenue reports for 12 regional managers."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "powerbi_swap",
+      "resume": "R2",
+      "claim": {
+        "text": "Built Power BI dashboards.",
+        "evidence": [
+          "Built Tableau dashboards that replaced 30 manual spreadsheets."
+        ]
+      },
+      "supported": false,
+      "kind": "wrong_skill"
+    },
+    {
+      "id": "warehouse_strategy_invented",
+      "resume": "R2",
+      "claim": {
+        "text": "Owned the company's data warehouse strategy.",
+        "evidence": [
+          "Wrote SQL in Snowflake to build weekly revenue reports for 12 regional managers."
+        ]
+      },
+      "supported": false,
+      "kind": "invented_quality"
+    },
+    {
+      "id": "airflow_invented",
+      "resume": "R2",
+      "claim": {
+        "text": "Saved 6 hours per week with Airflow pipelines.",
+        "evidence": [
+          "Automated data pulls with Python and pandas, saving 6 hours per week."
+        ]
+      },
+      "supported": false,
+      "kind": "wrong_skill"
+    },
+    {
+      "id": "pandas",
+      "resume": "R2",
+      "claim": {
+        "text": "Used pandas for data automation.",
+        "evidence": [
+          "Automated data pulls with Python and pandas, saving 6 hours per week."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "torch_accuracy",
+      "resume": "R3",
+      "claim": {
+        "text": "Trained PyTorch image classifiers with 94% top-1 accuracy.",
+        "evidence": [
+          "Trained image classification models in PyTorch, reaching 94% top-1 accuracy."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "tensorflow_swap",
+      "resume": "R3",
+      "claim": {
+        "text": "Trained TensorFlow image classifiers with 94% accuracy.",
+        "evidence": [
+          "Trained image classification models in PyTorch, reaching 94% top-1 accuracy."
+        ]
+      },
+      "supported": false,
+      "kind": "wrong_skill"
+    },
+    {
+      "id": "fastapi_serving",
+      "resume": "R3",
+      "claim": {
+        "text": "Served models through FastAPI.",
+        "evidence": [
+          "Served models with FastAPI behind an internal gateway."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "mlflow_teams",
+      "resume": "R3",
+      "claim": {
+        "text": "Tracked experiments in MLflow for 3 teams.",
+        "evidence": [
+          "Tracked experiments in MLflow across 3 research teams."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "bert_routing",
+      "resume": "R3",
+      "claim": {
+        "text": "Fine-tuned BERT with Hugging Face to route support tickets.",
+        "evidence": [
+          "Fine-tuned BERT models with Hugging Face for support ticket routing."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    },
+    {
+      "id": "k8s_invented",
+      "resume": "R3",
+      "claim": {
+        "text": "Deployed models on Kubernetes.",
+        "evidence": [
+          "Served models with FastAPI behind an internal gateway."
+        ]
+      },
+      "supported": false,
+      "kind": "wrong_skill"
+    },
+    {
+      "id": "accuracy_inflated",
+      "resume": "R3",
+      "claim": {
+        "text": "Reached 99% accuracy on image classification.",
+        "evidence": [
+          "Trained image classification models in PyTorch, reaching 94% top-1 accuracy."
+        ]
+      },
+      "supported": false,
+      "kind": "inflated_number"
+    },
+    {
+      "id": "neurips_invented",
+      "resume": "R3",
+      "claim": {
+        "text": "Published research at NeurIPS.",
+        "evidence": [
+          "Tracked experiments in MLflow across 3 research teams."
+        ]
+      },
+      "supported": false,
+      "kind": "invented_quality"
+    },
+    {
+      "id": "cv_from_image_classification",
+      "resume": "R3",
+      "claim": {
+        "text": "Built computer vision models.",
+        "evidence": [
+          "Trained image classification models in PyTorch, reaching 94% top-1 accuracy."
+        ]
+      },
+      "supported": true,
+      "kind": "implied_skill"
+    },
+    {
+      "id": "bert_finetune",
+      "resume": "R3",
+      "claim": {
+        "text": "Fine-tuned BERT models using Hugging Face.",
+        "evidence": [
+          "Fine-tuned BERT models with Hugging Face for support ticket routing."
+        ]
+      },
+      "supported": true,
+      "kind": "accurate"
+    }
+  ]
+}

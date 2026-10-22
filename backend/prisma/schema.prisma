@@ -37,6 +37,7 @@ model Resume {
   rawText     String  @db.Text
 
   applications Application[]
+  chunks       ResumeChunk[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime  @default(now())
@@ -172,4 +173,24 @@ model SkillEmbedding {
   skill     String   @unique
   embedding Unsupported("vector")?
   createdAt DateTime @default(now())
+}
+
+// Resume text split into chunks with embeddings, written by the ai-service
+// for evidence search. Searches are always scoped to one resume, so they use
+// an exact scan of that resume's rows rather than an HNSW index (HNSW applies
+// the resumeId filter after the nearest-neighbour search and can drop results).
+model ResumeChunk {
+  id          String                 @id @default(uuid())
+  resumeId    String
+  resume      Resume                 @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  chunkIndex  Int
+  text        String                 @db.Text
+  startOffset Int
+  endOffset   Int
+  contentHash String
+  embedding   Unsupported("vector(1536)")?
+  createdAt   DateTime               @default(now())
+
+  @@unique([resumeId, chunkIndex])
+  @@index([resumeId])
 }

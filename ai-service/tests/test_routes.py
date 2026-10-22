@@ -155,7 +155,9 @@ def test_unknown_or_path_like_prompt_version_returns_400():
 
     import main
 
-    client = TestClient(main.app)
+    from tests.conftest import TEST_SERVICE_TOKEN
+
+    client = TestClient(main.app, headers={"X-Service-Token": TEST_SERVICE_TOKEN})
 
     for version in ["analysis_v99", "../prompts/analysis_v1"]:
         response = client.post(

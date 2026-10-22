@@ -8,6 +8,7 @@ from pydantic import BaseModel, Field
 from llm import LLMCallError, RunMetadata, call_structured
 from prompt_loader import load_prompt
 from routes.errors import http_error_from_llm
+from skills.claim_verifier import skills_missing_from_resume
 
 router = APIRouter()
 
@@ -22,7 +23,7 @@ class ResumeReviewRequest(BaseModel):
     prompt_version: str = "resume_review_v1"
 
 
-class ResumeSuggestion(BaseModel):
+class ResumeSuggestionDraft(BaseModel):
     priority: Literal["HIGH", "MEDIUM", "LOW"]
     title: str
     target_section: str
@@ -30,107 +31,67 @@ class ResumeSuggestion(BaseModel):
     evidence: list[str]
     action: str
 
+
+class ResumeReviewDraft(BaseModel):
+    """Shape the model returns."""
+
+    summary: str
+    suggestions: list[ResumeSuggestionDraft]
+    growth_areas: list[str]
+    warnings: list[str]
+
+
+class ResumeSuggestion(ResumeSuggestionDraft):
+    # Skills the suggestion names that the resume does not show (claim verifier).
+    unsupported_skills: list[str] = Field(default_factory=list)
+
+
 class ResumeReviewPayload(BaseModel):
     summary: str
     suggestions: list[ResumeSuggestion]
     growth_areas: list[str]
     warnings: list[str]
 
+
 class ResumeReviewResponse(BaseModel):
     review: ResumeReviewPayload
     metadata: RunMetadata
 
-def normalize_review_text(text: str) -> str:
-    replacements = {
-        "Go Lang": "Go",
-        "Go lang": "Go",
-        "go lang": "Go",
-    }
 
-    cleaned = text.strip()
+def ground_suggestion(suggestion: ResumeSuggestionDraft, resume_text: str) -> ResumeSuggestion:
+    """A suggestion may point at a skill the resume does not show (a gap to
+    close). Flag those skills and make sure the action never reads as advice to
+    claim them."""
+    unsupported = skills_missing_from_resume(f"{suggestion.title} {suggestion.action}", resume_text)
+    action = suggestion.action.strip()
 
-    for wrong, right in replacements.items():
-        cleaned = cleaned.replace(wrong, right)
+    if unsupported:
+        names = ", ".join(unsupported)
+        it = "them" if len(unsupported) > 1 else "it"
+        action = f"{action} Only add {names} to the resume once you have real experience with {it}; the resume does not show {it} yet."
 
-    return cleaned
-
-
-def mentions_go(text: str) -> bool:
-    return bool(re.search(r"\b(go|golang|go lang)\b", text.lower()))
+    return ResumeSuggestion(**suggestion.model_dump(exclude={"action"}), action=action, unsupported_skills=unsupported)
 
 
-def mentions_open_source(text: str) -> bool:
-    lowered = text.lower()
-    return "open-source" in lowered or "open source" in lowered or "sdk" in lowered
-
-
-def clean_suggestion(suggestion: ResumeSuggestion) -> ResumeSuggestion:
-    combined_text = " ".join(
-        [
-            suggestion.title,
-            suggestion.why,
-            suggestion.action,
-            " ".join(suggestion.evidence),
-        ]
-    )
-
-    evidence = [normalize_review_text(point) for point in suggestion.evidence]
-
-    if mentions_go(combined_text):
-        return ResumeSuggestion(
-            priority="LOW",
-            title="Treat Go as a preferred growth area",
-            target_section="Skills or Projects",
-            why="The job mentions Go as a plus or preferred skill, but this should not be treated as a major resume gap unless the candidate has real Go experience.",
-            evidence=evidence,
-            action="Do not add Go unless you have genuinely used it. If applicable, mention real Go experience with a specific project or work example; otherwise emphasize adjacent typed-language experience already present in the resume.",
-        )
-
-    if mentions_open_source(combined_text):
-        return ResumeSuggestion(
-            priority="MEDIUM",
-            title="Clarify open-source or SDK-related work if applicable",
-            target_section=suggestion.target_section or "Projects",
-            why="The job values open-source or SDK-related work, but this should only be added if the candidate has real experience to support it.",
-            evidence=evidence,
-            action="If you have contributed to open-source projects or built developer-facing tools, mention the specific project and contribution. If not, do not claim open-source experience; emphasize relevant GitHub projects or full-stack project work instead.",
-        )
-
-    return ResumeSuggestion(
-        priority=suggestion.priority,
-        title=normalize_review_text(suggestion.title),
-        target_section=normalize_review_text(suggestion.target_section),
-        why=normalize_review_text(suggestion.why),
-        evidence=evidence,
-        action=normalize_review_text(suggestion.action),
-    )
-
-
-def clean_resume_review(review: ResumeReviewPayload) -> ResumeReviewPayload:
+def clean_resume_review(review: ResumeReviewDraft, resume_text: str) -> ResumeReviewPayload:
     cleaned_suggestions = []
     seen = set()
 
     for suggestion in review.suggestions:
-        cleaned = clean_suggestion(suggestion)
-
-        key = re.sub(
-            r"[^a-z0-9]+",
-            " ",
-            f"{cleaned.title} {cleaned.action}".lower(),
-        ).strip()
-
+        key = re.sub(r"[^a-z0-9]+", " ", f"{suggestion.title} {suggestion.action}".lower()).strip()
         if key in seen:
             continue
 
         seen.add(key)
-        cleaned_suggestions.append(cleaned)
+        cleaned_suggestions.append(ground_suggestion(suggestion, resume_text))
 
     return ResumeReviewPayload(
-        summary=normalize_review_text(review.summary),
+        summary=review.summary.strip(),
         suggestions=cleaned_suggestions[:5],
-        growth_areas=[normalize_review_text(item) for item in review.growth_areas],
-        warnings=[normalize_review_text(item) for item in review.warnings],
+        growth_areas=[item.strip() for item in review.growth_areas],
+        warnings=[item.strip() for item in review.warnings],
     )
+
 
 def build_resume_review_user_prompt(payload: ResumeReviewRequest) -> str:
     return json.dumps(
@@ -149,14 +110,14 @@ def run_resume_review(payload: ResumeReviewRequest, **llm_kwargs) -> ResumeRevie
         prompt_version=payload.prompt_version,
         system=load_prompt(payload.prompt_version),
         user=build_resume_review_user_prompt(payload),
-        schema=ResumeReviewPayload,
+        schema=ResumeReviewDraft,
         temperature=0.2,
         max_output_tokens=1200,
         **llm_kwargs,
     )
 
     return ResumeReviewResponse(
-        review=clean_resume_review(result.parsed),
+        review=clean_resume_review(result.parsed, payload.resume_text),
         metadata=result.metadata,
     )
 

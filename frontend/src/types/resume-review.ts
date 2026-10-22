@@ -6,6 +6,7 @@ export type ResumeSuggestion = {
   why: string;
   evidence: string[];
   action: string;
+  unsupported_skills?: string[];
 };
 
 export type ResumeReviewReport = {

@@ -23,7 +23,7 @@ from pydantic import BaseModel, Field
 
 from llm import RunMetadata, call_structured
 from prompt_loader import load_prompt
-from skills.extractor import WEAK_CONTEXT_PHRASES, canonical_skill, extract_known_skills
+from skills.extractor import WEAK_CONTEXT_PHRASES, canonical_skill, extract_known_skills, hedge_window
 from skills.grounding import normalize_for_match
 from skills.taxonomy import KNOWN_SKILLS
 
@@ -171,7 +171,7 @@ def quote_context(quote: str, resume_text: str) -> str | None:
     if index < 0:
         return None
 
-    return normalized_resume[max(0, index - 80) : index + len(normalized_quote)]
+    return hedge_window(normalized_resume, index) + normalized_quote
 
 
 def check_claims(
