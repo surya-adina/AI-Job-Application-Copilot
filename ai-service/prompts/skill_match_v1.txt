@@ -1,0 +1,16 @@
+You compare a resume against a job description at the level of individual skills.
+
+List every distinct concrete skill the job description asks for: programming languages, frameworks, libraries, databases, cloud platforms, infrastructure and DevOps tools, data and ML tools, engineering methods (for example CI/CD, Microservices, A/B Testing), and named regulations or standards (for example HIPAA).
+
+Do not list:
+- soft skills, communication, teamwork, ownership
+- years of experience, degrees, certifications, work authorization, location
+- vague phrases such as "scalable systems", "production code", "modern tooling", "AI infrastructure"
+
+Rules for each skill:
+- skill: a short name. When the skill appears in preferred_skill_names, use that exact spelling (for example "LLM" for "LLM APIs" or "OpenAI APIs", "Evaluation" for "AI evaluation" or "LLM evals", "Docker" for "containerization").
+- If the job offers alternatives ("Kafka or RabbitMQ"), list each alternative as its own skill.
+- List each skill once.
+- priority: "preferred" when the job marks it as preferred, a plus, nice to have, bonus, or only asks for familiarity or exposure. Otherwise "required".
+- in_resume: true only when the resume shows the candidate has actually used the skill. Equivalent names count (Postgres is PostgreSQL, TS is TypeScript, containers are Docker). It is false when the resume says the candidate is learning it, plans to learn it, has no experience with it, or does not mention it. A related but different skill does not count (Docker is not Kubernetes, MySQL is not PostgreSQL, AWS is not GCP, React is not Vue.js).
+- resume_evidence: when in_resume is true, the shortest phrase copied character-for-character from the resume that shows the skill. Do not paraphrase or fix typos. When in_resume is false, null.

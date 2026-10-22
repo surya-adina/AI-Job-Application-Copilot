@@ -78,12 +78,10 @@ export class ResumeReviewService {
           weaknesses: analysis.weaknesses,
           suggestions: analysis.suggestions,
         },
-        evidence: {
+        // Analyses saved before skill evidence existed have no evidence column value.
+        evidence: analysis.evidence ?? {
           matchedSkills: analysis.matchedSkills,
           missingSkills: analysis.missingSkills,
-          strengths: analysis.strengths,
-          weaknesses: analysis.weaknesses,
-          score: analysis.score,
         },
       }),
     );

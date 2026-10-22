@@ -19,6 +19,17 @@ JOB = (
 LLM_KWARGS = dict(model="gpt-4o-mini", max_retries=1, sleep=lambda _s: None)
 
 
+def stub_skill_matcher(resume_text, job_description, **_kwargs):
+    from llm import RunMetadata
+    from skills.skill_matcher import SkillEvidence
+
+    metadata = RunMetadata(
+        endpoint="skill:match", model="gpt-4o-mini", prompt_version="skill_match_v1", latency_ms=1,
+        tokens_in=1, tokens_out=1, total_tokens=2, retries=0, status="SUCCESS",
+    )
+    return SkillEvidence(mode="llm", required_skills=["Python"]), metadata
+
+
 def test_analysis_clamps_score_and_dedupes():
     client = FakeClient(
         ok(
@@ -33,11 +44,15 @@ def test_analysis_clamps_score_and_dedupes():
         )
     )
 
-    response = run_analysis(AnalyzeRequest(resume_text=RESUME, job_description=JOB), client=client, **LLM_KWARGS)
+    response = run_analysis(
+        AnalyzeRequest(resume_text=RESUME, job_description=JOB), skill_matcher=stub_skill_matcher, client=client, **LLM_KWARGS
+    )
 
     assert response.analysis.score == 100
     assert response.analysis.matched_skills == ["Python", "FastAPI"]
     assert len(response.analysis.strengths) == 3
+    assert response.evidence.required_skills == ["Python"]
+    assert [run.endpoint for run in response.runs] == ["skill:match"]
     assert response.metadata.endpoint == "/analyze"
 
 

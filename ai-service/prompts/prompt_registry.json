@@ -38,5 +38,10 @@
     "status": "active",
     "description": "LLM extraction of required vs preferred skills from a job description.",
     "intended_improvement": "Separate must-have from nice-to-have skills more reliably than heading heuristics."
+  },
+  "skill_match_v1": {
+    "status": "active",
+    "description": "Per-skill comparison: each job skill with priority, whether the resume shows it, and a verbatim resume quote as evidence.",
+    "intended_improvement": "Give the deterministic verifier checkable claims (exact quotes) instead of free-form matched/missing lists."
   }
 }

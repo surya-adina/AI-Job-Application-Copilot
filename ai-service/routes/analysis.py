@@ -1,4 +1,7 @@
 import json
+import logging
+from concurrent.futures import ThreadPoolExecutor
+from typing import Callable
 
 from fastapi import APIRouter
 from pydantic import BaseModel, Field
@@ -6,8 +9,10 @@ from pydantic import BaseModel, Field
 from llm import LLMCallError, RunMetadata, call_structured
 from prompt_loader import load_prompt
 from routes.errors import http_error_from_llm
+from skills.skill_matcher import SkillEvidence, match_skills
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 ENDPOINT = "/analyze"
 
@@ -39,19 +44,12 @@ class AnalysisPayload(BaseModel):
     recommendations: list[str]
 
 
-class SkillEvidence(BaseModel):
-    resume_skills: list[str] = Field(default_factory=list)
-    required_skills: list[str] = Field(default_factory=list)
-    preferred_skills: list[str] = Field(default_factory=list)
-    missing_required_skills: list[str] = Field(default_factory=list)
-    missing_preferred_skills: list[str] = Field(default_factory=list)
-    semantic_matches: list[dict] = Field(default_factory=list)
-
-
 class AnalyzeResponse(BaseModel):
     analysis: AnalysisPayload
     metadata: RunMetadata
     evidence: SkillEvidence
+    # Additional LLM calls made for this request (skill matching), logged as separate AiRun rows.
+    runs: list[RunMetadata] = Field(default_factory=list)
 
 
 def dedupe(items: list[str]) -> list[str]:
@@ -82,11 +80,38 @@ def clean_analysis(analysis: AnalysisLLMOutput) -> AnalysisPayload:
     )
 
 
-def run_analysis(payload: AnalyzeRequest, **llm_kwargs) -> AnalyzeResponse:
+def run_skill_matching(
+    payload: AnalyzeRequest, skill_matcher: Callable = match_skills, **llm_kwargs
+) -> tuple[SkillEvidence, list[RunMetadata]]:
+    """Skill evidence is supplementary: a failure here must not fail the analysis."""
+    try:
+        evidence, metadata = skill_matcher(payload.resume_text, payload.job_description, **llm_kwargs)
+        return evidence, [metadata]
+    except LLMCallError as error:
+        logger.warning("Skill matching failed: %s", error)
+        return SkillEvidence(mode="failed"), [error.metadata]
+    except Exception:
+        logger.exception("Skill matching failed")
+        return SkillEvidence(mode="failed"), []
+
+
+def run_analysis(payload: AnalyzeRequest, skill_matcher: Callable = match_skills, **llm_kwargs) -> AnalyzeResponse:
+    # Resolve the prompt first so an invalid prompt_version fails before any LLM call starts.
+    system_prompt = load_prompt(payload.prompt_version)
+
+    with ThreadPoolExecutor(max_workers=1) as pool:
+        skill_future = pool.submit(run_skill_matching, payload, skill_matcher, **llm_kwargs)
+        analysis, metadata = run_fit_analysis(payload, system_prompt, **llm_kwargs)
+        evidence, runs = skill_future.result()
+
+    return AnalyzeResponse(analysis=analysis, metadata=metadata, evidence=evidence, runs=runs)
+
+
+def run_fit_analysis(payload: AnalyzeRequest, system_prompt: str, **llm_kwargs) -> tuple[AnalysisPayload, RunMetadata]:
     result = call_structured(
         endpoint=ENDPOINT,
         prompt_version=payload.prompt_version,
-        system=load_prompt(payload.prompt_version),
+        system=system_prompt,
         user=json.dumps(
             {
                 "resume_text": payload.resume_text,
@@ -99,11 +124,7 @@ def run_analysis(payload: AnalyzeRequest, **llm_kwargs) -> AnalyzeResponse:
         **llm_kwargs,
     )
 
-    return AnalyzeResponse(
-        analysis=clean_analysis(result.parsed),
-        metadata=result.metadata,
-        evidence=SkillEvidence(),
-    )
+    return clean_analysis(result.parsed), result.metadata
 
 
 @router.post("/analyze", response_model=AnalyzeResponse)

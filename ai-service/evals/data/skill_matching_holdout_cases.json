@@ -3,34 +3,68 @@
     "id": "ai_platform_partial_match",
     "resume_text": "Backend engineer with experience building APIs using Python, FastAPI, PostgreSQL, Docker, OpenAI APIs, and observability tooling.",
     "job_description": "Required Qualifications: Python, FastAPI, PostgreSQL, Docker, LLM APIs. Preferred Qualifications: AWS, Kubernetes, RAG, Vector Search.",
-    "expected_required_matches": ["Python", "FastAPI", "PostgreSQL", "Docker", "LLM"],
+    "expected_required_matches": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "Docker",
+      "LLM"
+    ],
     "expected_required_missing": [],
     "expected_preferred_matches": [],
-    "expected_preferred_missing": ["AWS", "Kubernetes", "RAG", "Vector Search"]
+    "expected_preferred_missing": [
+      "AWS",
+      "Kubernetes",
+      "RAG",
+      "Vector Search"
+    ]
   },
   {
     "id": "frontend_role_strong_match",
     "resume_text": "Frontend developer experienced with React, Next.js, TypeScript, JavaScript, and UI component systems.",
     "job_description": "Required Qualifications: React, Next.js, TypeScript. Preferred Qualifications: Node.js, PostgreSQL, Docker.",
-    "expected_required_matches": ["React", "Next.js", "TypeScript"],
+    "expected_required_matches": [
+      "React",
+      "Next.js",
+      "TypeScript"
+    ],
     "expected_required_missing": [],
     "expected_preferred_matches": [],
-    "expected_preferred_missing": ["Node.js", "PostgreSQL", "Docker"]
+    "expected_preferred_missing": [
+      "Node.js",
+      "PostgreSQL",
+      "Docker"
+    ]
   },
   {
     "id": "cloud_gap_case",
     "resume_text": "Software engineer with Python, FastAPI, PostgreSQL, Redis, and Docker experience.",
     "job_description": "Required Qualifications: Python, FastAPI, PostgreSQL, Redis. Preferred Qualifications: AWS, Kubernetes, Observability.",
-    "expected_required_matches": ["Python", "FastAPI", "PostgreSQL", "Redis"],
+    "expected_required_matches": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "Redis"
+    ],
     "expected_required_missing": [],
     "expected_preferred_matches": [],
-    "expected_preferred_missing": ["AWS", "Kubernetes", "Observability"]
+    "expected_preferred_missing": [
+      "AWS",
+      "Kubernetes",
+      "Observability"
+    ]
   },
   {
     "id": "semantic_alias_case",
     "resume_text": "Built services with TS, Node, Postgres, containers, and OpenAI API integrations.",
     "job_description": "Required Qualifications: TypeScript, Node.js, PostgreSQL, Docker, LLM APIs.",
-    "expected_required_matches": ["TypeScript", "Node.js", "PostgreSQL", "Docker", "LLM"],
+    "expected_required_matches": [
+      "TypeScript",
+      "Node.js",
+      "PostgreSQL",
+      "Docker",
+      "LLM"
+    ],
     "expected_required_missing": [],
     "expected_preferred_matches": [],
     "expected_preferred_missing": []
@@ -39,8 +73,16 @@
     "id": "rag_gap_case",
     "resume_text": "AI engineer with experience in Python, embeddings, vector search, prompt engineering, and OpenAI APIs.",
     "job_description": "Required Qualifications: Python, LLM APIs, Prompt Engineering, Embeddings, Vector Search, RAG.",
-    "expected_required_matches": ["Python", "LLM", "Prompt Engineering", "Embeddings", "Vector Search"],
-    "expected_required_missing": ["RAG"],
+    "expected_required_matches": [
+      "Python",
+      "LLM",
+      "Prompt Engineering",
+      "Embeddings",
+      "Vector Search"
+    ],
+    "expected_required_missing": [
+      "RAG"
+    ],
     "expected_preferred_matches": [],
     "expected_preferred_missing": []
   },
@@ -48,27 +90,317 @@
     "id": "negated_cloud_experience_case",
     "resume_text": "Backend engineer with Python, FastAPI, PostgreSQL, and Docker experience. No professional experience with AWS or Kubernetes.",
     "job_description": "Required Qualifications: Python, FastAPI, PostgreSQL, Docker. Preferred Qualifications: AWS, Kubernetes.",
-    "expected_required_matches": ["Python", "FastAPI", "PostgreSQL", "Docker"],
+    "expected_required_matches": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "Docker"
+    ],
     "expected_required_missing": [],
     "expected_preferred_matches": [],
-    "expected_preferred_missing": ["AWS", "Kubernetes"]
+    "expected_preferred_missing": [
+      "AWS",
+      "Kubernetes"
+    ]
   },
   {
     "id": "learning_not_experience_case",
     "resume_text": "Software engineer experienced with React, TypeScript, and Node.js. Currently learning Docker and Kubernetes through tutorials.",
     "job_description": "Required Qualifications: React, TypeScript, Node.js, Docker. Preferred Qualifications: Kubernetes.",
-    "expected_required_matches": ["React", "TypeScript", "Node.js"],
-    "expected_required_missing": ["Docker"],
+    "expected_required_matches": [
+      "React",
+      "TypeScript",
+      "Node.js"
+    ],
+    "expected_required_missing": [
+      "Docker"
+    ],
     "expected_preferred_matches": [],
-    "expected_preferred_missing": ["Kubernetes"]
+    "expected_preferred_missing": [
+      "Kubernetes"
+    ]
   },
   {
     "id": "job_mentions_skills_resume_does_not",
     "resume_text": "Frontend developer focused on React, Next.js, TypeScript, accessibility, and UI performance.",
     "job_description": "Required Qualifications: React, Next.js, TypeScript. Preferred Qualifications: PostgreSQL, Docker, AWS, Redis.",
-    "expected_required_matches": ["React", "Next.js", "TypeScript"],
+    "expected_required_matches": [
+      "React",
+      "Next.js",
+      "TypeScript"
+    ],
     "expected_required_missing": [],
     "expected_preferred_matches": [],
-    "expected_preferred_missing": ["PostgreSQL", "Docker", "AWS", "Redis"]
+    "expected_preferred_missing": [
+      "PostgreSQL",
+      "Docker",
+      "AWS",
+      "Redis"
+    ]
+  },
+  {
+    "id": "data_engineer_pipeline",
+    "resume_text": "Data engineer running PySpark jobs, orchestrating them with Airflow, and writing dbt SQL models on Snowflake.",
+    "job_description": "Required: Spark, Airflow, SQL. Preferred: Snowflake, Kafka.",
+    "expected_required_matches": [
+      "Spark",
+      "Airflow",
+      "SQL"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [
+      "Snowflake"
+    ],
+    "expected_preferred_missing": [
+      "Kafka"
+    ]
+  },
+  {
+    "id": "explicit_negation_not_in_phrase_list",
+    "resume_text": "Built Flask APIs deployed on Azure. I have not used AWS.",
+    "job_description": "Required: Flask, AWS. Preferred: Azure.",
+    "expected_required_matches": [
+      "Flask"
+    ],
+    "expected_required_missing": [
+      "AWS"
+    ],
+    "expected_preferred_matches": [
+      "Azure"
+    ],
+    "expected_preferred_missing": []
+  },
+  {
+    "id": "flask_is_not_django",
+    "resume_text": "Python developer building Flask REST APIs with SQLAlchemy and PostgreSQL.",
+    "job_description": "Required: Python, Django, PostgreSQL, REST APIs. Preferred: Celery.",
+    "expected_required_matches": [
+      "Python",
+      "PostgreSQL",
+      "REST APIs"
+    ],
+    "expected_required_missing": [
+      "Django"
+    ],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "Celery"
+    ]
+  },
+  {
+    "id": "ios_engineer",
+    "resume_text": "iOS engineer shipping Swift apps with SwiftUI, plus some Kotlin for a shared networking module.",
+    "job_description": "Required: Swift, iOS. Preferred: Kotlin, Firebase.",
+    "expected_required_matches": [
+      "Swift",
+      "iOS"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [
+      "Kotlin"
+    ],
+    "expected_preferred_missing": [
+      "Firebase"
+    ]
+  },
+  {
+    "id": "auth_backend",
+    "resume_text": "Implemented OAuth login and JWT sessions in a NestJS (TypeScript) API.",
+    "job_description": "Required: OAuth, NestJS, TypeScript. Preferred: Redis.",
+    "expected_required_matches": [
+      "OAuth",
+      "NestJS",
+      "TypeScript"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "Redis"
+    ]
+  },
+  {
+    "id": "currently_learning_rust",
+    "resume_text": "C++ engineer on low-latency trading systems. Currently learning Rust on weekends.",
+    "job_description": "Required: C++, Linux. Preferred: Rust.",
+    "expected_required_matches": [
+      "C++"
+    ],
+    "expected_required_missing": [
+      "Linux"
+    ],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "Rust"
+    ]
+  },
+  {
+    "id": "docker_compose_is_not_kubernetes",
+    "resume_text": "Built Docker images and docker-compose setups for 12 microservices.",
+    "job_description": "Required: Docker, Kubernetes, Microservices. Preferred: Helm.",
+    "expected_required_matches": [
+      "Docker",
+      "Microservices"
+    ],
+    "expected_required_missing": [
+      "Kubernetes"
+    ],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "Helm"
+    ]
+  },
+  {
+    "id": "bi_analyst",
+    "resume_text": "Built Power BI reports and Excel models for the finance team, backed by SQL Server queries.",
+    "job_description": "Required: Power BI, SQL, Excel. Preferred: Tableau, Python.",
+    "expected_required_matches": [
+      "Power BI",
+      "SQL",
+      "Excel"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "Tableau",
+      "Python"
+    ]
+  },
+  {
+    "id": "gke_implies_gcp",
+    "resume_text": "Designed postgres schemas, tuned slow queries, and deployed services via k8s on GKE.",
+    "job_description": "Required: PostgreSQL, Kubernetes, GCP.",
+    "expected_required_matches": [
+      "PostgreSQL",
+      "Kubernetes",
+      "GCP"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": []
+  },
+  {
+    "id": "full_stack_nextjs",
+    "resume_text": "Full-stack engineer: Next.js frontend, Node.js and Express backend, Prisma with PostgreSQL, deployed on Vercel.",
+    "job_description": "Required: Next.js, Node.js, PostgreSQL. Preferred: Prisma, AWS, Docker.",
+    "expected_required_matches": [
+      "Next.js",
+      "Node.js",
+      "PostgreSQL"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [
+      "Prisma"
+    ],
+    "expected_preferred_missing": [
+      "AWS",
+      "Docker"
+    ]
+  },
+  {
+    "id": "nlp_research_engineer",
+    "resume_text": "Fine-tuned BERT models with Hugging Face Transformers in PyTorch and Python, with scikit-learn baselines.",
+    "job_description": "Required: PyTorch, Hugging Face, Python. Preferred: MLOps, Spark.",
+    "expected_required_matches": [
+      "PyTorch",
+      "Hugging Face",
+      "Python"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "MLOps",
+      "Spark"
+    ]
+  },
+  {
+    "id": "azure_is_not_aws",
+    "resume_text": "Azure DevOps pipelines deploying C# .NET services to Azure App Service.",
+    "job_description": "Required: C#, AWS, CI/CD. Preferred: Azure.",
+    "expected_required_matches": [
+      "C#",
+      "CI/CD"
+    ],
+    "expected_required_missing": [
+      "AWS"
+    ],
+    "expected_preferred_matches": [
+      "Azure"
+    ],
+    "expected_preferred_missing": []
+  },
+  {
+    "id": "graphql_gateway",
+    "resume_text": "Built a GraphQL gateway with Apollo Server over REST microservices written in TypeScript.",
+    "job_description": "Required: GraphQL, TypeScript, Microservices. Preferred: Redis, Kafka.",
+    "expected_required_matches": [
+      "GraphQL",
+      "TypeScript",
+      "Microservices"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "Redis",
+      "Kafka"
+    ]
+  },
+  {
+    "id": "no_experience_with_react",
+    "resume_text": "Frontend engineer working in Angular and TypeScript. No experience with React yet.",
+    "job_description": "Required: React, TypeScript. Preferred: Angular.",
+    "expected_required_matches": [
+      "TypeScript"
+    ],
+    "expected_required_missing": [
+      "React"
+    ],
+    "expected_preferred_matches": [
+      "Angular"
+    ],
+    "expected_preferred_missing": []
+  },
+  {
+    "id": "solutions_engineer",
+    "resume_text": "Solutions engineer running Salesforce demos and writing Python scripts for customer data migration.",
+    "job_description": "Required: Python, Salesforce. Preferred: SQL.",
+    "expected_required_matches": [
+      "Python",
+      "Salesforce"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "SQL"
+    ]
+  },
+  {
+    "id": "llm_feature_engineer",
+    "resume_text": "Shipped LLM features using the OpenAI API, managed prompts with prompt versioning, and built evaluation datasets for regression testing.",
+    "job_description": "Required: LLM, Prompt Versioning, Evaluation. Preferred: Observability, LangGraph.",
+    "expected_required_matches": [
+      "LLM",
+      "Prompt Versioning",
+      "Evaluation"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "Observability",
+      "LangGraph"
+    ]
+  },
+  {
+    "id": "course_only_kafka",
+    "resume_text": "Backend engineer writing Go services on PostgreSQL. Completed a Udemy course on Kafka.",
+    "job_description": "Required: Go, PostgreSQL. Preferred: Kafka.",
+    "expected_required_matches": [
+      "Go",
+      "PostgreSQL"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "Kafka"
+    ]
   }
 ]
