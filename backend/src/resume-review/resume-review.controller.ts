@@ -4,7 +4,7 @@ import { ResumeReviewService } from './resume-review.service';
 
 type AuthenticatedRequest = {
   user: {
-    sub: string;
+    userId: string;
     email: string;
   };
 };
@@ -21,7 +21,7 @@ export class ResumeReviewController {
   ) {
     return this.resumeReviewService.getForApplication(
       applicationId,
-      req.user.sub,
+      req.user.userId,
     );
   }
 
@@ -32,7 +32,7 @@ export class ResumeReviewController {
   ) {
     return this.resumeReviewService.createForApplication(
       applicationId,
-      req.user.sub,
+      req.user.userId,
     );
   }
 }
