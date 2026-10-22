@@ -1,17 +1,17 @@
 import json
-import os
 import re
-import time
 from typing import Literal
-from fastapi import APIRouter, HTTPException
-from openai import OpenAI
-from pydantic import BaseModel, Field, ValidationError
+
+from fastapi import APIRouter
+from pydantic import BaseModel, Field
+
+from llm import LLMCallError, RunMetadata, call_structured
 from prompt_loader import load_prompt
+from routes.errors import http_error_from_llm
 
 router = APIRouter()
 
-_review_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+ENDPOINT = "/resume-review"
 
 
 class ResumeReviewRequest(BaseModel):
@@ -36,21 +36,9 @@ class ResumeReviewPayload(BaseModel):
     growth_areas: list[str]
     warnings: list[str]
 
-class ReviewMetadata(BaseModel):
-    endpoint: str
-    model: str
-    prompt_version: str
-    latency_ms: int
-    tokens_in: int
-    tokens_out: int
-    total_tokens: int
-    status: Literal["SUCCESS", "FAILED"]
-    error_type: str | None = None
-
-
 class ResumeReviewResponse(BaseModel):
     review: ResumeReviewPayload
-    metadata: ReviewMetadata
+    metadata: RunMetadata
 
 def normalize_review_text(text: str) -> str:
     replacements = {
@@ -145,117 +133,37 @@ def clean_resume_review(review: ResumeReviewPayload) -> ResumeReviewPayload:
     )
 
 def build_resume_review_user_prompt(payload: ResumeReviewRequest) -> str:
-    context = {
-        "resume_text": payload.resume_text,
-        "job_description": payload.job_description,
-        "analysis": payload.analysis,
-        "evidence": payload.evidence,
-    }
-
-    return (
-        "Return valid JSON only.\n"
-        "Do not copy the input context.\n"
-        "Do not include resume_text, job_description, analysis, evidence, task, context, or output_schema as top-level keys.\n"
-        "The top-level JSON keys must be exactly: summary, suggestions, growth_areas, warnings.\n\n"
-        "Required JSON shape:\n"
-        "{\n"
-        '  "summary": "short overview of the review",\n'
-        '  "suggestions": [\n'
-        "    {\n"
-        '      "priority": "HIGH | MEDIUM | LOW",\n'
-        '      "title": "specific recommendation title",\n'
-        '      "target_section": "Summary, Experience, Projects, Skills, or Education",\n'
-        '      "why": "why this recommendation matters",\n'
-        '      "evidence": ["supporting evidence"],\n'
-        '      "action": "truthful action the candidate can take"\n'
-        "    }\n"
-        "  ],\n"
-        '  "growth_areas": ["optional growth areas"],\n'
-        '  "warnings": ["truthfulness warnings only if needed"]\n'
-        "}\n\n"
-        "Context JSON:\n"
-        + json.dumps(context)
+    return json.dumps(
+        {
+            "resume_text": payload.resume_text,
+            "job_description": payload.job_description,
+            "analysis": payload.analysis,
+            "evidence": payload.evidence,
+        }
     )
+
+
+def run_resume_review(payload: ResumeReviewRequest, **llm_kwargs) -> ResumeReviewResponse:
+    result = call_structured(
+        endpoint=ENDPOINT,
+        prompt_version=payload.prompt_version,
+        system=load_prompt(payload.prompt_version),
+        user=build_resume_review_user_prompt(payload),
+        schema=ResumeReviewPayload,
+        temperature=0.2,
+        max_output_tokens=1200,
+        **llm_kwargs,
+    )
+
+    return ResumeReviewResponse(
+        review=clean_resume_review(result.parsed),
+        metadata=result.metadata,
+    )
+
 
 @router.post("/resume-review", response_model=ResumeReviewResponse)
 def review_resume(payload: ResumeReviewRequest):
-    started_at = time.perf_counter()
-
     try:
-        system_prompt = load_prompt(payload.prompt_version)
-
-        response = _review_client.responses.create(
-            model=OPENAI_MODEL,
-            input=[
-                {"role": "system", "content": system_prompt},
-                {
-                    "role": "user",
-                    "content": build_resume_review_user_prompt(payload),
-                },
-            ],
-            temperature=0.2,
-            max_output_tokens=850,
-            text={"format": {"type": "json_object"}},
-        )
-
-        latency_ms = int((time.perf_counter() - started_at) * 1000)
-
-        parsed = json.loads(response.output_text)
-        review = ResumeReviewPayload(**parsed)
-        review = clean_resume_review(review)
-
-        usage = response.usage
-        tokens_in = usage.input_tokens if usage else 0
-        tokens_out = usage.output_tokens if usage else 0
-        total_tokens = usage.total_tokens if usage else tokens_in + tokens_out
-
-        metadata = ReviewMetadata(
-            endpoint="/resume-review",
-            model=OPENAI_MODEL,
-            prompt_version=payload.prompt_version,
-            latency_ms=latency_ms,
-            tokens_in=tokens_in,
-            tokens_out=tokens_out,
-            total_tokens=total_tokens,
-            status="SUCCESS",
-        )
-
-        return ResumeReviewResponse(review=review, metadata=metadata)
-
-    except (json.JSONDecodeError, ValidationError) as error:
-        latency_ms = int((time.perf_counter() - started_at) * 1000)
-
-        raise HTTPException(
-            status_code=502,
-            detail={
-                "message": "Model returned invalid resume review output",
-                "error": str(error),
-                "metadata": {
-                    "endpoint": "/resume-review",
-                    "model": OPENAI_MODEL,
-                    "prompt_version": payload.prompt_version,
-                    "latency_ms": latency_ms,
-                    "status": "FAILED",
-                    "error_type": "STRUCTURED_OUTPUT_ERROR",
-                },
-            },
-        )
-
-    except Exception as error:
-        latency_ms = int((time.perf_counter() - started_at) * 1000)
-
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "message": "Resume review failed",
-                "error": str(error),
-                "metadata": {
-                    "endpoint": "/resume-review",
-                    "model": OPENAI_MODEL,
-                    "prompt_version": payload.prompt_version,
-                    "latency_ms": latency_ms,
-                    "status": "FAILED",
-                    "error_type": type(error).__name__,
-                },
-            },
-        )
+        return run_resume_review(payload)
+    except LLMCallError as error:
+        raise http_error_from_llm(error, "Resume review failed") from error

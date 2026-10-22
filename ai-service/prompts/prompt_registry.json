@@ -15,13 +15,28 @@
     "intended_improvement": "Provide truthful resume guidance without inventing experience."
   },
   "cover_letter_v1": {
-    "status": "active",
+    "status": "deprecated",
     "description": "Cover letter generation prompt using only the resume and job description.",
     "intended_improvement": "Generate truthful, job-specific cover letters without fabricating experience."
   },
   "interview_prep_v1": {
-    "status": "active",
+    "status": "deprecated",
     "description": "Interview preparation prompt for technical, behavioral, and project-specific questions.",
     "intended_improvement": "Generate grounded interview prep from resume and job description."
+  },
+  "cover_letter_v2": {
+    "status": "active",
+    "description": "Cover letter as strict structured output: three body paragraphs, each with verbatim supporting resume quotes, plus a closing sentence. Greeting is added in code.",
+    "intended_improvement": "Remove post-hoc string patching and make every claim checkable against the resume."
+  },
+  "interview_prep_v2": {
+    "status": "active",
+    "description": "Interview prep with project questions derived from the submitted resume instead of hardcoded project names.",
+    "intended_improvement": "Work for any user's resume; rely on strict structured outputs for the JSON shape."
+  },
+  "job_requirements_v1": {
+    "status": "active",
+    "description": "LLM extraction of required vs preferred skills from a job description.",
+    "intended_improvement": "Separate must-have from nice-to-have skills more reliably than heading heuristics."
   }
 }

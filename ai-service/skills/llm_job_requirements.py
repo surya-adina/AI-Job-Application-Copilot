@@ -1,18 +1,16 @@
 import json
-import os
 
-from openai import OpenAI
-from pydantic import BaseModel, Field, ValidationError
+from pydantic import BaseModel
 
+from llm import RunMetadata, call_structured
 from prompt_loader import load_prompt
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
+PROMPT_VERSION = "job_requirements_v1"
 
 
 class JobRequirementsPayload(BaseModel):
-    required_skills: list[str] = Field(default_factory=list)
-    preferred_skills: list[str] = Field(default_factory=list)
+    required_skills: list[str]
+    preferred_skills: list[str]
 
 
 def clean_skill_name(skill: str) -> str:
@@ -54,45 +52,31 @@ def dedupe_skills(skills: list[str]) -> list[str]:
     return cleaned_skills
 
 
-def extract_job_requirements_llm(job_description: str) -> dict[str, list[str]]:
-    prompt = load_prompt("job_requirements_v1")
-
-    response = client.responses.create(
-        model=OPENAI_MODEL,
-        input=[
-            {
-                "role": "system",
-                "content": prompt,
-            },
-            {
-                "role": "user",
-                "content": json.dumps(
-                    {
-                        "job_description": job_description,
-                    }
-                ),
-            },
-        ],
+def extract_job_requirements_llm_with_metadata(
+    job_description: str, **llm_kwargs
+) -> tuple[dict[str, list[str]], RunMetadata]:
+    result = call_structured(
+        endpoint="skill:extract_job_requirements",
+        prompt_version=PROMPT_VERSION,
+        system=load_prompt(PROMPT_VERSION),
+        user=json.dumps({"job_description": job_description}),
+        schema=JobRequirementsPayload,
         temperature=0.1,
         max_output_tokens=500,
-        text={
-            "format": {
-                "type": "json_object",
-            }
-        },
+        **llm_kwargs,
     )
 
-    parsed = json.loads(response.output_text)
-    payload = JobRequirementsPayload(**parsed)
+    required_skills = dedupe_skills(result.parsed.required_skills)
+    preferred_skills = dedupe_skills(result.parsed.preferred_skills)
+    required_set = {skill.lower() for skill in required_skills}
 
-    required_skills = dedupe_skills(payload.required_skills)
-    preferred_skills = dedupe_skills(payload.preferred_skills)
-
-    required_set = set(required_skills)
-
-    return {
+    requirements = {
         "required_skills": required_skills,
-        "preferred_skills": [
-            skill for skill in preferred_skills if skill not in required_set
-        ],
+        "preferred_skills": [skill for skill in preferred_skills if skill.lower() not in required_set],
     }
+    return requirements, result.metadata
+
+
+def extract_job_requirements_llm(job_description: str, **llm_kwargs) -> dict[str, list[str]]:
+    requirements, _ = extract_job_requirements_llm_with_metadata(job_description, **llm_kwargs)
+    return requirements

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { HttpService } from '@nestjs/axios';
 import { firstValueFrom } from 'rxjs';
+import type { AiRunMetadata } from './ai-runs.service';
 
 type AnalyzeRequest = {
   resume_text: string;
@@ -16,24 +17,62 @@ type AnalysisPayload = {
   recommendations: string[];
 };
 
-type AiRunMetadata = {
-  endpoint: string;
-  model: string;
-  prompt_version: string;
-  latency_ms: number;
-  tokens_in: number;
-  tokens_out: number;
-  total_tokens: number;
-  status: string;
-  error_type?: string | null;
-  estimated_cost_usd?: number | null;
+export type SkillEvidence = {
+  resume_skills: string[];
+  required_skills: string[];
+  preferred_skills: string[];
+  missing_required_skills: string[];
+  missing_preferred_skills: string[];
+  semantic_matches: { job_skill: string; resume_skill: string; similarity: number }[];
 };
 
 export type AnalyzeResponse = {
   analysis: AnalysisPayload;
   metadata: AiRunMetadata;
+  evidence: SkillEvidence;
 };
 
+export type CoverLetterResponse = {
+  content: string;
+  paragraphs: { text: string; supporting_resume_quotes: string[] }[];
+  grounding: {
+    quotes_checked: number;
+    unsupported_quotes: string[];
+    placeholders: string[];
+  };
+  metadata: AiRunMetadata;
+};
+
+type InterviewQuestion = {
+  question: string;
+  why_it_matters: string;
+  suggested_focus: string;
+};
+
+export type InterviewPrepResponse = {
+  technical_questions: InterviewQuestion[];
+  behavioral_questions: InterviewQuestion[];
+  project_questions: InterviewQuestion[];
+  preparation_tips: string[];
+  metadata: AiRunMetadata;
+};
+
+export type ResumeReviewResponse = {
+  review: {
+    summary: string;
+    suggestions: {
+      priority: 'HIGH' | 'MEDIUM' | 'LOW';
+      title: string;
+      target_section: string;
+      why: string;
+      evidence: string[];
+      action: string;
+    }[];
+    growth_areas: string[];
+    warnings: string[];
+  };
+  metadata: AiRunMetadata;
+};
 
 @Injectable()
 export class AiGatewayService {
@@ -45,8 +84,8 @@ export class AiGatewayService {
     jobDescription: string;
     analysis: unknown;
     evidence: unknown;
-  }) {
-    const response = await this.httpService.axiosRef.post(
+  }): Promise<ResumeReviewResponse> {
+    const response = await this.httpService.axiosRef.post<ResumeReviewResponse>(
       `${this.aiServiceUrl}/resume-review`,
       {
         resume_text: input.resumeText,
@@ -63,8 +102,8 @@ export class AiGatewayService {
   async createCoverLetter(payload: {
     resumeText: string;
     jobDescription: string;
-  }) {
-    const response = await this.httpService.axiosRef.post(
+  }): Promise<CoverLetterResponse> {
+    const response = await this.httpService.axiosRef.post<CoverLetterResponse>(
       `${this.aiServiceUrl}/cover-letter`,
       {
         resume_text: payload.resumeText,
@@ -78,8 +117,8 @@ export class AiGatewayService {
   async createInterviewPrep(payload: {
     resumeText: string;
     jobDescription: string;
-  }) {
-    const response = await this.httpService.axiosRef.post(
+  }): Promise<InterviewPrepResponse> {
+    const response = await this.httpService.axiosRef.post<InterviewPrepResponse>(
       `${this.aiServiceUrl}/interview-prep`,
       {
         resume_text: payload.resumeText,

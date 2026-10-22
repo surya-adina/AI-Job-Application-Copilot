@@ -1,12 +1,14 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AiGatewayService } from '../ai-gateway/ai-gateway.service';
+import { AiRunsService } from '../ai-gateway/ai-runs.service';
 
 @Injectable()
 export class CoverLetterService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly aiGateway: AiGatewayService,
+    private readonly aiRuns: AiRunsService,
   ) {}
 
   async getForApplication(applicationId: string, userId: string) {
@@ -53,10 +55,14 @@ export class CoverLetterService {
       throw new NotFoundException('Application is missing resume or job');
     }
 
-    const result = await this.aiGateway.createCoverLetter({
-      resumeText: application.resume.rawText,
-      jobDescription: application.job.jdText,
-    });
+    const resume = application.resume;
+
+    const result = await this.aiRuns.track(userId, '/cover-letter', () =>
+      this.aiGateway.createCoverLetter({
+        resumeText: resume.rawText,
+        jobDescription: application.job.jdText,
+      }),
+    );
 
     const savedCoverLetter = await this.prisma.coverLetter.upsert({
       where: {

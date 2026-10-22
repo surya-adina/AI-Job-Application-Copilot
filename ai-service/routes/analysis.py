@@ -1,25 +1,33 @@
 import json
-import os
-import time
-from typing import Literal
 
-from fastapi import APIRouter, HTTPException
-from openai import OpenAI
-from pydantic import BaseModel, Field, ValidationError
+from fastapi import APIRouter
+from pydantic import BaseModel, Field
 
+from llm import LLMCallError, RunMetadata, call_structured
 from prompt_loader import load_prompt
+from routes.errors import http_error_from_llm
 
 router = APIRouter()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-OPENAI_MODEL = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-PROMPT_VERSION = "analysis_v1"
+ENDPOINT = "/analyze"
 
 
 class AnalyzeRequest(BaseModel):
     resume_text: str = Field(..., min_length=50)
     job_description: str = Field(..., min_length=50)
     prompt_version: str = "analysis_v1"
+
+
+class AnalysisLLMOutput(BaseModel):
+    """Shape the model must return (strict Structured Outputs). No numeric
+    constraints here: strict mode can't enforce them reliably, so we clamp below."""
+
+    score: int
+    matched_skills: list[str]
+    missing_skills: list[str]
+    strengths: list[str]
+    weaknesses: list[str]
+    recommendations: list[str]
 
 
 class AnalysisPayload(BaseModel):
@@ -29,19 +37,6 @@ class AnalysisPayload(BaseModel):
     strengths: list[str]
     weaknesses: list[str]
     recommendations: list[str]
-
-
-class AiRunMetadata(BaseModel):
-    endpoint: str
-    model: str
-    prompt_version: str
-    latency_ms: int
-    tokens_in: int
-    tokens_out: int
-    total_tokens: int
-    status: Literal["SUCCESS", "FAILED"]
-    error_type: str | None = None
-    estimated_cost_usd: float | None = None
 
 
 class SkillEvidence(BaseModel):
@@ -55,7 +50,7 @@ class SkillEvidence(BaseModel):
 
 class AnalyzeResponse(BaseModel):
     analysis: AnalysisPayload
-    metadata: AiRunMetadata
+    metadata: RunMetadata
     evidence: SkillEvidence
 
 
@@ -65,13 +60,9 @@ def dedupe(items: list[str]) -> list[str]:
 
     for item in items:
         value = item.strip()
-
-        if not value:
-            continue
-
         key = value.lower()
 
-        if key in seen:
+        if not value or key in seen:
             continue
 
         seen.add(key)
@@ -80,7 +71,7 @@ def dedupe(items: list[str]) -> list[str]:
     return result
 
 
-def clean_analysis(analysis: AnalysisPayload) -> AnalysisPayload:
+def clean_analysis(analysis: AnalysisLLMOutput) -> AnalysisPayload:
     return AnalysisPayload(
         score=max(0, min(100, analysis.score)),
         matched_skills=dedupe(analysis.matched_skills)[:10],
@@ -91,115 +82,33 @@ def clean_analysis(analysis: AnalysisPayload) -> AnalysisPayload:
     )
 
 
+def run_analysis(payload: AnalyzeRequest, **llm_kwargs) -> AnalyzeResponse:
+    result = call_structured(
+        endpoint=ENDPOINT,
+        prompt_version=payload.prompt_version,
+        system=load_prompt(payload.prompt_version),
+        user=json.dumps(
+            {
+                "resume_text": payload.resume_text,
+                "job_description": payload.job_description,
+            }
+        ),
+        schema=AnalysisLLMOutput,
+        temperature=0.2,
+        max_output_tokens=850,
+        **llm_kwargs,
+    )
+
+    return AnalyzeResponse(
+        analysis=clean_analysis(result.parsed),
+        metadata=result.metadata,
+        evidence=SkillEvidence(),
+    )
+
+
 @router.post("/analyze", response_model=AnalyzeResponse)
 def analyze(payload: AnalyzeRequest):
-    started_at = time.perf_counter()
-    estimated_cost_usd = None
-
     try:
-        system_prompt = load_prompt(payload.prompt_version)
-
-        response = client.responses.create(
-            model=OPENAI_MODEL,
-            input=[
-                {
-                    "role": "system",
-                    "content": system_prompt,
-                },
-                {
-                    "role": "user",
-                    "content": json.dumps(
-                        {
-                            "resume_text": payload.resume_text,
-                            "job_description": payload.job_description,
-                            "output_schema": {
-                                "score": "integer from 0 to 100",
-                                "matched_skills": "array of strings",
-                                "missing_skills": "array of strings",
-                                "strengths": "array of strings",
-                                "weaknesses": "array of strings",
-                                "recommendations": "array of strings",
-                            },
-                        }
-                    ),
-                },
-            ],
-            temperature=0.2,
-            max_output_tokens=850,
-            text={
-                "format": {
-                    "type": "json_object",
-                }
-            },
-        )
-
-        latency_ms = int((time.perf_counter() - started_at) * 1000)
-
-        parsed = json.loads(response.output_text)
-        analysis = clean_analysis(AnalysisPayload(**parsed))
-
-        usage = response.usage
-        tokens_in = usage.input_tokens if usage else 0
-        tokens_out = usage.output_tokens if usage else 0
-        total_tokens = usage.total_tokens if usage else tokens_in + tokens_out
-
-        estimated_cost_usd = (
-            tokens_in * 0.150 / 1_000_000
-            + tokens_out * 0.600 / 1_000_000
-        )
-
-        metadata = AiRunMetadata(
-            endpoint="/analyze",
-            model=OPENAI_MODEL,
-            prompt_version=payload.prompt_version,
-            latency_ms=latency_ms,
-            tokens_in=tokens_in,
-            tokens_out=tokens_out,
-            total_tokens=total_tokens,
-            status="SUCCESS",
-            estimated_cost_usd=estimated_cost_usd,
-        )
-
-        return AnalyzeResponse(
-            analysis=analysis,
-            metadata=metadata,
-            evidence=SkillEvidence(),
-        )
-
-    except (json.JSONDecodeError, ValidationError) as error:
-        latency_ms = int((time.perf_counter() - started_at) * 1000)
-
-        raise HTTPException(
-            status_code=502,
-            detail={
-                "message": "Model returned invalid structured output",
-                "error": str(error),
-                "metadata": {
-                    "endpoint": "/analyze",
-                    "model": OPENAI_MODEL,
-                    "prompt_version": payload.prompt_version,
-                    "latency_ms": latency_ms,
-                    "status": "FAILED",
-                    "error_type": "STRUCTURED_OUTPUT_ERROR",
-                },
-            },
-        )
-
-    except Exception as error:
-        latency_ms = int((time.perf_counter() - started_at) * 1000)
-
-        raise HTTPException(
-            status_code=500,
-            detail={
-                "message": "AI analysis failed",
-                "error": str(error),
-                "metadata": {
-                    "endpoint": "/analyze",
-                    "model": OPENAI_MODEL,
-                    "prompt_version": payload.prompt_version,
-                    "latency_ms": latency_ms,
-                    "status": "FAILED",
-                    "error_type": type(error).__name__,
-                },
-            },
-        )
+        return run_analysis(payload)
+    except LLMCallError as error:
+        raise http_error_from_llm(error, "AI analysis failed") from error

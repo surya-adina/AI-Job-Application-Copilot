@@ -1,19 +1,21 @@
 import json
-import time
 
-from fastapi import APIRouter, HTTPException
-from openai import OpenAI
-from pydantic import BaseModel
+from fastapi import APIRouter
+from pydantic import BaseModel, Field
 
+from llm import LLMCallError, RunMetadata, call_structured
 from prompt_loader import load_prompt
+from routes.errors import http_error_from_llm
 
 router = APIRouter()
-client = OpenAI()
+
+ENDPOINT = "/interview-prep"
 
 
 class InterviewPrepRequest(BaseModel):
-    resume_text: str
-    job_description: str
+    resume_text: str = Field(..., min_length=50)
+    job_description: str = Field(..., min_length=50)
+    prompt_version: str = "interview_prep_v2"
 
 
 class InterviewQuestion(BaseModel):
@@ -22,78 +24,47 @@ class InterviewQuestion(BaseModel):
     suggested_focus: str
 
 
-class InterviewPrepResponse(BaseModel):
+class InterviewPrepPayload(BaseModel):
     technical_questions: list[InterviewQuestion]
     behavioral_questions: list[InterviewQuestion]
     project_questions: list[InterviewQuestion]
     preparation_tips: list[str]
-    metadata: dict
 
 
-def parse_json_output(output: str) -> dict:
-    cleaned = output.strip()
+class InterviewPrepResponse(InterviewPrepPayload):
+    metadata: RunMetadata
 
-    if cleaned.startswith("```json"):
-        cleaned = cleaned.replace("```json", "", 1).strip()
 
-    if cleaned.startswith("```"):
-        cleaned = cleaned.replace("```", "", 1).strip()
+def run_interview_prep(request: InterviewPrepRequest, **llm_kwargs) -> InterviewPrepResponse:
+    result = call_structured(
+        endpoint=ENDPOINT,
+        prompt_version=request.prompt_version,
+        system=load_prompt(request.prompt_version),
+        user=json.dumps(
+            {
+                "resume_text": request.resume_text,
+                "job_description": request.job_description,
+            }
+        ),
+        schema=InterviewPrepPayload,
+        temperature=0.2,
+        max_output_tokens=1200,
+        **llm_kwargs,
+    )
 
-    if cleaned.endswith("```"):
-        cleaned = cleaned[:-3].strip()
-
-    return json.loads(cleaned)
+    prep = result.parsed
+    return InterviewPrepResponse(
+        technical_questions=prep.technical_questions[:5],
+        behavioral_questions=prep.behavioral_questions[:3],
+        project_questions=prep.project_questions[:3],
+        preparation_tips=prep.preparation_tips[:5],
+        metadata=result.metadata,
+    )
 
 
 @router.post("/interview-prep", response_model=InterviewPrepResponse)
 def create_interview_prep(request: InterviewPrepRequest):
     try:
-        start_time = time.time()
-
-        prompt_template = load_prompt("interview_prep_v1")
-
-        prompt = (
-            prompt_template
-            .replace("{resume_text}", request.resume_text)
-            .replace("{job_description}", request.job_description)
-        )
-
-        response = client.responses.create(
-            model="gpt-4o-mini",
-            input=prompt,
-            temperature=0.2,
-            max_output_tokens=900,
-            text={
-                "format": {
-                    "type": "json_object",
-                }
-            },
-        )
-
-        usage = response.usage
-        tokens_in = usage.input_tokens if usage else None
-        tokens_out = usage.output_tokens if usage else None
-        total_tokens = usage.total_tokens if usage else None
-
-        parsed = parse_json_output(response.output_text)
-        latency_ms = int((time.time() - start_time) * 1000)
-
-        return {
-            **parsed,
-            "metadata": {
-                "endpoint": "/interview-prep",
-                "model": "gpt-4o-mini",
-                "prompt_version": "interview_prep_v1",
-                "latency_ms": latency_ms,
-                "status": "SUCCESS",
-                "tokens_in": tokens_in,
-                "tokens_out": tokens_out,
-                "total_tokens": total_tokens,
-            },
-        }
-
-    except Exception as error:
-        raise HTTPException(
-            status_code=500,
-            detail=f"{type(error).__name__}: {error}",
-        )
+        return run_interview_prep(request)
+    except LLMCallError as error:
+        raise http_error_from_llm(error, "Interview prep generation failed") from error
