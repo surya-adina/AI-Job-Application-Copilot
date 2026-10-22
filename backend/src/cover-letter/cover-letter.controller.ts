@@ -4,7 +4,7 @@ import { CoverLetterService } from './cover-letter.service';
 
 type AuthenticatedRequest = {
   user: {
-    sub: string;
+    userId: string;
     email: string;
   };
 };
@@ -21,7 +21,7 @@ export class CoverLetterController {
   ) {
     return this.coverLetterService.getForApplication(
       applicationId,
-      req.user.sub,
+      req.user.userId,
     );
   }
 
@@ -32,7 +32,7 @@ export class CoverLetterController {
   ) {
     return this.coverLetterService.createForApplication(
       applicationId,
-      req.user.sub,
+      req.user.userId,
     );
   }
 }

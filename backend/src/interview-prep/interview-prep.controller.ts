@@ -4,7 +4,7 @@ import { InterviewPrepService } from './interview-prep.service';
 
 type AuthenticatedRequest = {
   user: {
-    sub: string;
+    userId: string;
     email: string;
   };
 };
@@ -21,7 +21,7 @@ export class InterviewPrepController {
   ) {
     return this.interviewPrepService.getForApplication(
       applicationId,
-      req.user.sub,
+      req.user.userId,
     );
   }
 
@@ -32,7 +32,7 @@ export class InterviewPrepController {
   ) {
     return this.interviewPrepService.createForApplication(
       applicationId,
-      req.user.sub,
+      req.user.userId,
     );
   }
 }
