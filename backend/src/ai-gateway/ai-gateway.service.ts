@@ -17,19 +17,30 @@ type AnalysisPayload = {
   recommendations: string[];
 };
 
+export type SkillDecision = {
+  skill: string;
+  priority: 'required' | 'preferred';
+  present: boolean;
+  basis: string;
+  evidence: string | null;
+};
+
 export type SkillEvidence = {
+  mode: string;
   resume_skills: string[];
   required_skills: string[];
   preferred_skills: string[];
   missing_required_skills: string[];
   missing_preferred_skills: string[];
   semantic_matches: { job_skill: string; resume_skill: string; similarity: number }[];
+  skills: SkillDecision[];
 };
 
 export type AnalyzeResponse = {
   analysis: AnalysisPayload;
   metadata: AiRunMetadata;
   evidence: SkillEvidence;
+  runs: AiRunMetadata[];
 };
 
 export type CoverLetterResponse = {

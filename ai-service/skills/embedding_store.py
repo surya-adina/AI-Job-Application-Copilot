@@ -1,47 +1,47 @@
+"""Postgres/pgvector access for skill-name embeddings.
+
+Only skill names are stored. Resume sentences are embedded on the fly and
+compared in SQL as query vectors, never persisted.
+"""
+
 import os
+
 import psycopg
-from dotenv import load_dotenv
 
-load_dotenv()
 
-def get_connection():
+def get_connection() -> psycopg.Connection:
     database_url = os.getenv("DATABASE_URL")
     if not database_url:
         raise RuntimeError("DATABASE_URL is not configured")
 
-    return psycopg.connect(database_url)
+    return psycopg.connect(database_url, autocommit=True)
 
-def save_skill_embedding(skill: str, embedding: list[float]) -> None:
-    vector_value = "[" + ",".join(str(value) for value in embedding) + "]"
 
-    with get_connection() as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                INSERT INTO "SkillEmbedding" ("id", "skill", "embedding")
-                VALUES (gen_random_uuid(), %s, %s::vector)
-                ON CONFLICT ("skill")
-                DO UPDATE SET "embedding" = EXCLUDED."embedding"
-                """,
-                (skill, vector_value),
-            )
+def to_vector_literal(embedding: list[float]) -> str:
+    return "[" + ",".join(repr(value) for value in embedding) + "]"
 
-def get_skill_embedding(skill: str) -> list[float] | None:
-    with get_connection() as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                SELECT "embedding"::text
-                FROM "SkillEmbedding"
-                WHERE "skill" = %s
-                """,
-                (skill,),
-            )
 
-            row = cursor.fetchone()
+def stored_skills(connection: psycopg.Connection, skills: list[str]) -> set[str]:
+    with connection.cursor() as cursor:
+        cursor.execute(
+            """
+            SELECT "skill"
+            FROM "SkillEmbedding"
+            WHERE "skill" = ANY(%s) AND "embedding" IS NOT NULL
+            """,
+            (skills,),
+        )
+        return {row[0] for row in cursor.fetchall()}
 
-    if not row:
-        return None
 
-    vector_text = row[0].strip("[]")
-    return [float(value) for value in vector_text.split(",")]
+def save_skill_embeddings(connection: psycopg.Connection, vectors: dict[str, list[float]]) -> None:
+    with connection.cursor() as cursor:
+        cursor.executemany(
+            """
+            INSERT INTO "SkillEmbedding" ("id", "skill", "embedding")
+            VALUES (gen_random_uuid(), %s, %s::vector)
+            ON CONFLICT ("skill")
+            DO UPDATE SET "embedding" = EXCLUDED."embedding"
+            """,
+            [(skill, to_vector_literal(vector)) for skill, vector in vectors.items()],
+        )

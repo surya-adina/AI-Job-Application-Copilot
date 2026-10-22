@@ -1,4 +1,5 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AiGatewayService } from '../ai-gateway/ai-gateway.service';
 import { AiRunsService } from '../ai-gateway/ai-runs.service';
@@ -49,6 +50,7 @@ export class AnalysesService {
       suggestions: {
         recommendations: matchReport.analysis.recommendations,
       },
+      evidence: matchReport.evidence as Prisma.InputJsonValue,
     };
 
     return this.prisma.analysis.upsert({

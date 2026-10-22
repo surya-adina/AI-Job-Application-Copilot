@@ -89,8 +89,11 @@ export class AiRunsService {
     });
   }
 
-  /** Call the ai-service and record the run either way. */
-  async track<T extends { metadata: AiRunMetadata }>(
+  /**
+   * Call the ai-service and record the run either way. Responses that made
+   * more than one LLM call list the extra calls in `runs`; each gets a row.
+   */
+  async track<T extends { metadata: AiRunMetadata; runs?: AiRunMetadata[] }>(
     userId: string,
     endpoint: string,
     call: () => Promise<T>,
@@ -103,6 +106,9 @@ export class AiRunsService {
       throw error;
     }
     await this.record(userId, result.metadata);
+    for (const run of result.runs ?? []) {
+      await this.record(userId, run);
+    }
     return result;
   }
 }

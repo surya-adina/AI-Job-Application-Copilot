@@ -3,27 +3,267 @@
     "id": "ai_backend_strong_match",
     "resume_text": "Software engineer with experience in Python, FastAPI, PostgreSQL, Docker, OpenAI APIs, prompt engineering, evaluation pipelines, observability, and vector search.",
     "job_description": "Required Qualifications: Python, FastAPI, PostgreSQL, Docker, LLM APIs, Prompt Engineering, AI Evaluation. Preferred Qualifications: AWS, Kubernetes, pgvector, Vector Search, RAG, Production AI Infrastructure, Observability.",
-    "expected_required_matches": ["Python", "FastAPI", "PostgreSQL", "Docker", "LLM", "Prompt Engineering", "Evaluation"],
+    "expected_required_matches": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "Docker",
+      "LLM",
+      "Prompt Engineering",
+      "Evaluation"
+    ],
     "expected_required_missing": [],
-    "expected_preferred_matches": ["Vector Search", "Observability"],
-    "expected_preferred_missing": ["AWS", "Kubernetes", "pgvector", "RAG"]
+    "expected_preferred_matches": [
+      "Vector Search",
+      "Observability"
+    ],
+    "expected_preferred_missing": [
+      "AWS",
+      "Kubernetes",
+      "pgvector",
+      "RAG"
+    ]
   },
   {
     "id": "frontend_gap_backend_role",
     "resume_text": "Frontend engineer with experience in React, Next.js, TypeScript, JavaScript, Tailwind CSS, and UI component development.",
     "job_description": "Required Qualifications: Python, FastAPI, PostgreSQL, Docker. Preferred Qualifications: AWS, Kubernetes, Redis.",
     "expected_required_matches": [],
-    "expected_required_missing": ["Python", "FastAPI", "PostgreSQL", "Docker"],
+    "expected_required_missing": [
+      "Python",
+      "FastAPI",
+      "PostgreSQL",
+      "Docker"
+    ],
     "expected_preferred_matches": [],
-    "expected_preferred_missing": ["AWS", "Kubernetes", "Redis"]
+    "expected_preferred_missing": [
+      "AWS",
+      "Kubernetes",
+      "Redis"
+    ]
   },
   {
     "id": "alias_match_case",
     "resume_text": "Built backend systems using Postgres, Node, TS, containerized services, and OpenAI APIs.",
     "job_description": "Required Qualifications: PostgreSQL, Node.js, TypeScript, Docker, LLM APIs.",
-    "expected_required_matches": ["PostgreSQL", "Node.js", "TypeScript", "Docker", "LLM"],
+    "expected_required_matches": [
+      "PostgreSQL",
+      "Node.js",
+      "TypeScript",
+      "Docker",
+      "LLM"
+    ],
     "expected_required_missing": [],
     "expected_preferred_matches": [],
     "expected_preferred_missing": []
+  },
+  {
+    "id": "eks_counts_as_kubernetes",
+    "resume_text": "Platform engineer. Ran production workloads on AWS EKS with Helm charts, wrote Terraform modules for VPCs, and maintained CI with GitHub Actions.",
+    "job_description": "Required Qualifications: Kubernetes, Terraform, AWS. Preferred Qualifications: Ansible, Prometheus.",
+    "expected_required_matches": [
+      "Kubernetes",
+      "Terraform",
+      "AWS"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "Ansible",
+      "Prometheus"
+    ]
+  },
+  {
+    "id": "mysql_is_not_postgresql",
+    "resume_text": "Backend developer building PHP and Laravel applications on MySQL, with Redis caching for session data.",
+    "job_description": "Required Qualifications: PHP, PostgreSQL, Redis. Preferred Qualifications: Docker.",
+    "expected_required_matches": [
+      "PHP",
+      "Redis"
+    ],
+    "expected_required_missing": [
+      "PostgreSQL"
+    ],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "Docker"
+    ]
+  },
+  {
+    "id": "react_is_not_vue",
+    "resume_text": "Frontend engineer who built single-page dashboards in React with Redux and TypeScript, covered by Jest unit tests.",
+    "job_description": "Requirements: Vue.js, TypeScript, Jest. Nice to have: GraphQL.",
+    "expected_required_matches": [
+      "TypeScript",
+      "Jest"
+    ],
+    "expected_required_missing": [
+      "Vue.js"
+    ],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "GraphQL"
+    ]
+  },
+  {
+    "id": "data_analyst_full_match",
+    "resume_text": "Data analyst. Wrote SQL in Snowflake, built Tableau dashboards for the sales team, ran A/B tests on the checkout flow, and automated weekly reports with Python and pandas.",
+    "job_description": "Required: SQL, Tableau, A/B Testing, Python. Preferred: dbt, Airflow.",
+    "expected_required_matches": [
+      "SQL",
+      "Tableau",
+      "A/B Testing",
+      "Python"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "dbt",
+      "Airflow"
+    ]
+  },
+  {
+    "id": "tensorflow_is_not_pytorch",
+    "resume_text": "ML engineer. Trained image classification models in TensorFlow using Python, served them with FastAPI, and tracked experiments in MLflow.",
+    "job_description": "Required: PyTorch, Python, MLflow. Preferred: Kubernetes, Computer Vision.",
+    "expected_required_matches": [
+      "Python",
+      "MLflow"
+    ],
+    "expected_required_missing": [
+      "PyTorch"
+    ],
+    "expected_preferred_matches": [
+      "Computer Vision"
+    ],
+    "expected_preferred_missing": [
+      "Kubernetes"
+    ]
+  },
+  {
+    "id": "course_familiarity_is_not_experience",
+    "resume_text": "Java developer building Spring Boot microservices for a payments platform. Familiar with Kafka concepts from an online course; no production use.",
+    "job_description": "Required Qualifications: Java, Spring Boot, Kafka. Preferred Qualifications: Microservices.",
+    "expected_required_matches": [
+      "Java",
+      "Spring Boot"
+    ],
+    "expected_required_missing": [
+      "Kafka"
+    ],
+    "expected_preferred_matches": [
+      "Microservices"
+    ],
+    "expected_preferred_missing": []
+  },
+  {
+    "id": "go_as_ordinary_word",
+    "resume_text": "Go-to engineer for on-call incidents. Builds Python and Django services and is ready to go deeper into infrastructure work.",
+    "job_description": "Required: Python, Django. Preferred: Go.",
+    "expected_required_matches": [
+      "Python",
+      "Django"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "Go"
+    ]
+  },
+  {
+    "id": "hipaa_healthcare_backend",
+    "resume_text": "Built HIPAA-compliant patient intake APIs in Node.js and PostgreSQL at a telehealth startup.",
+    "job_description": "Required: Node.js, PostgreSQL, HIPAA. Preferred: AWS, FHIR.",
+    "expected_required_matches": [
+      "Node.js",
+      "PostgreSQL",
+      "HIPAA"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "AWS",
+      "FHIR"
+    ]
+  },
+  {
+    "id": "google_cloud_alias",
+    "resume_text": "Deployed services to Google Cloud Run and maintained BigQuery reporting pipelines.",
+    "job_description": "Required: GCP, BigQuery. Preferred: Terraform.",
+    "expected_required_matches": [
+      "GCP",
+      "BigQuery"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "Terraform"
+    ]
+  },
+  {
+    "id": "either_or_alternatives",
+    "resume_text": "Python developer building services that consume RabbitMQ queues, containerized with Docker.",
+    "job_description": "Required: Python, and either Kafka or RabbitMQ. Preferred: Docker.",
+    "expected_required_matches": [
+      "Python",
+      "RabbitMQ"
+    ],
+    "expected_required_missing": [
+      "Kafka"
+    ],
+    "expected_preferred_matches": [
+      "Docker"
+    ],
+    "expected_preferred_missing": []
+  },
+  {
+    "id": "ci_from_jenkins_wording",
+    "resume_text": "QA automation engineer writing Cypress and Selenium suites in JavaScript, run on every commit through Jenkins CI.",
+    "job_description": "Required: Playwright, JavaScript, CI/CD. Preferred: Cypress.",
+    "expected_required_matches": [
+      "JavaScript",
+      "CI/CD"
+    ],
+    "expected_required_missing": [
+      "Playwright"
+    ],
+    "expected_preferred_matches": [
+      "Cypress"
+    ],
+    "expected_preferred_missing": []
+  },
+  {
+    "id": "llm_app_without_python_named",
+    "resume_text": "Built RAG chatbots with LangChain and Pinecone on top of OpenAI APIs, and wrote LLM evals to score answer quality.",
+    "job_description": "Required: LLM, RAG, Evaluation, Python. Preferred: LangGraph, Fine-Tuning.",
+    "expected_required_matches": [
+      "LLM",
+      "RAG",
+      "Evaluation"
+    ],
+    "expected_required_missing": [
+      "Python"
+    ],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "LangGraph",
+      "Fine-Tuning"
+    ]
+  },
+  {
+    "id": "sre_observability_stack",
+    "resume_text": "SRE maintaining GitHub Actions deployment pipelines, Prometheus alerting with Grafana dashboards, and Linux server administration.",
+    "job_description": "Required: CI/CD, Linux, Prometheus. Preferred: Datadog, Kubernetes.",
+    "expected_required_matches": [
+      "CI/CD",
+      "Linux",
+      "Prometheus"
+    ],
+    "expected_required_missing": [],
+    "expected_preferred_matches": [],
+    "expected_preferred_missing": [
+      "Datadog",
+      "Kubernetes"
+    ]
   }
 ]
