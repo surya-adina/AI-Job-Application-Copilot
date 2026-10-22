@@ -1,12 +1,14 @@
 import { ConflictException, Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AiGatewayService } from '../ai-gateway/ai-gateway.service';
+import { AiRunsService } from '../ai-gateway/ai-runs.service';
 
 @Injectable()
 export class AnalysesService {
   constructor(
     private prisma: PrismaService,
     private aiGateway: AiGatewayService,
+    private readonly aiRuns: AiRunsService,
   ) {}
 
   async createForApplication(userId: string, applicationId: string) {
@@ -30,53 +32,13 @@ export class AnalysesService {
       throw new ConflictException('Application must have a resume before analysis');
     }
 
-    let matchReport;
-
-    try {
-      matchReport = await this.aiGateway.analyze({
-        resume_text: application.resume.rawText,
+    const resumeText = application.resume.rawText;
+    const matchReport = await this.aiRuns.track(userId, '/analyze', () =>
+      this.aiGateway.analyze({
+        resume_text: resumeText,
         job_description: application.job.jdText,
-      });
-    } catch (error) {
-      await this.prisma.aiRun.create({
-        data: {
-          userId,
-          endpoint: '/analyze',
-          model: 'unknown',
-          promptVersion: 'unknown',
-          tokensIn: 0,
-          tokensOut: 0,
-          totalTokens: 0,
-          latencyMs: 0,
-          retries: 0,
-          status: 'FAILED',
-          errorType:
-          error instanceof Error && 'code' in error && error.code === 'ECONNREFUSED'
-            ? 'AI_SERVICE_UNAVAILABLE'
-            : error instanceof Error
-              ? error.name
-              : 'UNKNOWN_ERROR',
-        },
-      });
-
-      throw error;
-    }
-
-    await this.prisma.aiRun.create({
-      data: {
-        userId,
-        endpoint: matchReport.metadata.endpoint,
-        model: matchReport.metadata.model,
-        promptVersion: matchReport.metadata.prompt_version,
-        tokensIn: matchReport.metadata.tokens_in,
-        tokensOut: matchReport.metadata.tokens_out,
-        totalTokens: matchReport.metadata.total_tokens,
-        latencyMs: matchReport.metadata.latency_ms,
-        retries: 0,
-        status: matchReport.metadata.status,
-        estimatedCostUsd: matchReport.metadata.estimated_cost_usd ?? null,
-      },
-    });
+      }),
+    );
 
     const analysisData = {
       score: matchReport.analysis.score,

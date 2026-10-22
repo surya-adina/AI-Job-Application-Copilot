@@ -2,12 +2,14 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AiGatewayService } from '../ai-gateway/ai-gateway.service';
+import { AiRunsService } from '../ai-gateway/ai-runs.service';
 
 @Injectable()
 export class ResumeReviewService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly aiGateway: AiGatewayService,
+    private readonly aiRuns: AiRunsService,
   ) {}
 
   async getForApplication(applicationId: string, userId: string) {
@@ -61,25 +63,30 @@ export class ResumeReviewService {
       throw new NotFoundException('Run analysis before requesting resume review');
     }
 
-    const review = await this.aiGateway.createResumeReview({
-      resumeText: application.resume.rawText,
-      jobDescription: application.job.jdText,
-      analysis: {
-        score: application.analysis.score,
-        matchedSkills: application.analysis.matchedSkills,
-        missingSkills: application.analysis.missingSkills,
-        strengths: application.analysis.strengths,
-        weaknesses: application.analysis.weaknesses,
-        suggestions: application.analysis.suggestions,
-      },
-      evidence: {
-        matchedSkills: application.analysis.matchedSkills,
-        missingSkills: application.analysis.missingSkills,
-        strengths: application.analysis.strengths,
-        weaknesses: application.analysis.weaknesses,
-        score: application.analysis.score,
-      },
-    });
+    const resume = application.resume;
+    const analysis = application.analysis;
+
+    const review = await this.aiRuns.track(userId, '/resume-review', () =>
+      this.aiGateway.createResumeReview({
+        resumeText: resume.rawText,
+        jobDescription: application.job.jdText,
+        analysis: {
+          score: analysis.score,
+          matchedSkills: analysis.matchedSkills,
+          missingSkills: analysis.missingSkills,
+          strengths: analysis.strengths,
+          weaknesses: analysis.weaknesses,
+          suggestions: analysis.suggestions,
+        },
+        evidence: {
+          matchedSkills: analysis.matchedSkills,
+          missingSkills: analysis.missingSkills,
+          strengths: analysis.strengths,
+          weaknesses: analysis.weaknesses,
+          score: analysis.score,
+        },
+      }),
+    );
 
     const savedReview = await this.prisma.resumeReview.upsert({
       where: {

@@ -1,111 +1,96 @@
-import re
-import time
+import json
+
 from fastapi import APIRouter
-from openai import OpenAI
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from llm import LLMCallError, RunMetadata, call_structured
 from prompt_loader import load_prompt
+from routes.errors import http_error_from_llm
+from skills.grounding import find_placeholders, find_unsupported_quotes
 
 router = APIRouter()
-client = OpenAI()
 
-def clean_cover_letter(content: str) -> str:
-    lines = content.strip().splitlines()
-    cleaned_lines = []
+ENDPOINT = "/cover-letter"
+GREETING = "Dear Hiring Manager,"
 
-    blocked_lines = {
-        "sincerely",
-        "sincerely,",
-        "best regards",
-        "best regards,",
-        "regards",
-        "regards,",
-    }
-
-    for line in lines:
-        stripped = line.strip()
-        normalized = stripped.lower()
-
-        if not stripped:
-            cleaned_lines.append("")
-            continue
-
-        if normalized in blocked_lines:
-            continue
-
-        if "[" in stripped and "]" in stripped:
-            continue
-
-        cleaned_lines.append(stripped)
-
-    replacements = {
-        "Myfamiliarity": "My familiarity",
-        "workingwith": "working with",
-        "reliabilityand": "reliability and",
-        "inareas": "in areas",
-        "tooptimizing": "to optimizing",
-        "tothe": "to the",
-        "Go Lang": "Go",
-        "Go lang": "Go",
-        "go lang": "Go",
-        "I am writing to express my interest in": "I am excited to apply for",
-    }
-
-    cleaned_content = "\n".join(cleaned_lines).strip()
-
-    for wrong, fixed in replacements.items():
-        cleaned_content = cleaned_content.replace(wrong, fixed)
-
-    cleaned_content = re.sub(r"([.!?])([A-Z])", r"\1 \2", cleaned_content)
-    
-    return cleaned_content
 
 class CoverLetterRequest(BaseModel):
-    resume_text: str
-    job_description: str
+    resume_text: str = Field(..., min_length=50)
+    job_description: str = Field(..., min_length=50)
+    prompt_version: str = "cover_letter_v2"
+
+
+class CoverLetterParagraph(BaseModel):
+    text: str
+    supporting_resume_quotes: list[str]
+
+
+class CoverLetterDraft(BaseModel):
+    paragraphs: list[CoverLetterParagraph]
+    closing_sentence: str
+
+
+class CoverLetterGrounding(BaseModel):
+    """Deterministic checks on the draft. unsupported_quotes are 'evidence'
+    the model claimed to copy from the resume that is not actually there."""
+
+    quotes_checked: int
+    unsupported_quotes: list[str]
+    placeholders: list[str]
 
 
 class CoverLetterResponse(BaseModel):
     content: str
-    metadata: dict
+    paragraphs: list[CoverLetterParagraph]
+    grounding: CoverLetterGrounding
+    metadata: RunMetadata
+
+
+def assemble_letter(draft: CoverLetterDraft) -> str:
+    body = [paragraph.text.strip() for paragraph in draft.paragraphs if paragraph.text.strip()]
+    return "\n\n".join([GREETING, *body, draft.closing_sentence.strip()])
+
+
+def check_grounding(draft: CoverLetterDraft, resume_text: str, content: str) -> CoverLetterGrounding:
+    quotes = [quote for paragraph in draft.paragraphs for quote in paragraph.supporting_resume_quotes]
+    return CoverLetterGrounding(
+        quotes_checked=len(quotes),
+        unsupported_quotes=find_unsupported_quotes(quotes, resume_text),
+        placeholders=find_placeholders(content),
+    )
+
+
+def run_cover_letter(request: CoverLetterRequest, **llm_kwargs) -> CoverLetterResponse:
+    result = call_structured(
+        endpoint=ENDPOINT,
+        prompt_version=request.prompt_version,
+        system=load_prompt(request.prompt_version),
+        user=json.dumps(
+            {
+                "resume_text": request.resume_text,
+                "job_description": request.job_description,
+            }
+        ),
+        schema=CoverLetterDraft,
+        temperature=0.3,
+        max_output_tokens=900,
+        **llm_kwargs,
+    )
+
+    draft = result.parsed
+    content = assemble_letter(draft)
+
+    return CoverLetterResponse(
+        content=content,
+        paragraphs=draft.paragraphs,
+        grounding=check_grounding(draft, request.resume_text, content),
+        metadata=result.metadata,
+    )
 
 
 @router.post("/cover-letter", response_model=CoverLetterResponse)
 def create_cover_letter(request: CoverLetterRequest):
-    start_time = time.time()
-
-    prompt_template = load_prompt("cover_letter_v1")
-
-    prompt = prompt_template.format(
-        resume_text=request.resume_text,
-        job_description=request.job_description,
-    )
-
-    response = client.responses.create(
-    model="gpt-4o-mini",
-    input=prompt,
-    temperature=0.2,
-    max_output_tokens=500,
-)
-
-    content = clean_cover_letter(response.output_text)
-
-    latency_ms = int((time.time() - start_time) * 1000)
-
-    usage = response.usage
-    tokens_in = usage.input_tokens if usage else None
-    tokens_out = usage.output_tokens if usage else None
-    total_tokens = usage.total_tokens if usage else None
-    
-    return {
-        "content": content,
-        "metadata": {
-            "endpoint": "/cover-letter",
-            "model": "gpt-4o-mini",
-            "prompt_version": "cover_letter_v1",
-            "latency_ms": latency_ms,
-            "status": "SUCCESS",
-            "tokens_in": tokens_in,
-            "tokens_out": tokens_out,
-            "total_tokens": total_tokens,
-        },
-    }
+    try:
+        return run_cover_letter(request)
+    except LLMCallError as error:
+        raise http_error_from_llm(error, "Cover letter generation failed") from error

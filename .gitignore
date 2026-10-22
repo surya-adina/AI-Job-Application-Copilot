@@ -12,6 +12,7 @@
 
 # Python
 __pycache__/
+.pytest_cache/
 *.pyc
 ai-service/.venv/
 ai-service/__pycache__
