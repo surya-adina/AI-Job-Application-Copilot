@@ -86,6 +86,24 @@ export type ResumeReviewResponse = {
   metadata: AiRunMetadata;
 };
 
+export type AgentStepPayload = {
+  node: string;
+  status: string;
+  latency_ms: number;
+  runs: AiRunMetadata[];
+  detail: unknown;
+  error?: { type: string; message: string } | null;
+};
+
+export type AgentRunResponse = {
+  thread_id: string;
+  status: 'awaiting_review' | 'completed' | 'rejected' | 'failed';
+  steps: AgentStepPayload[];
+  review: Record<string, unknown> | null;
+  final_text: string | null;
+  error: { type: string; message: string } | null;
+};
+
 @Injectable()
 export class AiGatewayService {
   private readonly aiServiceUrl = process.env.AI_SERVICE_URL ?? 'http://localhost:8000';
@@ -156,6 +174,38 @@ export class AiGatewayService {
       ),
     );
 
+    return response.data;
+  }
+
+  async startAgentRun(input: {
+    threadId: string;
+    resumeId: string;
+    resumeText: string;
+    jobDescription: string;
+    instructions: string;
+  }): Promise<AgentRunResponse> {
+    const response = await this.httpService.axiosRef.post<AgentRunResponse>(
+      `${this.aiServiceUrl}/agent/runs`,
+      {
+        thread_id: input.threadId,
+        task: 'cover_letter',
+        resume_id: input.resumeId,
+        resume_text: input.resumeText,
+        job_description: input.jobDescription,
+        instructions: input.instructions,
+      },
+    );
+    return response.data;
+  }
+
+  async resumeAgentRun(
+    threadId: string,
+    decision: { action: 'approve' | 'edit' | 'reject'; text?: string },
+  ): Promise<AgentRunResponse> {
+    const response = await this.httpService.axiosRef.post<AgentRunResponse>(
+      `${this.aiServiceUrl}/agent/runs/${encodeURIComponent(threadId)}/resume`,
+      decision,
+    );
     return response.data;
   }
 }

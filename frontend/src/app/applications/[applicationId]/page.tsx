@@ -21,6 +21,12 @@ const actions = [
     available: true,
   },
   {
+    title: 'Cover Letter Agent',
+    description: 'Let the agent draft a fact-checked cover letter from your resume, then approve, edit or reject it.',
+    href: 'agent',
+    available: true,
+  },
+  {
     title: 'View / Generate Cover Letter',
     description: 'Create or view a tailored cover letter using the resume and job context.',
     href: 'cover-letter',

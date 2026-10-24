@@ -14,9 +14,10 @@ import { ResumeReviewModule } from './resume-review/resume-review.module';
 import { CoverLetterModule } from './cover-letter/cover-letter.module';
 import { InterviewPrepModule } from './interview-prep/interview-prep.module';
 import { HealthModule } from './health/health.module';
+import { AgentRunsModule } from './agent-runs/agent-runs.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, AuthModule, ResumesModule, JobsModule, ApplicationsModule, AnalysesModule, AiGatewayModule, ResumeReviewModule, CoverLetterModule, InterviewPrepModule, HealthModule],
+  imports: [PrismaModule, UsersModule, AuthModule, ResumesModule, JobsModule, ApplicationsModule, AnalysesModule, AiGatewayModule, ResumeReviewModule, CoverLetterModule, InterviewPrepModule, HealthModule, AgentRunsModule],
   controllers: [AppController, AuthController],
   providers: [AppService],
 })

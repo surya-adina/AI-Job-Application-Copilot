@@ -11,6 +11,7 @@ The AI features are built to be checked rather than trusted. Every model call re
 - 📝 **Resume review.** Prioritized suggestions grounded in the analysis and skill evidence.
 - ✉️ **Cover letter.** Three paragraphs, each with the resume quotes it relies on. Quotes that do not appear in the resume are flagged.
 - 🎤 **Interview prep.** Technical, behavioral and project questions built from the candidate's own resume.
+- 🕵️ **Cover letter agent.** Plans the letter, retrieves supporting resume lines, drafts, fact-checks every claim, revises what fails, then pauses for you to approve, edit or reject.
 - 📁 **Application tracking.** Resumes (text or PDF upload), jobs, applications, status and notes.
 
 ## 🏗️ Architecture
@@ -65,6 +66,28 @@ Results (gpt-4.1-mini, 3 repeats, pooled micro F1 over required/preferred × mat
 
 Verification did not beat LLM-only on holdout, so the default stays `SKILL_MATCH_MODE=llm`. On holdout the two modes differ by one labeled skill out of 121: the verifier rejected "GCP" for a resume that mentions only "GKE", and it did not catch either of the LLM's two errors. On data this size the difference is not meaningful in either direction. The harness is in place to re-test the verifier as the dataset grows.
 
+## 🕵️ Cover letter agent
+
+A LangGraph workflow in [`ai-service/agent/graph.py`](ai-service/agent/graph.py):
+
+```mermaid
+flowchart LR
+    plan --> gather_evidence --> draft --> verify
+    verify -- "claim rejected,<br/>revisions left" --> revise --> verify
+    verify -- "all supported or<br/>budget used" --> human_review["human review<br/>(interrupt)"]
+    human_review --> done(["approve / edit / reject"])
+```
+
+- **Typed tools.** Each step calls tools from one registry ([`ai-service/tools/`](ai-service/tools/)): `match_skills`, `search_resume_evidence` (pgvector search over resume chunks), `draft_section` and `verify_claims`. The same tools are exposed at `GET /tools` and `POST /tools/{name}`, alongside an SSRF-safe `fetch_job_posting` and `extract_requirements`.
+- **Fact-checking.** [`skills/claim_verifier.py`](ai-service/skills/claim_verifier.py) rejects a claim unless its cited resume lines exist, are not hedged ("currently learning"), and contain every skill and number the claim states. It also checks the paragraph text itself, so a statement the model left out of its claim list is still caught. A rejected paragraph is redrafted with the verifier's reasons as feedback.
+- **Bounded.** At most two revisions per paragraph and a hard step limit. Paragraphs that still fail are shown to the reviewer as unresolved rather than hidden.
+- **Human approval.** The run pauses with `interrupt()` and its state is saved by the LangGraph Postgres checkpointer, so the decision can arrive in a later request. Nothing is saved as the cover letter until the user approves or edits it.
+- **Traces.** Every step is stored as an `AgentStep` (node, latency, detail), and every LLM call as an `AiRun` linked to its step.
+
+Live runs on a sample resume and job posting took 8–14 seconds and about $0.004 with gpt-4.1-mini.
+
+The claim verifier was measured on 40 hand-labeled claims ([`evals/claim_verification_eval.py`](ai-service/evals/claim_verification_eval.py)): rejection precision 0.78 and recall 0.78. It catches inflated numbers, swapped tools and hedged sources; it misses invented qualities with no skill or number in them ("fault-tolerant") and is strict about implied skills. The labels and rules come from the same author, so treat this as behaviour on known patterns rather than a generalization measure.
+
 ## 🚀 Running locally
 
 **Prerequisites:** Node.js 20+, Python 3.12+, Docker, an OpenAI API key.
@@ -78,6 +101,8 @@ openssl rand -hex 32
 ```bash
 docker run -d --name ajc-postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=ajc \
   -p 5432:5432 pgvector/pgvector:pg16
+# Separate database for agent checkpoints (LangGraph manages its own tables there)
+docker exec ajc-postgres createdb -U postgres ajc_agent
 ```
 
 **2. Backend (http://localhost:4000):**
@@ -127,9 +152,11 @@ cd backend && npx tsc --noEmit && npm run build
 
 ```
 ai-service/
+  agent/          LangGraph cover-letter agent and Postgres checkpointer
   llm/            structured-output client, retries, cost config
-  routes/         /analyze, /cover-letter, /interview-prep, /resume-review
-  skills/         skill matcher, taxonomy, pgvector similarity, grounding checks
+  routes/         AI endpoints, /tools and /agent/runs
+  skills/         skill matcher, claim verifier, resume chunks, SSRF-safe fetch, taxonomy
+  tools/          typed tool registry
   prompts/        versioned prompts and registry
   evals/          labeled datasets and evaluation harnesses
   tests/          pytest suite
@@ -142,7 +169,5 @@ frontend/
 
 ## 🗺️ Roadmap
 
-- 🛠️ **Typed tools:** job-posting fetch (SSRF-safe), requirement extraction, skill matching, resume evidence search with pgvector, and a claim verifier that rejects claims without resume evidence.
-- 🔄 **Agent workflow:** a LangGraph plan → tools → draft → verify → revise loop with step limits, human approval, and per-step traces.
 - 🔌 **MCP server:** the same tools exposed through the Model Context Protocol.
 - 📏 **Agent evals:** task success, tool-call accuracy, unsupported-claim rate with and without the verifier, cost and latency.

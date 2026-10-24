@@ -3,8 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
@@ -25,31 +25,32 @@ model User {
 
   resumes      Resume[]
   jobs         Job[]
-  applications  Application[]
+  applications Application[]
   aiRuns       AiRun[]
+  agentRuns    AgentRun[]
 }
 
 model Resume {
-  id          String  @id @default(uuid())
-  userId      String
-  user         User  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  title       String
-  rawText     String  @db.Text
+  id      String @id @default(uuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  title   String
+  rawText String @db.Text
 
   applications Application[]
   chunks       ResumeChunk[]
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime  @default(now())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
 }
 
 model Job {
-  id          String  @id @default(uuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id        String  @id @default(uuid())
+  userId    String
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   company   String?
   title     String
-  jdText    String   @db.Text
+  jdText    String  @db.Text
   sourceUrl String?
 
   applications Application[]
@@ -59,23 +60,24 @@ model Job {
 }
 
 model Application {
-  id       String @id @default(uuid())
-  userId   String
-  user     User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id     String @id @default(uuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  jobId    String
-  job      Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+  jobId String
+  job   Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
 
   resumeId String?
   resume   Resume? @relation(fields: [resumeId], references: [id], onDelete: SetNull)
 
-  status   ApplicationStatus @default(SAVED)
-  notes    String? @db.Text
+  status ApplicationStatus @default(SAVED)
+  notes  String?           @db.Text
 
-  analysis Analysis?
-  resumeReview ResumeReview?
-  coverLetter CoverLetter?
+  analysis      Analysis?
+  resumeReview  ResumeReview?
+  coverLetter   CoverLetter?
   interviewPrep InterviewPrep?
+  agentRuns     AgentRun[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -89,8 +91,8 @@ model Analysis {
   score         Float
   matchedSkills String[]
   missingSkills String[]
-  strengths     String? @db.Text
-  weaknesses    String? @db.Text
+  strengths     String?  @db.Text
+  weaknesses    String?  @db.Text
   suggestions   Json?
   evidence      Json?
 
@@ -100,7 +102,7 @@ model Analysis {
 model ResumeReview {
   id String @id @default(uuid())
 
-  applicationId String @unique
+  applicationId String      @unique
   application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   summary     String   @db.Text
@@ -115,7 +117,7 @@ model ResumeReview {
 model CoverLetter {
   id String @id @default(uuid())
 
-  applicationId String @unique
+  applicationId String      @unique
   application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   content String @db.Text
@@ -127,7 +129,7 @@ model CoverLetter {
 model InterviewPrep {
   id String @id @default(uuid())
 
-  applicationId String @unique
+  applicationId String      @unique
   application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
 
   technicalQuestions  Json
@@ -140,28 +142,36 @@ model InterviewPrep {
 }
 
 model AiRun {
-  id            String   @id @default(uuid())
+  id String @id @default(uuid())
 
-  userId        String?
-  user          User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId String?
+  user   User?   @relation(fields: [userId], references: [id], onDelete: SetNull)
 
   endpoint      String
   model         String
   promptVersion String
 
-  tokensIn      Int      @default(0)
-  tokensOut     Int      @default(0)
-  totalTokens   Int      @default(0)
+  tokensIn    Int @default(0)
+  tokensOut   Int @default(0)
+  totalTokens Int @default(0)
 
   estimatedCostUsd Decimal? @db.Decimal(10, 6)
-  
-  latencyMs     Int      @default(0)
-  retries       Int      @default(0)
 
-  status        String
-  errorType     String?
+  latencyMs Int @default(0)
+  retries   Int @default(0)
 
-  createdAt     DateTime @default(now())
+  status    String
+  errorType String?
+
+  // Set when the call was made by an agent run step.
+  agentRunId  String?
+  agentRun    AgentRun?  @relation(fields: [agentRunId], references: [id], onDelete: SetNull)
+  agentStepId String?
+  agentStep   AgentStep? @relation(fields: [agentStepId], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+
+  @@index([agentRunId])
 }
 
 // The HNSW index on "embedding" is created in raw SQL
@@ -169,10 +179,10 @@ model AiRun {
 // If `prisma migrate dev` generates DROP INDEX "SkillEmbedding_embedding_idx",
 // delete that line from the generated migration before applying it.
 model SkillEmbedding {
-  id        String   @id @default(uuid())
-  skill     String   @unique
+  id        String                 @id @default(uuid())
+  skill     String                 @unique
   embedding Unsupported("vector")?
-  createdAt DateTime @default(now())
+  createdAt DateTime               @default(now())
 }
 
 // Resume text split into chunks with embeddings, written by the ai-service
@@ -180,17 +190,71 @@ model SkillEmbedding {
 // an exact scan of that resume's rows rather than an HNSW index (HNSW applies
 // the resumeId filter after the nearest-neighbour search and can drop results).
 model ResumeChunk {
-  id          String                 @id @default(uuid())
+  id          String                       @id @default(uuid())
   resumeId    String
-  resume      Resume                 @relation(fields: [resumeId], references: [id], onDelete: Cascade)
+  resume      Resume                       @relation(fields: [resumeId], references: [id], onDelete: Cascade)
   chunkIndex  Int
-  text        String                 @db.Text
+  text        String                       @db.Text
   startOffset Int
   endOffset   Int
   contentHash String
   embedding   Unsupported("vector(1536)")?
-  createdAt   DateTime               @default(now())
+  createdAt   DateTime                     @default(now())
 
   @@unique([resumeId, chunkIndex])
   @@index([resumeId])
+}
+
+enum AgentRunStatus {
+  RUNNING
+  AWAITING_REVIEW
+  COMPLETED
+  REJECTED
+  FAILED
+}
+
+// One run of the cover-letter agent. The ai-service keeps the LangGraph
+// checkpoint (keyed by this id) in its own database; this row is the
+// user-facing record.
+model AgentRun {
+  id            String      @id @default(uuid())
+  userId        String
+  user          User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  applicationId String
+  application   Application @relation(fields: [applicationId], references: [id], onDelete: Cascade)
+
+  task         String
+  status       AgentRunStatus @default(RUNNING)
+  instructions String?        @db.Text
+  review       Json?
+  decision     Json?
+  finalText    String?        @db.Text
+  error        Json?
+
+  steps  AgentStep[]
+  aiRuns AiRun[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([applicationId])
+}
+
+model AgentStep {
+  id         String   @id @default(uuid())
+  agentRunId String
+  agentRun   AgentRun @relation(fields: [agentRunId], references: [id], onDelete: Cascade)
+
+  index     Int
+  node      String
+  status    String
+  latencyMs Int
+  detail    Json?
+  error     Json?
+
+  aiRuns AiRun[]
+
+  createdAt DateTime @default(now())
+
+  @@unique([agentRunId, index])
 }

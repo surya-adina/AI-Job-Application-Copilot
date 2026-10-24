@@ -23,11 +23,17 @@ export class AiRunsService {
 
   constructor(private prisma: PrismaService) {}
 
-  async record(userId: string, metadata: AiRunMetadata) {
+  async record(
+    userId: string,
+    metadata: AiRunMetadata,
+    links: { agentRunId?: string; agentStepId?: string } = {},
+  ) {
     try {
       await this.prisma.aiRun.create({
         data: {
           userId,
+          agentRunId: links.agentRunId,
+          agentStepId: links.agentStepId,
           endpoint: metadata.endpoint,
           model: metadata.model,
           promptVersion: metadata.prompt_version,

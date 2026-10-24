@@ -67,6 +67,17 @@ def extract_known_skills(
     return sorted(found_skills)
 
 
+def skill_mentions(text: str, include_ambiguous: bool = True) -> list[tuple[str, int]]:
+    """(canonical skill, character offset) for every alias occurrence in text."""
+    lowered = text.lower()
+    mentions = []
+    for skill_alias, canonical_name in KNOWN_SKILLS.items():
+        if not include_ambiguous and skill_alias in AMBIGUOUS_ALIASES:
+            continue
+        mentions += [(canonical_name, match.start()) for match in _PATTERNS[skill_alias].finditer(lowered)]
+    return mentions
+
+
 def canonical_skill(name: str) -> str:
     """Map a free-form skill name ("LLM APIs", "Apache Kafka") to its taxonomy
     name when it clearly refers to one known skill; otherwise keep it as given."""

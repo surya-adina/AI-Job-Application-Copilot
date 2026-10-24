@@ -48,5 +48,10 @@
     "status": "active",
     "description": "Drafts one application section (cover letter paragraph, resume bullet, summary, interview answer) from numbered resume evidence, listing each factual claim with the evidence ids that support it.",
     "intended_improvement": "Make every drafted claim traceable to resume chunks so verify_claims can check it."
+  },
+  "agent_plan_v1": {
+    "status": "active",
+    "description": "Plans the cover-letter agent: a goal and a resume evidence query for each of three paragraphs, using matched and missing skills.",
+    "intended_improvement": "Separate planning from writing so each paragraph is drafted from targeted resume evidence."
   }
 }

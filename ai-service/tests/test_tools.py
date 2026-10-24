@@ -318,3 +318,24 @@ def test_resume_search_is_scoped_and_ordered(monkeypatch):
     assert matches[0].text == "Packaged everything with Docker images."
     assert matches[0].similarity == pytest.approx(1.0)
     assert all("different person" not in match.text for match in matches)
+
+
+def test_number_words_match_abbreviations():
+    claim = Claim(text="Built FastAPI services handling 2 million requests a day.", evidence=["Built FastAPI microservices handling 2M requests/day"])
+    assert verify_claim(claim, RESUME).supported
+
+
+def test_negated_gap_statement_is_not_a_skill_claim():
+    claim = Claim(text="I have not yet worked with Kubernetes, but I use Docker.", evidence=["Containerized services with Docker"])
+    assert verify_claim(claim, RESUME).supported
+
+
+def test_unsupported_facts_checks_free_text():
+    from skills.claim_verifier import unsupported_facts
+
+    evidence = ["Built FastAPI microservices handling 2M requests/day for shipment tracking."]
+    assert unsupported_facts("I built FastAPI services handling 2 million requests a day.", evidence) == []
+    assert unsupported_facts("I ran Kafka at 3M requests/day.", evidence) == [
+        "skill_not_in_evidence: Kafka",
+        "number_not_in_evidence: 3M",
+    ]

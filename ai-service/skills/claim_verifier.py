@@ -16,7 +16,7 @@ import re
 
 from pydantic import BaseModel, Field
 
-from skills.extractor import WEAK_CONTEXT_PHRASES, extract_known_skills, hedge_window
+from skills.extractor import WEAK_CONTEXT_PHRASES, extract_known_skills, hedge_window, skill_mentions
 from skills.grounding import normalize_for_match
 
 
@@ -33,7 +33,9 @@ class ClaimVerdict(BaseModel):
     numbers: list[str]
 
 
-NUMBER_PATTERN = re.compile(r"(?<![\w.])\$?\d+(?:[.,]\d+)*(?:\s?(?:%|percent|[kmb]\b|x\b|million|billion))?", re.IGNORECASE)
+NUMBER_PATTERN = re.compile(
+    r"(?<![\w.])\$?\d+(?:[.,]\d+)*(?:\s?(?:%|percent|[kmb]\b|x\b|thousand|million|billion))?", re.IGNORECASE
+)
 
 
 def extract_numbers(text: str) -> list[str]:
@@ -45,10 +47,43 @@ def extract_numbers(text: str) -> list[str]:
     return numbers
 
 
+NUMBER_WORDS = {"thousand": "k", "million": "m", "billion": "b", "percent": "%"}
+
+
 def number_key(value: str) -> str:
-    """'40 %', '40%' and '40 percent' compare equal; so do '2M' and '2 m'."""
-    value = value.lower().replace(",", "").replace("$", "").replace("percent", "%").replace(" ", "")
-    return value
+    """'40 %', '40%' and '40 percent' compare equal; so do '2M', '2 m' and '2 million'."""
+    value = value.lower().replace(",", "").replace("$", "")
+    for word, symbol in NUMBER_WORDS.items():
+        value = value.replace(word, symbol)
+    return value.replace(" ", "")
+
+
+# Phrases in the candidate's own text that mark a skill as a gap, not a claim
+# ("I have not yet worked with Kubernetes").
+NEGATION_PHRASES = [
+    *WEAK_CONTEXT_PHRASES,
+    "not yet",
+    "have not",
+    "haven't",
+    "has not",
+    "hasn't",
+    "not worked with",
+    "eager to learn",
+    "excited to learn",
+]
+
+
+def claimed_skills(text: str) -> list[str]:
+    """Skills the text asserts, skipping mentions in a negated or hedged phrase.
+    Ambiguous aliases ("go", "rag") are skipped so ordinary words are not treated
+    as skill claims."""
+    lowered = text.lower()
+    claimed = set()
+    for skill, start in skill_mentions(text, include_ambiguous=False):
+        window = hedge_window(lowered, start)
+        if not any(phrase in window for phrase in NEGATION_PHRASES):
+            claimed.add(skill)
+    return sorted(claimed)
 
 
 def quote_problem(quote: str, resume_text: str) -> str | None:
@@ -70,9 +105,7 @@ def quote_problem(quote: str, resume_text: str) -> str | None:
 
 
 def verify_claim(claim: Claim, resume_text: str, require_evidence: bool = True) -> ClaimVerdict:
-    # Ambiguous aliases ("go", "rag") are skipped in the claim text so ordinary
-    # words are not treated as skill claims.
-    skills = extract_known_skills(claim.text, ignore_weak_context=False, include_ambiguous=False)
+    skills = claimed_skills(claim.text)
     numbers = extract_numbers(claim.text)
     reasons = []
 
@@ -110,3 +143,19 @@ def skills_missing_from_resume(text: str, resume_text: str) -> list[str]:
         for skill in extract_known_skills(text, ignore_weak_context=False, include_ambiguous=False)
         if skill not in resume_skills
     ]
+
+
+def unsupported_facts(text: str, evidence: list[str]) -> list[str]:
+    """Numbers and asserted skills in free text that none of the evidence states.
+
+    Checks the text itself rather than a model-reported claim list, so a
+    statement the model wrote but did not list as a claim is still caught."""
+    evidence_text = " ".join(evidence)
+    evidence_skills = set(extract_known_skills(evidence_text, ignore_weak_context=False))
+    evidence_numbers = {number_key(value) for value in extract_numbers(evidence_text)}
+
+    problems = [f"skill_not_in_evidence: {skill}" for skill in claimed_skills(text) if skill not in evidence_skills]
+    problems += [
+        f"number_not_in_evidence: {value}" for value in extract_numbers(text) if number_key(value) not in evidence_numbers
+    ]
+    return problems
