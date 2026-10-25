@@ -26,6 +26,7 @@ from __future__ import annotations
 
 import json
 import operator
+import re
 import time
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
@@ -39,7 +40,9 @@ from pydantic import BaseModel
 
 from llm import call_structured
 from prompt_loader import load_prompt
-from skills.claim_verifier import unsupported_facts
+from skills.claim_verifier import supported_by, unsupported_facts
+from skills.extractor import extract_known_skills
+from skills.resume_chunks import chunk_resume
 from tools import ToolContext, invoke
 
 PLAN_PROMPT_VERSION = "agent_plan_v1"
@@ -105,6 +108,32 @@ def _step(node: str, started: float, runs: list | None = None, detail: Any = Non
 def assemble_letter(state: AgentState) -> str:
     paragraphs = [state["drafts"][key]["text"].strip() for key in SECTION_KEYS if key in state.get("drafts", {})]
     return "\n\n".join([GREETING, *paragraphs, CLOSING])
+
+
+ISSUE_PATTERN = re.compile(r"(?:skill|number)_not_in_evidence: [^;\"]+|quote_not_in_resume|quote_is_hedged|no_evidence|unknown evidence id \d+")
+MISSING_SKILL_PATTERN = re.compile(r"skill_not_in_evidence: ([^;\"]+)")
+EVIDENCE_PER_MISSING_SKILL = 2
+
+
+def issue_keys(problems: list[str]) -> set[str]:
+    """The kinds of problem a paragraph has, ignoring how its claims are worded,
+    so two drafts with the same unsupported skill compare equal."""
+    return {issue.strip() for issue in ISSUE_PATTERN.findall(" ".join(problems))}
+
+
+def resume_lines_for_skills(resume_text: str, skills: list[str], known_ids: set[int]) -> dict[str, list[dict]]:
+    """For each skill, resume chunks that state it (outside hedged phrases).
+    Chunk ids match search_resume_evidence, which indexes the same chunks."""
+    chunks = chunk_resume(resume_text)
+    found = {}
+    for skill in skills:
+        matches = [
+            {"id": chunk.index, "text": chunk.text}
+            for chunk in chunks
+            if chunk.index not in known_ids and supported_by(skill, set(extract_known_skills(chunk.text)))
+        ]
+        found[skill] = matches[:EVIDENCE_PER_MISSING_SKILL]
+    return found
 
 
 def failing_sections(state: AgentState) -> list[str]:
@@ -235,18 +264,62 @@ def build_graph(config: AgentConfig | None = None, checkpointer=None):
                 ]
             verification[key] = {"passed": not problems, "problems": problems, "verdicts": verdicts}
 
+        # A revision that leaves the same issues will not be fixed by another
+        # one: stop revising that paragraph and let the reviewer decide.
+        revisions = dict(state.get("revisions", {}))
+        previous = state.get("verification", {})
+        stalled = [
+            key
+            for key, result in verification.items()
+            if not result["passed"]
+            and revisions.get(key, 0) > 0
+            and key in previous
+            and issue_keys(result["problems"]) == issue_keys(previous[key]["problems"])
+        ]
+        for key in stalled:
+            revisions[key] = MAX_REVISIONS
+
         detail = {key: {"passed": value["passed"], "problems": value["problems"]} for key, value in verification.items()}
-        return {"verification": verification, "trace": [_step("verify", started, detail=detail)], "steps": 1}
+        if stalled:
+            detail["stopped_no_progress"] = stalled
+        return {
+            "verification": verification,
+            "revisions": revisions,
+            "trace": [_step("verify", started, detail=detail)],
+            "steps": 1,
+        }
 
     def revise(state: AgentState) -> dict:
         started = time.perf_counter()
         keys = [key for key in failing_sections(state) if state["revisions"][key] < MAX_REVISIONS]
-        drafts, runs = _draft_many(state, [(key, state["verification"][key]["problems"]) for key in keys])
+
+        # Before redrafting, look up each unsupported skill in the whole resume:
+        # the section's search may simply have missed the line that states it.
+        evidence = {key: list(chunks) for key, chunks in state["evidence"].items()}
+        jobs, added = [], {}
+        for key in keys:
+            problems = state["verification"][key]["problems"]
+            skills = sorted(set(MISSING_SKILL_PATTERN.findall(" ".join(problems))))
+            known_ids = {chunk["id"] for chunk in evidence[key]}
+            feedback = list(problems)
+
+            for skill, lines in resume_lines_for_skills(state["resume_text"], skills, known_ids).items():
+                if lines:
+                    evidence[key] += lines
+                    added.setdefault(key, []).extend(line["id"] for line in lines)
+                    ids = ", ".join(str(line["id"]) for line in lines)
+                    feedback.append(f"The resume does state {skill}: evidence id {ids} was added. Cite it for that claim.")
+                else:
+                    feedback.append(f"The resume never mentions {skill}. Remove it from the paragraph.")
+            jobs.append((key, feedback))
+
+        drafts, runs = _draft_many({**state, "evidence": evidence}, jobs)
         revisions = {**state["revisions"], **{key: state["revisions"][key] + 1 for key in keys}}
         return {
             "drafts": drafts,
+            "evidence": evidence,
             "revisions": revisions,
-            "trace": [_step("revise", started, runs, {"sections": keys, "revisions": revisions})],
+            "trace": [_step("revise", started, runs, {"sections": keys, "revisions": revisions, "evidence_added": added})],
             "steps": 1,
         }
 

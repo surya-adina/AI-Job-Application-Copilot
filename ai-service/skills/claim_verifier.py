@@ -73,6 +73,33 @@ NEGATION_PHRASES = [
 ]
 
 
+# Taxonomy names that refer to the same capability.
+SKILL_EQUIVALENTS = [{"LLM", "Generative AI"}]
+
+
+def supported_by(skill: str, evidence_skills: set[str]) -> bool:
+    if skill in evidence_skills:
+        return True
+    return any(skill in group and group & evidence_skills for group in SKILL_EQUIVALENTS)
+
+
+def _negated(lowered: str, start: int) -> bool:
+    window = hedge_window(lowered, start)
+    return any(phrase in window for phrase in NEGATION_PHRASES)
+
+
+def claimed_numbers(text: str) -> list[str]:
+    """Numbers the text asserts, skipping those in a negated or hedged phrase
+    ("I have not worked with Microsoft 365")."""
+    lowered = text.lower()
+    numbers = []
+    for match in NUMBER_PATTERN.finditer(text):
+        value = match.group(0).strip()
+        if not _negated(lowered, match.start()) and value not in numbers:
+            numbers.append(value)
+    return numbers
+
+
 def claimed_skills(text: str) -> list[str]:
     """Skills the text asserts, skipping mentions in a negated or hedged phrase.
     Ambiguous aliases ("go", "rag") are skipped so ordinary words are not treated
@@ -80,8 +107,7 @@ def claimed_skills(text: str) -> list[str]:
     lowered = text.lower()
     claimed = set()
     for skill, start in skill_mentions(text, include_ambiguous=False):
-        window = hedge_window(lowered, start)
-        if not any(phrase in window for phrase in NEGATION_PHRASES):
+        if not _negated(lowered, start):
             claimed.add(skill)
     return sorted(claimed)
 
@@ -106,7 +132,7 @@ def quote_problem(quote: str, resume_text: str) -> str | None:
 
 def verify_claim(claim: Claim, resume_text: str, require_evidence: bool = True) -> ClaimVerdict:
     skills = claimed_skills(claim.text)
-    numbers = extract_numbers(claim.text)
+    numbers = claimed_numbers(claim.text)
     reasons = []
 
     valid_quotes = []
@@ -125,7 +151,7 @@ def verify_claim(claim: Claim, resume_text: str, require_evidence: bool = True) 
     evidence_numbers = {number_key(value) for value in extract_numbers(evidence_text)}
 
     if claim.evidence:
-        reasons += [f"skill_not_in_evidence: {skill}" for skill in skills if skill not in evidence_skills]
+        reasons += [f"skill_not_in_evidence: {skill}" for skill in skills if not supported_by(skill, evidence_skills)]
         reasons += [f"number_not_in_evidence: {value}" for value in numbers if number_key(value) not in evidence_numbers]
 
     return ClaimVerdict(text=claim.text, supported=not reasons, reasons=reasons, skills=skills, numbers=numbers)
@@ -154,8 +180,10 @@ def unsupported_facts(text: str, evidence: list[str]) -> list[str]:
     evidence_skills = set(extract_known_skills(evidence_text, ignore_weak_context=False))
     evidence_numbers = {number_key(value) for value in extract_numbers(evidence_text)}
 
-    problems = [f"skill_not_in_evidence: {skill}" for skill in claimed_skills(text) if skill not in evidence_skills]
+    problems = [
+        f"skill_not_in_evidence: {skill}" for skill in claimed_skills(text) if not supported_by(skill, evidence_skills)
+    ]
     problems += [
-        f"number_not_in_evidence: {value}" for value in extract_numbers(text) if number_key(value) not in evidence_numbers
+        f"number_not_in_evidence: {value}" for value in claimed_numbers(text) if number_key(value) not in evidence_numbers
     ]
     return problems

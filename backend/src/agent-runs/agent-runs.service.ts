@@ -12,6 +12,30 @@ const STATUS: Record<AgentRunResponse['status'], AgentRunStatus> = {
   failed: AgentRunStatus.FAILED,
 };
 
+type ReviewPayload = {
+  letter: string;
+  paragraphs: { key: string; text: string; passed: boolean; claims: { text: string; supported: boolean; reasons: string[] }[] }[];
+  unresolved: Record<string, string[]>;
+};
+
+/** Keep only what the review screen needs from the agent's review payload. */
+function toUserReview(review: Prisma.JsonValue | null) {
+  if (!review || typeof review !== 'object' || Array.isArray(review)) {
+    return null;
+  }
+  const payload = review as unknown as ReviewPayload;
+  return {
+    letter: payload.letter,
+    paragraphs: payload.paragraphs.map((paragraph) => ({
+      key: paragraph.key,
+      text: paragraph.text,
+      passed: paragraph.passed,
+      claims: paragraph.claims.map(({ text, supported, reasons }) => ({ text, supported, reasons })),
+    })),
+    unresolved: payload.unresolved,
+  };
+}
+
 const ACTIVE: AgentRunStatus[] = [AgentRunStatus.RUNNING, AgentRunStatus.AWAITING_REVIEW];
 
 @Injectable()
@@ -115,29 +139,24 @@ export class AgentRunsService {
     });
   }
 
+  /**
+   * The user-facing view of a run: status, the draft under review and the
+   * outcome. Steps, model calls, tokens and cost stay in AgentStep/AiRun for
+   * evaluation and are not sent to the browser.
+   */
   async findOne(userId: string, applicationId: string, runId: string) {
     const run = await this.prisma.agentRun.findFirst({
       where: { id: runId, applicationId, userId },
-      include: {
-        steps: {
-          orderBy: { index: 'asc' },
-          include: {
-            aiRuns: {
-              select: {
-                endpoint: true,
-                model: true,
-                promptVersion: true,
-                tokensIn: true,
-                tokensOut: true,
-                latencyMs: true,
-                retries: true,
-                status: true,
-                errorType: true,
-                estimatedCostUsd: true,
-              },
-            },
-          },
-        },
+      select: {
+        id: true,
+        task: true,
+        status: true,
+        instructions: true,
+        review: true,
+        decision: true,
+        finalText: true,
+        createdAt: true,
+        updatedAt: true,
       },
     });
 
@@ -145,15 +164,7 @@ export class AgentRunsService {
       throw new NotFoundException('Agent run not found');
     }
 
-    const calls = run.steps.flatMap((step) => step.aiRuns);
-    return {
-      ...run,
-      totals: {
-        llmCalls: calls.length,
-        costUsd: calls.reduce((sum, call) => sum + Number(call.estimatedCostUsd ?? 0), 0),
-        latencyMs: run.steps.reduce((sum, step) => sum + step.latencyMs, 0),
-      },
-    };
+    return { ...run, review: toUserReview(run.review) };
   }
 
   /** Store steps the backend has not seen yet (one AiRun row per LLM call) and the run's new state. */

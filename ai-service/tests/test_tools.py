@@ -339,3 +339,17 @@ def test_unsupported_facts_checks_free_text():
         "skill_not_in_evidence: Kafka",
         "number_not_in_evidence: 3M",
     ]
+
+
+def test_numbers_in_negated_phrases_are_not_claims():
+    from skills.claim_verifier import unsupported_facts
+
+    text = "While I have not yet worked with Microsoft 365, I built FastAPI services handling 2M requests/day."
+    assert unsupported_facts(text, ["Built FastAPI microservices handling 2M requests/day"]) == []
+
+
+def test_equivalent_skill_names_match():
+    from skills.claim_verifier import unsupported_facts
+
+    evidence = ["Tech: Python, Mistral LLM, FAISS, LangChain"]
+    assert unsupported_facts("I have experience with large language models like Mistral LLM.", evidence) == []

@@ -114,13 +114,39 @@ def test_rejected_claim_is_revised_with_feedback():
     assert "number_not_in_evidence: 60%" in state["trace"][3]["detail"]["p2"]["problems"][0]
 
 
-def test_unfixable_paragraph_goes_to_review_as_unresolved():
-    graph = make_graph(SKILLS, PLAN, GOOD[0], BAD_P2, GOOD[2], *[BAD_P2] * MAX_REVISIONS)
+def test_revision_without_progress_stops_early():
+    # The same unsupported number comes back after a revision: a second revision would be wasted.
+    graph = make_graph(SKILLS, PLAN, GOOD[0], BAD_P2, GOOD[2], BAD_P2)
+    review = start(graph)["__interrupt__"][0].value
+
+    assert list(review["unresolved"]) == ["p2"]
+    assert nodes(graph).count("revise") == 1
+    trace = graph.get_state(run_config("thread-0001")).values["trace"]
+    assert trace[-1]["detail"]["stopped_no_progress"] == ["p2"]
+
+
+def test_revisions_continue_while_problems_change_up_to_the_limit():
+    other_bad = draft("I cut PostgreSQL latency by 70%.", "Cut PostgreSQL latency by 70%.", [1])
+    graph = make_graph(SKILLS, PLAN, GOOD[0], BAD_P2, GOOD[2], other_bad, BAD_P2)
     review = start(graph)["__interrupt__"][0].value
 
     assert list(review["unresolved"]) == ["p2"]
     assert review["revisions"]["p2"] == MAX_REVISIONS
     assert nodes(graph).count("revise") == MAX_REVISIONS
+
+
+def test_revise_adds_resume_lines_for_skills_the_search_missed():
+    # Python is in the resume, but the section's search results (FASTAPI, POSTGRES) do not mention it.
+    python_claim = draft("I write Python services.", "Writes Python services.", [0])
+    fixed = draft("I write Python services.", "Writes Python services.", [2])
+    graph = make_graph(SKILLS, PLAN, python_claim, *GOOD[1:], fixed)
+    review = start(graph)["__interrupt__"][0].value
+
+    state = graph.get_state(run_config("thread-0001")).values
+    revise_step = next(step for step in state["trace"] if step["node"] == "revise")
+    assert revise_step["detail"]["evidence_added"] == {"p1": [2]}
+    assert any("Python services" in chunk["text"] for chunk in state["evidence"]["p1"])
+    assert review["unresolved"] == {}
 
 
 @pytest.mark.parametrize(
