@@ -88,6 +88,24 @@ Live runs on a sample resume and job posting took 8–14 seconds and about $0.00
 
 The claim verifier was measured on 40 hand-labeled claims ([`evals/claim_verification_eval.py`](ai-service/evals/claim_verification_eval.py)): rejection precision 0.78 and recall 0.78. It catches inflated numbers, swapped tools and hedged sources; it misses invented qualities with no skill or number in them ("fault-tolerant") and is strict about implied skills. The labels and rules come from the same author, so treat this as behaviour on known patterns rather than a generalization measure.
 
+## 🔌 MCP server
+
+The same six tools are available to any MCP client through [`ai-service/mcp_server.py`](ai-service/mcp_server.py), built on the official Python SDK. Tool names, descriptions and input/output schemas come from the same registry as the HTTP API and the agent, so the three cannot drift apart. Results include structured output plus usage metadata (LLM calls, estimated cost, latency); failures such as a blocked URL or invalid arguments come back as MCP tool errors.
+
+```bash
+cd ai-service
+
+# Explore the tools in the MCP Inspector (web UI)
+npx @modelcontextprotocol/inspector .venv/bin/python mcp_server.py
+
+# Or from the command line
+npx @modelcontextprotocol/inspector --cli .venv/bin/python mcp_server.py --method tools/list
+npx @modelcontextprotocol/inspector --cli .venv/bin/python mcp_server.py \
+  --method tools/call --tool-name fetch_job_posting --tool-arg url=https://www.python.org/jobs/
+```
+
+To use it from an MCP client, register a stdio server whose command is the absolute path to `ai-service/.venv/bin/python` with the argument `ai-service/mcp_server.py`. The server runs locally over stdio and opens no network port; it reads `OPENAI_API_KEY` and `DATABASE_URL` from `ai-service/.env`.
+
 ## 🚀 Running locally
 
 **Prerequisites:** Node.js 20+, Python 3.12+, Docker, an OpenAI API key.
@@ -154,6 +172,7 @@ cd backend && npx tsc --noEmit && npm run build
 ai-service/
   agent/          LangGraph cover-letter agent and Postgres checkpointer
   llm/            structured-output client, retries, cost config
+  mcp_server.py   MCP server exposing the tool registry over stdio
   routes/         AI endpoints, /tools and /agent/runs
   skills/         skill matcher, claim verifier, resume chunks, SSRF-safe fetch, taxonomy
   tools/          typed tool registry
@@ -169,5 +188,4 @@ frontend/
 
 ## 🗺️ Roadmap
 
-- 🔌 **MCP server:** the same tools exposed through the Model Context Protocol.
 - 📏 **Agent evals:** task success, tool-call accuracy, unsupported-claim rate with and without the verifier, cost and latency.
