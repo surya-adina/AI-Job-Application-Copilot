@@ -1,0 +1,282 @@
+[
+  {
+    "id": "faithful_node_0",
+    "original": "Built REST APIs in Node.js and Express with Jest unit tests.",
+    "rewrite": "Developed Node.js/Express REST APIs covered by Jest unit tests.",
+    "adds_content": false,
+    "kind": "verb_swap"
+  },
+  {
+    "id": "faithful_pg_1",
+    "original": "Reduced p95 query latency by 40% by adding PostgreSQL indexes.",
+    "rewrite": "Cut p95 query latency 40% with PostgreSQL indexing.",
+    "adds_content": false,
+    "kind": "condense"
+  },
+  {
+    "id": "faithful_rag_2",
+    "original": "Designed a RAG chatbot using Mistral LLM and FAISS for course Q&A.",
+    "rewrite": "Built an LLM-powered RAG chatbot (Mistral, FAISS) for course Q&A.",
+    "adds_content": false,
+    "kind": "job_terms"
+  },
+  {
+    "id": "faithful_airflow_3",
+    "original": "Migrated 12 cron jobs to Airflow DAGs with retries and alerting.",
+    "rewrite": "Moved 12 cron jobs onto Airflow DAGs with retries and alerting.",
+    "adds_content": false,
+    "kind": "verb_swap"
+  },
+  {
+    "id": "faithful_resnet_4",
+    "original": "Trained a ResNet-50 classifier on 50,000 product images, reaching 92% accuracy.",
+    "rewrite": "Reached 92% accuracy training a ResNet-50 classifier on 50,000 product images.",
+    "adds_content": false,
+    "kind": "reorder"
+  },
+  {
+    "id": "faithful_ecs_5",
+    "original": "Containerized three Flask services with Docker and deployed them to AWS ECS.",
+    "rewrite": "Deployed three Dockerized Flask services to AWS ECS.",
+    "adds_content": false,
+    "kind": "condense"
+  },
+  {
+    "id": "faithful_snow_6",
+    "original": "Wrote SQL in Snowflake for weekly revenue reports used by 12 regional managers.",
+    "rewrite": "Produced weekly Snowflake SQL revenue reports for 12 regional managers.",
+    "adds_content": false,
+    "kind": "condense"
+  },
+  {
+    "id": "faithful_invoice_7",
+    "original": "Automated invoice processing with Python scripts, saving the finance team 6 hours per week.",
+    "rewrite": "Saved the finance team 6 hours per week by automating invoice processing in Python.",
+    "adds_content": false,
+    "kind": "reorder"
+  },
+  {
+    "id": "faithful_react_8",
+    "original": "Built React dashboards in TypeScript showing real-time order status for support agents.",
+    "rewrite": "Created real-time order-status dashboards in React and TypeScript for support agents.",
+    "adds_content": false,
+    "kind": "reorder"
+  },
+  {
+    "id": "faithful_oauth_9",
+    "original": "Implemented OAuth login and JWT session handling in a NestJS API.",
+    "rewrite": "Added OAuth login and JWT sessions to a NestJS API.",
+    "adds_content": false,
+    "kind": "condense"
+  },
+  {
+    "id": "faithful_ab_10",
+    "original": "Ran A/B tests on the checkout page that raised conversion by 3.5%.",
+    "rewrite": "Raised checkout conversion 3.5% through A/B testing.",
+    "adds_content": false,
+    "kind": "reorder"
+  },
+  {
+    "id": "faithful_gha_11",
+    "original": "Set up GitHub Actions pipelines that run tests and deploy on every merge to main.",
+    "rewrite": "Built GitHub Actions CI/CD that tests and deploys every merge to main.",
+    "adds_content": false,
+    "kind": "job_terms"
+  },
+  {
+    "id": "faithful_bert_12",
+    "original": "Fine-tuned BERT with Hugging Face Transformers to route support tickets into 8 queues.",
+    "rewrite": "Routed support tickets into 8 queues by fine-tuning BERT with Hugging Face Transformers.",
+    "adds_content": false,
+    "kind": "reorder"
+  },
+  {
+    "id": "faithful_mentor_13",
+    "original": "Mentored 2 junior engineers through weekly code reviews.",
+    "rewrite": "Mentored 2 junior engineers via weekly code reviews.",
+    "adds_content": false,
+    "kind": "verb_swap"
+  },
+  {
+    "id": "faithful_spark_14",
+    "original": "Built an ETL pipeline in PySpark on Databricks that processes 100,000 orders daily.",
+    "rewrite": "Engineered a Databricks PySpark ETL pipeline processing 100,000 daily orders.",
+    "adds_content": false,
+    "kind": "reorder"
+  },
+  {
+    "id": "faithful_scrape_15",
+    "original": "Scraped competitor pricing from 30 websites with Python and stored it in PostgreSQL.",
+    "rewrite": "Collected competitor pricing from 30 sites using Python scrapers, storing results in PostgreSQL.",
+    "adds_content": false,
+    "kind": "paraphrase"
+  },
+  {
+    "id": "faithful_pbi_16",
+    "original": "Created Power BI reports that replaced manual Excel tracking for the operations team.",
+    "rewrite": "Replaced the operations team's manual Excel tracking with Power BI reports.",
+    "adds_content": false,
+    "kind": "reorder"
+  },
+  {
+    "id": "faithful_openai_17",
+    "original": "Integrated the OpenAI API to summarize customer calls for account managers.",
+    "rewrite": "Used an LLM (OpenAI API) to summarize customer calls for account managers.",
+    "adds_content": false,
+    "kind": "job_terms"
+  },
+  {
+    "id": "faithful_django_18",
+    "original": "Optimized a Django ORM query layer, cutting page load time from 3.2s to 1.1s.",
+    "rewrite": "Cut page load time from 3.2s to 1.1s by optimizing Django ORM queries.",
+    "adds_content": false,
+    "kind": "reorder"
+  },
+  {
+    "id": "faithful_tf_19",
+    "original": "Maintained Terraform modules for VPCs, IAM roles and RDS instances on AWS.",
+    "rewrite": "Managed AWS infrastructure as code with Terraform modules for VPCs, IAM roles and RDS.",
+    "adds_content": false,
+    "kind": "job_terms"
+  },
+  {
+    "id": "adds_pg_0",
+    "original": "Reduced p95 query latency by 40% by adding PostgreSQL indexes.",
+    "rewrite": "Reduced p95 query latency by 60% by adding PostgreSQL indexes.",
+    "adds_content": true,
+    "kind": "changed_number"
+  },
+  {
+    "id": "adds_node_1",
+    "original": "Built REST APIs in Node.js and Express with Jest unit tests.",
+    "rewrite": "Built scalable REST APIs in Node.js and Express with Jest and Cypress tests.",
+    "adds_content": true,
+    "kind": "added_tool"
+  },
+  {
+    "id": "adds_ecs_2",
+    "original": "Containerized three Flask services with Docker and deployed them to AWS ECS.",
+    "rewrite": "Containerized three Flask services with Docker and orchestrated them on Kubernetes.",
+    "adds_content": true,
+    "kind": "swapped_tool"
+  },
+  {
+    "id": "adds_snow_3",
+    "original": "Wrote SQL in Snowflake for weekly revenue reports used by 12 regional managers.",
+    "rewrite": "Wrote Snowflake SQL for weekly revenue reports used by 12 regional managers to drive investment decisions.",
+    "adds_content": true,
+    "kind": "added_purpose"
+  },
+  {
+    "id": "adds_mentor_4",
+    "original": "Mentored 2 junior engineers through weekly code reviews.",
+    "rewrite": "Led a team of 2 junior engineers through weekly code reviews.",
+    "adds_content": true,
+    "kind": "inflated_scope"
+  },
+  {
+    "id": "adds_react_5",
+    "original": "Built React dashboards in TypeScript showing real-time order status for support agents.",
+    "rewrite": "Built React dashboards in TypeScript showing real-time order status, cutting support resolution time.",
+    "adds_content": true,
+    "kind": "added_impact"
+  },
+  {
+    "id": "adds_rag_6",
+    "original": "Designed a RAG chatbot using Mistral LLM and FAISS for course Q&A.",
+    "rewrite": "Designed a production-grade RAG chatbot using Mistral LLM and FAISS serving thousands of students.",
+    "adds_content": true,
+    "kind": "added_scale"
+  },
+  {
+    "id": "adds_ab_7",
+    "original": "Ran A/B tests on the checkout page that raised conversion by 3.5%.",
+    "rewrite": "Ran A/B tests on the checkout page that raised conversion by 3.5% and revenue by $200K.",
+    "adds_content": true,
+    "kind": "added_number"
+  },
+  {
+    "id": "adds_scrape_8",
+    "original": "Scraped competitor pricing from 30 websites with Python and stored it in PostgreSQL.",
+    "rewrite": "Scraped competitor pricing from 30 websites with Python, giving executives weekly competitive intelligence.",
+    "adds_content": true,
+    "kind": "added_purpose"
+  },
+  {
+    "id": "adds_oauth_9",
+    "original": "Implemented OAuth login and JWT session handling in a NestJS API.",
+    "rewrite": "Implemented OAuth login and JWT session handling in a NestJS API, achieving SOC 2 compliance.",
+    "adds_content": true,
+    "kind": "added_claim"
+  },
+  {
+    "id": "adds_resnet_10",
+    "original": "Trained a ResNet-50 classifier on 50,000 product images, reaching 92% accuracy.",
+    "rewrite": "Trained a ResNet-50 classifier on 50,000 product images in PyTorch, reaching 92% accuracy.",
+    "adds_content": true,
+    "kind": "added_tool"
+  },
+  {
+    "id": "adds_spark_11",
+    "original": "Built an ETL pipeline in PySpark on Databricks that processes 100,000 orders daily.",
+    "rewrite": "Built a real-time ETL pipeline in PySpark on Databricks that processes 100,000 orders daily.",
+    "adds_content": true,
+    "kind": "added_quality"
+  },
+  {
+    "id": "adds_invoice_12",
+    "original": "Automated invoice processing with Python scripts, saving the finance team 6 hours per week.",
+    "rewrite": "Automated invoice processing with Python and machine learning, saving the finance team 6 hours per week.",
+    "adds_content": true,
+    "kind": "added_tool"
+  },
+  {
+    "id": "adds_gha_13",
+    "original": "Set up GitHub Actions pipelines that run tests and deploy on every merge to main.",
+    "rewrite": "Set up GitHub Actions pipelines that run tests and deploy on every merge, reducing release time by 50%.",
+    "adds_content": true,
+    "kind": "added_number"
+  },
+  {
+    "id": "adds_pbi_14",
+    "original": "Created Power BI reports that replaced manual Excel tracking for the operations team.",
+    "rewrite": "Created Power BI reports for the operations team, enabling data-driven decisions across the company.",
+    "adds_content": true,
+    "kind": "added_impact"
+  },
+  {
+    "id": "adds_bert_15",
+    "original": "Fine-tuned BERT with Hugging Face Transformers to route support tickets into 8 queues.",
+    "rewrite": "Fine-tuned BERT with Hugging Face Transformers to route support tickets into 8 queues with 95% accuracy.",
+    "adds_content": true,
+    "kind": "added_number"
+  },
+  {
+    "id": "adds_django_16",
+    "original": "Optimized a Django ORM query layer, cutting page load time from 3.2s to 1.1s.",
+    "rewrite": "Optimized a Django ORM query layer for a high-traffic platform, cutting page load time from 3.2s to 1.1s.",
+    "adds_content": true,
+    "kind": "added_scale"
+  },
+  {
+    "id": "adds_tf_17",
+    "original": "Maintained Terraform modules for VPCs, IAM roles and RDS instances on AWS.",
+    "rewrite": "Maintained Terraform modules for VPCs, IAM roles and RDS instances on AWS and GCP.",
+    "adds_content": true,
+    "kind": "added_tool"
+  },
+  {
+    "id": "adds_airflow_18",
+    "original": "Migrated 12 cron jobs to Airflow DAGs with retries and alerting.",
+    "rewrite": "Migrated 12 cron jobs to Airflow DAGs with retries and alerting, improving pipeline reliability.",
+    "adds_content": true,
+    "kind": "added_impact"
+  },
+  {
+    "id": "adds_openai_19",
+    "original": "Integrated the OpenAI API to summarize customer calls for account managers.",
+    "rewrite": "Integrated the OpenAI API to summarize customer calls, helping account managers close more deals.",
+    "adds_content": true,
+    "kind": "added_impact"
+  }
+]

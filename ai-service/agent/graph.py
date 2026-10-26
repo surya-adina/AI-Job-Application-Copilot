@@ -214,26 +214,20 @@ def build_graph(config: AgentConfig | None = None, checkpointer=None):
         instructions = item["goal"]
         if state.get("instructions"):
             instructions += f"\nCandidate instructions: {state['instructions']}"
-        if feedback:
-            previous = state["drafts"][key]["text"]
-            instructions += (
-                "\nYour previous draft was rejected by the fact checker:\n"
-                + previous
-                + "\nProblems:\n- "
-                + "\n- ".join(feedback)
-                + "\nRewrite the paragraph so every claim is supported by the evidence exactly as written "
-                "(copy numbers and tool names as they appear), or drop the unsupported claim."
-            )
 
-        output, runs = call_tool(
-            "draft_section",
-            {
-                "section": "cover_letter_paragraph",
-                "instructions": instructions,
-                "job_description": state["job_description"],
-                "evidence": state["evidence"][key],
-            },
-        )
+        arguments = {
+            "section": "cover_letter_paragraph",
+            "instructions": instructions[:2000],
+            "job_description": state["job_description"],
+            "evidence": state["evidence"][key],
+        }
+        if feedback:
+            # Feedback and the rejected draft go in their own fields so a long
+            # problem list cannot push the instructions past their size limit.
+            arguments["previous_draft"] = state["drafts"][key]["text"][:4000]
+            arguments["feedback"] = [problem[:500] for problem in feedback][:30]
+
+        output, runs = call_tool("draft_section", arguments)
         return key, output, runs
 
     def _draft_many(state: AgentState, jobs: list[tuple[str, list[str] | None]]) -> tuple[dict, list]:

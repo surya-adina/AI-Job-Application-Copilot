@@ -178,7 +178,7 @@ register(
 
 # ---------- draft_section ----------
 
-DRAFT_PROMPT_VERSION = "draft_section_v1"
+DRAFT_PROMPT_VERSION = "draft_section_v2"
 
 
 class EvidenceItem(BaseModel):
@@ -191,6 +191,10 @@ class DraftSectionInput(BaseModel):
     instructions: str = Field(..., min_length=3, max_length=2000)
     job_description: str = Field(..., min_length=50)
     evidence: list[EvidenceItem] = Field(..., min_length=1, max_length=30)
+    previous_draft: str | None = Field(default=None, max_length=4000, description="Draft to revise.")
+    feedback: list[str] = Field(
+        default_factory=list, max_length=30, description="Fact-check problems to fix in previous_draft."
+    )
 
 
 class DraftClaim(BaseModel):
@@ -220,6 +224,8 @@ def draft_section(args: DraftSectionInput, context: ToolContext):
                 "instructions": args.instructions,
                 "job_description": args.job_description,
                 "evidence": [item.model_dump() for item in args.evidence],
+                "previous_draft": args.previous_draft,
+                "fact_checker_feedback": args.feedback,
             }
         ),
         schema=DraftSectionLLMOutput,
@@ -253,7 +259,7 @@ register(
 
 # ---------- rewrite_bullet ----------
 
-REWRITE_PROMPT_VERSION = "rewrite_bullet_v1"
+REWRITE_PROMPT_VERSION = "rewrite_bullet_v2"
 
 
 class RewriteBulletInput(BaseModel):

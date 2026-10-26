@@ -83,7 +83,7 @@ flowchart LR
 - **Your review.** Each line shows the original next to the suggestion with *Use suggestion / Edit / Keep original*; flagged suggestions default to the original. Job skills the resume doesn't show are listed separately and are never added.
 - **Saved as a new resume.** Accepted lines are spliced into the resume at their original positions and saved under a name you choose; the original resume is unchanged. One click switches the application to the new resume.
 
-On a real resume and job posting, live runs took about 8 seconds and every rewrite either passed or was revised until it did. The added-wording threshold was set from a handful of real rewrites, so it is a heuristic that the evaluation work will measure on more cases.
+Measured results are in [Agent evaluation](#-agent-evaluation): verification roughly halves invented content, but some still gets through, which is why every line still needs your approval.
 
 ## 🕵️ Cover letter assistant
 
@@ -103,9 +103,34 @@ flowchart LR
 - **Human approval.** The run pauses with `interrupt()` and its state is saved by the LangGraph Postgres checkpointer, so the decision can arrive in a later request. Nothing is saved as the cover letter until the user approves or edits it.
 - **Traces.** Every step is stored as an `AgentStep` (node, latency, detail), and every LLM call as an `AiRun` linked to its step.
 
-Live runs on a sample resume and job posting took 8–14 seconds and about $0.004 with gpt-4.1-mini.
+Measured results are in [Agent evaluation](#-agent-evaluation).
 
 The claim verifier was measured on 40 hand-labeled claims ([`evals/claim_verification_eval.py`](ai-service/evals/claim_verification_eval.py)): rejection precision 0.78 and recall 0.78. It catches inflated numbers, swapped tools and hedged sources; it misses invented qualities with no skill or number in them ("fault-tolerant") and is strict about implied skills. The labels and rules come from the same author, so treat this as behaviour on known patterns rather than a generalization measure.
+
+## 📏 Agent evaluation
+
+[`evals/agent_eval.py`](ai-service/evals/agent_eval.py) measures both agents and the checks they rely on, with real model calls (agents on gpt-4.1-mini).
+
+**1. Rewrite checker** (deterministic, no model): 40 hand-labeled rewrites, 20 faithful and 20 that add content, none used to build the checker. Precision **0.76**, recall **0.80**. It catches added tools, numbers, purposes and scale claims; it misses additions phrased in one or two words ("led a team", "real-time") and flags some honest rewrites that use job terms ("infrastructure as code").
+
+**2. Judge.** A stronger model (gpt-4.1) labels the same 40 rewrites: **97.5% agreement** with the human labels (Cohen's κ 0.95). It then scores the agents' output below. Its paragraph-level judgements for cover letters were spot-checked by hand but not formally validated.
+
+**3. Agents end to end** on 8 synthetic resume/job pairs. "Without verification" is each run's first draft, read back from the LangGraph checkpoint history; "with verification" is what the user is shown. Two runs each:
+
+| | Resume tailoring | Cover letter |
+|---|---|---|
+| Task success (reached review, nothing unresolved) | 100% | 100% |
+| Content the resume doesn't support, without verification | 17–30% of rewrites | 67–71% of paragraphs |
+| …with verification | **11–17%** of lines applied by default | **63%** of paragraphs |
+| Valid planner selections / cited evidence ids | 100% | 100% |
+| Mean LLM calls, cost, latency per run | 6.6, $0.0023, 5.7 s | 6.0, $0.0041, 9.0–9.5 s |
+
+What this shows:
+- **Tailoring:** verification consistently cuts invented content roughly in half (three runs: 24→13%, 17→11%, 30→17%). What remains is mostly qualifiers and scope taken from the job ("advanced SQL", "Led development").
+- **Cover letter:** the first evaluation found unsupported statements in 90% of paragraphs, mostly self-praise such as "demonstrating strong database skills" and job requirements stated as experience. Rewriting the drafting prompt (`draft_section_v2`) brought that to about 63%. The deterministic verifier adds only a few points on top, because it checks skills and numbers and this content is neither.
+- The evaluation also found a crash when revision feedback was long; it is fixed and covered by a regression test.
+
+The cover letter remains a draft to edit, not a letter to send unread. Catching self-assessment needs a model-based check in the verify step, which is the next improvement to measure with this same harness.
 
 ## 🔌 MCP server
 
@@ -181,6 +206,10 @@ PGVECTOR_TEST_DATABASE_URL="postgresql://postgres:postgres@localhost:5432/ajc" \
 # Skill-matching A/B eval (real OpenAI calls, about $0.08 with --repeats 3; LLM output is cached)
 .venv/bin/python evals/skill_matching_ab.py --repeats 3
 
+# Agent evaluation: rewrite checker, judge validation, both agents end to end (about $0.35)
+.venv/bin/python evals/agent_eval.py
+.venv/bin/python evals/agent_eval.py --skip-agents   # checker and judge only (about $0.04)
+
 # Backend type check and build
 cd backend && npx tsc --noEmit && npm run build
 ```
@@ -207,4 +236,5 @@ frontend/
 
 ## 🗺️ Roadmap
 
-- 📏 **Agent evals:** task success, tool-call accuracy, unsupported-claim rate with and without the verifier, cost and latency.
+- 🔎 **Model-based claim check:** add a semantic check to the verify step to catch self-assessment and scope inflation, and measure it against the current results.
+- 📊 **Larger evaluation sets:** more resumes, real (consented) job postings, and repeated runs for tighter ranges.

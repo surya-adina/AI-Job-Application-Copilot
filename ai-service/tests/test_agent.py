@@ -223,3 +223,16 @@ def test_text_that_contradicts_its_claim_list_is_caught():
     trace = graph.get_state(run_config("thread-0001")).values["trace"]
     assert trace[3]["detail"]["p2"]["problems"] == ["paragraph text: number_not_in_evidence: 60%"]
     assert [step["node"] for step in trace][-2:] == ["revise", "verify"]
+
+
+def test_long_feedback_does_not_break_revision():
+    # Many long rejected claims used to push the revision instructions past the tool's size limit.
+    claims = [{"text": f"Ran Kafka clusters for team {n} across many regions and environments for years.", "evidence_ids": [0]} for n in range(40)]
+    noisy = ok({"text": "I ran Kafka clusters.", "claims": claims})
+    fixed = draft("I built FastAPI services handling 2M requests/day.", "Built FastAPI services handling 2M requests/day.", [0])
+    graph = make_graph(SKILLS, PLAN, noisy, *GOOD[1:], fixed)
+    review = start(graph)["__interrupt__"][0].value
+
+    assert review["unresolved"] == {}
+    revise_runs = [step for step in graph.get_state(run_config("thread-0001")).values["trace"] if step["node"] == "revise"]
+    assert len(revise_runs) == 1

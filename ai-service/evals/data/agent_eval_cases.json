@@ -1,0 +1,42 @@
+[
+  {
+    "id": "backend_fintech",
+    "resume": "Priya Raman\npriya.raman@example.com\nSummary\nBackend engineer with 4 years building Python and Go services for payments and logistics.\nExperience\nSenior Software Engineer, LedgerLine (2023-Present)\n\u2022 Built FastAPI payment-reconciliation services processing 1.2M transactions per day with PostgreSQL and Redis.\n\u2022 Cut p95 API latency from 480ms to 190ms by adding query indexes and response caching in Redis.\n\u2022 Designed an idempotent webhook pipeline on AWS SQS that eliminated duplicate payouts across 3 partner banks.\nSoftware Engineer, ShipFast (2021-2023)\n\u2022 Wrote Go microservices for shipment tracking deployed on Kubernetes with Helm; maintained 99.9% uptime over\n12 months.\n\u2022 Added OpenTelemetry tracing and Grafana dashboards that shortened incident triage from hours to minutes.\nSkills\nPython, Go, FastAPI, PostgreSQL, Redis, AWS, SQS, Kubernetes, Helm, Docker, Grafana, OpenTelemetry",
+    "job": "Backend Engineer, Payments - Northwind Bank\nBuild reliable payment APIs used by millions of customers. Requirements: 3+ years of backend development in Python or Java; strong PostgreSQL; experience with event-driven systems (Kafka or SQS); AWS. Preferred: Kafka, Terraform, PCI-DSS knowledge, observability tooling."
+  },
+  {
+    "id": "data_analyst_retail",
+    "resume": "Marcus Lee\nData Analyst, Fresh Foods Co (2022-Present)\n- Wrote SQL in Snowflake to build weekly revenue reports for 12 regional managers.\n- Built Tableau dashboards that replaced 30 manual spreadsheets for the supply team.\n- Ran A/B tests on the checkout flow that raised online conversion by 3.5%.\n- Automated weekly data pulls with Python and pandas, saving 6 hours per week.\nAnalyst Intern, CityBikes (2021)\n- Cleaned and analyzed 2 years of trip data in Excel and Python to recommend 8 new station locations.\nSkills: SQL, Snowflake, Tableau, Python, pandas, Excel, A/B testing",
+    "job": "Senior Data Analyst - Marketplace Analytics\nOwn reporting and experimentation for our marketplace. Requirements: advanced SQL; Tableau or Looker; experience designing and analyzing A/B tests; Python for analysis. Preferred: dbt, Airflow, statistics background, stakeholder communication."
+  },
+  {
+    "id": "ml_engineer_vision",
+    "resume": "Arjun Mehta\nML Engineer, VisionWorks (2021-Present)\n\u2022 Trained image classification models in PyTorch on 2M product photos, reaching 94% top-1 accuracy.\n\u2022 Served models with FastAPI and ONNX Runtime, cutting inference latency by 60% versus the PyTorch baseline.\n\u2022 Tracked experiments in MLflow across 3 research teams and set up weekly model evaluation reports.\n\u2022 Fine-tuned BERT with Hugging Face Transformers to route support tickets into 8 queues.\nProjects\n\u2022 Built a defect-detection prototype with YOLOv8 and OpenCV for a factory line camera feed.\nSkills: Python, PyTorch, ONNX, FastAPI, MLflow, Hugging Face, OpenCV, Docker",
+    "job": "Machine Learning Engineer - Computer Vision\nShip vision models to production. Requirements: PyTorch; model deployment and inference optimization; experiment tracking; Python. Preferred: Kubernetes, TensorRT, edge deployment, data labeling pipelines."
+  },
+  {
+    "id": "frontend_saas",
+    "resume": "Sofia Alvarez\nFrontend Engineer, BrightDesk (2022-Present)\n- Built React and TypeScript dashboards showing real-time ticket status for 400 support agents.\n- Migrated the component library from JavaScript to TypeScript, removing 1,200 runtime type errors per month.\n- Wrote Jest and Cypress tests that raised frontend coverage from 35% to 80%.\nJunior Developer, PixelCraft (2020-2022)\n- Developed Vue.js marketing pages and improved Lighthouse performance scores from 62 to 91.\nSkills: React, TypeScript, JavaScript, Vue.js, Jest, Cypress, CSS, Figma",
+    "job": "Senior Frontend Engineer\nBuild the next version of our analytics product. Requirements: React and TypeScript; testing with Jest or Playwright; performance optimization. Preferred: Next.js, GraphQL, design systems, accessibility (WCAG)."
+  },
+  {
+    "id": "devops_platform",
+    "resume": "Daniel Okafor\nPlatform Engineer, CloudNest (2021-Present)\n\u2022 Maintained Terraform modules for VPCs, IAM roles and RDS instances on AWS across 4 environments.\n\u2022 Built GitHub Actions pipelines that test and deploy 30 services on every merge to main.\n\u2022 Moved 12 cron jobs onto Kubernetes CronJobs with alerting through Prometheus and PagerDuty.\n\u2022 Reduced monthly AWS spend by 22% by rightsizing EC2 instances and adding S3 lifecycle rules.\nSkills: AWS, Terraform, Kubernetes, Docker, GitHub Actions, Prometheus, Grafana, Linux, Bash",
+    "job": "DevOps Engineer\nRun and improve our cloud platform. Requirements: AWS; Terraform; Kubernetes; CI/CD pipelines; monitoring and alerting. Preferred: GCP, Ansible, Datadog, cost optimization experience."
+  },
+  {
+    "id": "data_engineer_lakehouse",
+    "resume": "Mei Chen\nData Engineer, OrderFlow (2022-Present)\n\u2022 Architected a Databricks lakehouse with Delta Lake that processes 100,000 restaurant orders per day across Bronze,\nSilver and Gold layers.\n\u2022 Orchestrated 40 PySpark jobs with Airflow, adding retries and SLA alerts.\n\u2022 Built dbt models for finance reporting that replaced 15 hand-maintained SQL scripts.\nData Analyst, MetroTransit (2020-2022)\n\u2022 Wrote SQL against PostgreSQL to analyze ridership for the planning team.\nSkills: Python, PySpark, SQL, Databricks, Delta Lake, Airflow, dbt, PostgreSQL",
+    "job": "Data Engineer - Streaming\nBuild our real-time data platform. Requirements: Spark; SQL; Airflow or similar orchestration; data modeling. Preferred: Kafka, Flink, Snowflake, streaming pipelines."
+  },
+  {
+    "id": "ai_engineer_llm",
+    "resume": "Nora Patel\nSoftware Engineer, HelpHub (2023-Present)\n- Built a RAG assistant over 20,000 help-center articles using LangChain, OpenAI APIs and pgvector.\n- Wrote an evaluation set of 300 labeled questions and tracked answer accuracy across prompt versions.\n- Integrated the OpenAI API to summarize customer calls for account managers.\nSoftware Engineer Intern, DataPeak (2022)\n- Built a Flask API for internal search and deployed it with Docker.\nSkills: Python, LangChain, OpenAI API, pgvector, PostgreSQL, Flask, Docker, prompt engineering",
+    "job": "AI Engineer - Agents\nBuild LLM-powered agents for customer support. Requirements: Python; building applications with LLM APIs; retrieval-augmented generation; evaluation of LLM output. Preferred: LangGraph, tool calling, Kubernetes, TypeScript."
+  },
+  {
+    "id": "mobile_ios",
+    "resume": "Liam Novak\niOS Engineer, TrailMate (2021-Present)\n\u2022 Shipped Swift and SwiftUI features for a hiking app with 250,000 monthly active users.\n\u2022 Reduced app launch time by 35% by deferring work off the main thread and caching map tiles.\n\u2022 Added offline sync with Core Data, cutting support tickets about lost routes by half.\nProjects\n\u2022 Wrote a Kotlin companion app prototype for Android with shared REST APIs.\nSkills: Swift, SwiftUI, Core Data, Kotlin, REST APIs, Git",
+    "job": "Senior iOS Engineer\nLead features in our consumer app. Requirements: Swift and SwiftUI; performance optimization; offline-first data. Preferred: Kotlin or React Native, CI/CD for mobile, experimentation."
+  }
+]

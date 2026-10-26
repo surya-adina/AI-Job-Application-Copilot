@@ -45,7 +45,7 @@
     "intended_improvement": "Give the deterministic verifier checkable claims (exact quotes) instead of free-form matched/missing lists."
   },
   "draft_section_v1": {
-    "status": "active",
+    "status": "deprecated",
     "description": "Drafts one application section (cover letter paragraph, resume bullet, summary, interview answer) from numbered resume evidence, listing each factual claim with the evidence ids that support it.",
     "intended_improvement": "Make every drafted claim traceable to resume chunks so verify_claims can check it."
   },
@@ -60,8 +60,18 @@
     "intended_improvement": "Focus tailoring on the lines that matter for this job instead of rewriting the whole resume."
   },
   "rewrite_bullet_v1": {
-    "status": "active",
+    "status": "deprecated",
     "description": "Rewrites one resume line in the job's terms while keeping exactly the facts it states.",
     "intended_improvement": "Tailor wording without adding experience; output is checked against the original line."
+  },
+  "draft_section_v2": {
+    "status": "active",
+    "description": "draft_section_v1 plus rules against self-assessment, upgraded scope and job qualifiers attributed to the candidate; takes the previous draft and checker feedback as separate fields.",
+    "intended_improvement": "Agent eval (v1) found unsupported self-praise and job-description qualifiers in most cover letter paragraphs."
+  },
+  "rewrite_bullet_v2": {
+    "status": "active",
+    "description": "rewrite_bullet_v1 plus rules against upgraded scope and job-description qualifiers.",
+    "intended_improvement": "Agent eval (v1) found rewrites adding 'Led' and 'advanced' that the original did not state."
   }
 }

@@ -128,6 +128,7 @@ def build_tailoring_graph(config: AgentConfig | None = None, checkpointer=None):
 
         candidates = [unit for unit in resume_units(state["resume_text"]) if len(unit.text.split()) >= MIN_CANDIDATE_WORDS]
         selections = []
+        planner_returned = 0
         if candidates:
             result = call_structured(
                 endpoint="agent:tailor_plan",
@@ -148,6 +149,7 @@ def build_tailoring_graph(config: AgentConfig | None = None, checkpointer=None):
                 **context.llm_kwargs,
             )
             runs.append(result.metadata)
+            planner_returned = len(result.parsed.selections)
             by_id = {unit.id: unit for unit in candidates}
             seen = set()
             for selection in result.parsed.selections:
@@ -163,7 +165,18 @@ def build_tailoring_graph(config: AgentConfig | None = None, checkpointer=None):
             "drafts": {},
             "verification": {},
             "revisions": {str(item["unit_id"]): 0 for item in selections},
-            "trace": [_step("plan", started, runs, {"units": [item["unit_id"] for item in selections], "candidates": len(candidates)})],
+            "trace": [
+                _step(
+                    "plan",
+                    started,
+                    runs,
+                    {
+                        "units": [item["unit_id"] for item in selections],
+                        "candidates": len(candidates),
+                        "planner_returned": planner_returned,
+                    },
+                )
+            ],
             "steps": 1,
         }
 
