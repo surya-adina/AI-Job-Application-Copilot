@@ -10,7 +10,7 @@
     "intended_improvement": "Improve missing-skill detection, reduce hallucinated matches, and make scoring more consistent."
   },
   "resume_review_v1": {
-    "status": "active",
+    "status": "hidden",
     "description": "Resume review prompt for grounded, evidence-backed resume improvement suggestions.",
     "intended_improvement": "Provide truthful resume guidance without inventing experience."
   },
@@ -53,5 +53,15 @@
     "status": "active",
     "description": "Plans the cover-letter agent: a goal and a resume evidence query for each of three paragraphs, using matched and missing skills.",
     "intended_improvement": "Separate planning from writing so each paragraph is drafted from targeted resume evidence."
+  },
+  "tailor_plan_v1": {
+    "status": "active",
+    "description": "Chooses up to six resume units worth tailoring for a job and the job requirement each should speak to.",
+    "intended_improvement": "Focus tailoring on the lines that matter for this job instead of rewriting the whole resume."
+  },
+  "rewrite_bullet_v1": {
+    "status": "active",
+    "description": "Rewrites one resume line in the job's terms while keeping exactly the facts it states.",
+    "intended_improvement": "Tailor wording without adding experience; output is checked against the original line."
   }
 }

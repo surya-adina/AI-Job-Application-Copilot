@@ -1,4 +1,4 @@
-import type { AgentDecision, AgentRun, AgentRunSummary } from '@/types/agent-run';
+import type { AgentDecision, AgentRun, AgentRunSummary, AgentTask } from '@/types/agent-run';
 
 async function request<T>(path: string, init?: RequestInit): Promise<T> {
   const response = await fetch(`/api/applications/${path}`, {
@@ -14,18 +14,18 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   return data as T;
 }
 
-export function listAgentRuns(applicationId: string) {
-  return request<AgentRunSummary[]>(`${applicationId}/agent-runs`);
+export function listAgentRuns(applicationId: string, task: AgentTask) {
+  return request<AgentRunSummary[]>(`${applicationId}/agent-runs?task=${task}`);
 }
 
 export function getAgentRun(applicationId: string, runId: string) {
   return request<AgentRun>(`${applicationId}/agent-runs/${runId}`);
 }
 
-export function startAgentRun(applicationId: string, instructions: string) {
+export function startAgentRun(applicationId: string, task: AgentTask, instructions: string) {
   return request<AgentRun>(`${applicationId}/agent-runs`, {
     method: 'POST',
-    body: JSON.stringify(instructions ? { instructions } : {}),
+    body: JSON.stringify(instructions ? { task, instructions } : { task }),
   });
 }
 

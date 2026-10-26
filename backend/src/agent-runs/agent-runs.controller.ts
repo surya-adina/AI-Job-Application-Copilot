@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Param, Post, Req, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, Req, UseGuards } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { AgentRunsService } from './agent-runs.service';
 import { AgentDecisionDto } from './dto/agent-decision.dto';
-import { StartAgentRunDto } from './dto/start-agent-run.dto';
+import { AGENT_TASKS, AgentTask, StartAgentRunDto } from './dto/start-agent-run.dto';
 
 type AuthenticatedRequest = {
   user: {
@@ -22,12 +22,17 @@ export class AgentRunsController {
     @Req() req: AuthenticatedRequest,
     @Body() dto: StartAgentRunDto,
   ) {
-    return this.agentRuns.start(req.user.userId, applicationId, dto.instructions);
+    return this.agentRuns.start(req.user.userId, applicationId, dto.task, dto.instructions);
   }
 
   @Get()
-  list(@Param('applicationId') applicationId: string, @Req() req: AuthenticatedRequest) {
-    return this.agentRuns.list(req.user.userId, applicationId);
+  list(
+    @Param('applicationId') applicationId: string,
+    @Req() req: AuthenticatedRequest,
+    @Query('task') task?: string,
+  ) {
+    const filter = AGENT_TASKS.includes(task as AgentTask) ? (task as AgentTask) : undefined;
+    return this.agentRuns.list(req.user.userId, applicationId, filter);
   }
 
   @Get(':runId')

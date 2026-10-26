@@ -15,9 +15,9 @@ const actions = [
     available: true,
   },
   {
-    title: 'Review Resume Suggestions',
-    description: 'See prioritized, evidence-backed resume improvement guidance.',
-    href: 'review',
+    title: 'Tailor Resume',
+    description: 'Reword your strongest bullets for this job without adding anything untrue, then save the result as a new resume.',
+    href: 'tailor',
     available: true,
   },
   {

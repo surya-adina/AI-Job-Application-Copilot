@@ -110,7 +110,10 @@ def assemble_letter(state: AgentState) -> str:
     return "\n\n".join([GREETING, *paragraphs, CLOSING])
 
 
-ISSUE_PATTERN = re.compile(r"(?:skill|number)_not_in_evidence: [^;\"]+|quote_not_in_resume|quote_is_hedged|no_evidence|unknown evidence id \d+")
+ISSUE_PATTERN = re.compile(
+    r"(?:skill|number)_not_in_evidence: [^;\"]+|adds_wording: [^;\"]+|empty_rewrite|quote_not_in_resume|quote_is_hedged"
+    r"|no_evidence|unknown evidence id \d+"
+)
 MISSING_SKILL_PATTERN = re.compile(r"skill_not_in_evidence: ([^;\"]+)")
 EVIDENCE_PER_MISSING_SKILL = 2
 

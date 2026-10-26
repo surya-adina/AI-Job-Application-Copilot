@@ -8,10 +8,10 @@ The AI features are built to be checked rather than trusted. Every model call re
 
 - 📊 **Fit analysis.** Score, strengths, weaknesses and recommendations for a resume against a job description.
 - 🔍 **Skill evidence.** Every skill the job asks for, marked required or preferred, matched or missing, with the exact resume quote that supports each match.
-- 📝 **Resume review.** Prioritized suggestions grounded in the analysis and skill evidence.
+- ✂️ **Resume tailoring agent.** Picks the resume lines that matter for a job, rewords them in the job's terms, rejects any rewrite that adds a skill, number or claim the original line doesn't state, then lets you accept, edit or keep each line and save the result as a new, named resume.
 - ✉️ **Cover letter.** Three paragraphs, each with the resume quotes it relies on. Quotes that do not appear in the resume are flagged.
 - 🎤 **Interview prep.** Technical, behavioral and project questions built from the candidate's own resume.
-- 🕵️ **Cover letter agent.** Plans the letter, retrieves supporting resume lines, drafts, fact-checks every claim, revises what fails, then pauses for you to approve, edit or reject.
+- 🕵️ **Cover letter assistant.** Plans the letter, retrieves supporting resume lines, drafts, fact-checks every claim, revises what fails, then pauses for you to approve, edit or reject.
 - 📁 **Application tracking.** Resumes (text or PDF upload), jobs, applications, status and notes.
 
 ## 🏗️ Architecture
@@ -66,7 +66,26 @@ Results (gpt-4.1-mini, 3 repeats, pooled micro F1 over required/preferred × mat
 
 Verification did not beat LLM-only on holdout, so the default stays `SKILL_MATCH_MODE=llm`. On holdout the two modes differ by one labeled skill out of 121: the verifier rejected "GCP" for a resume that mentions only "GKE", and it did not catch either of the LLM's two errors. On data this size the difference is not meaningful in either direction. The harness is in place to re-test the verifier as the dataset grows.
 
-## 🕵️ Cover letter agent
+## ✂️ Resume tailoring agent
+
+The main agent, in [`ai-service/agent/tailoring.py`](ai-service/agent/tailoring.py):
+
+```mermaid
+flowchart LR
+    plan --> rewrite --> verify
+    verify -- "a rewrite added something,<br/>revisions left" --> revise --> verify
+    verify -- "every rewrite only rephrases<br/>its original" --> human_review["your review<br/>(interrupt)"]
+    human_review --> done(["save as a new resume / discard"])
+```
+
+- **Plan.** `match_skills` compares the resume with the job, the resume is split into units (wrapped PDF lines are rejoined into whole bullets, [`skills/resume_units.py`](ai-service/skills/resume_units.py)), and a planner picks up to six lines worth tailoring and what each should emphasize.
+- **Rewrite, verify, revise.** `rewrite_bullet` rewords each line. The check is strict because each rewrite is compared only with its own original line: it may not add a skill, a number, or three or more content words the original doesn't contain (which catches padding like "to support investor dashboards"). Failing rewrites are redrafted with that feedback; a revision that fixes nothing stops early.
+- **Your review.** Each line shows the original next to the suggestion with *Use suggestion / Edit / Keep original*; flagged suggestions default to the original. Job skills the resume doesn't show are listed separately and are never added.
+- **Saved as a new resume.** Accepted lines are spliced into the resume at their original positions and saved under a name you choose; the original resume is unchanged. One click switches the application to the new resume.
+
+On a real resume and job posting, live runs took about 8 seconds and every rewrite either passed or was revised until it did. The added-wording threshold was set from a handful of real rewrites, so it is a heuristic that the evaluation work will measure on more cases.
+
+## 🕵️ Cover letter assistant
 
 A LangGraph workflow in [`ai-service/agent/graph.py`](ai-service/agent/graph.py):
 
@@ -78,7 +97,7 @@ flowchart LR
     human_review --> done(["approve / edit / reject"])
 ```
 
-- **Typed tools.** Each step calls tools from one registry ([`ai-service/tools/`](ai-service/tools/)): `match_skills`, `search_resume_evidence` (pgvector search over resume chunks), `draft_section` and `verify_claims`. The same tools are exposed at `GET /tools` and `POST /tools/{name}`, alongside an SSRF-safe `fetch_job_posting` and `extract_requirements`.
+- **Typed tools.** Each step calls tools from one registry ([`ai-service/tools/`](ai-service/tools/)): `match_skills`, `search_resume_evidence` (pgvector search over resume chunks), `draft_section`, `rewrite_bullet` and `verify_claims`. The same tools are exposed at `GET /tools` and `POST /tools/{name}`, alongside an SSRF-safe `fetch_job_posting` and `extract_requirements`.
 - **Fact-checking.** [`skills/claim_verifier.py`](ai-service/skills/claim_verifier.py) rejects a claim unless its cited resume lines exist, are not hedged ("currently learning"), and contain every skill and number the claim states. It also checks the paragraph text itself, so a statement the model left out of its claim list is still caught. A rejected paragraph is redrafted with the verifier's reasons as feedback.
 - **Bounded.** At most two revisions per paragraph and a hard step limit. Paragraphs that still fail are shown to the reviewer as unresolved rather than hidden.
 - **Human approval.** The run pauses with `interrupt()` and its state is saved by the LangGraph Postgres checkpointer, so the decision can arrive in a later request. Nothing is saved as the cover letter until the user approves or edits it.
@@ -90,7 +109,7 @@ The claim verifier was measured on 40 hand-labeled claims ([`evals/claim_verific
 
 ## 🔌 MCP server
 
-The same six tools are available to any MCP client through [`ai-service/mcp_server.py`](ai-service/mcp_server.py), built on the official Python SDK. Tool names, descriptions and input/output schemas come from the same registry as the HTTP API and the agent, so the three cannot drift apart. Results include structured output plus usage metadata (LLM calls, estimated cost, latency); failures such as a blocked URL or invalid arguments come back as MCP tool errors.
+The same seven tools are available to any MCP client through [`ai-service/mcp_server.py`](ai-service/mcp_server.py), built on the official Python SDK. Tool names, descriptions and input/output schemas come from the same registry as the HTTP API and the agent, so the three cannot drift apart. Results include structured output plus usage metadata (LLM calls, estimated cost, latency); failures such as a blocked URL or invalid arguments come back as MCP tool errors.
 
 ```bash
 cd ai-service

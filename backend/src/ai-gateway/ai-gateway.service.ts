@@ -179,6 +179,7 @@ export class AiGatewayService {
 
   async startAgentRun(input: {
     threadId: string;
+    task: 'cover_letter' | 'resume_tailoring';
     resumeId: string;
     resumeText: string;
     jobDescription: string;
@@ -188,7 +189,7 @@ export class AiGatewayService {
       `${this.aiServiceUrl}/agent/runs`,
       {
         thread_id: input.threadId,
-        task: 'cover_letter',
+        task: input.task,
         resume_id: input.resumeId,
         resume_text: input.resumeText,
         job_description: input.jobDescription,
@@ -200,7 +201,13 @@ export class AiGatewayService {
 
   async resumeAgentRun(
     threadId: string,
-    decision: { action: 'approve' | 'edit' | 'reject'; text?: string },
+    decision: {
+      task: 'cover_letter' | 'resume_tailoring';
+      action: 'approve' | 'edit' | 'reject' | 'save' | 'discard';
+      text?: string;
+      title?: string;
+      items?: { unit_id: number; choice: 'accept' | 'edit' | 'keep'; text?: string }[];
+    },
   ): Promise<AgentRunResponse> {
     const response = await this.httpService.axiosRef.post<AgentRunResponse>(
       `${this.aiServiceUrl}/agent/runs/${encodeURIComponent(threadId)}/resume`,

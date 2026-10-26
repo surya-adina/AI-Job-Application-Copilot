@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import { explainProblems } from '@/lib/agent-feedback';
 import { decideAgentRun, getAgentRun, listAgentRuns, startAgentRun } from '@/lib/api/agent-runs';
-import type { AgentDecision, AgentRun } from '@/types/agent-run';
+import type { AgentDecision, AgentRun, CoverLetterReview } from '@/types/agent-run';
 
 const STATUS_LABELS: Record<AgentRun['status'], { label: string; style: string }> = {
   RUNNING: { label: 'Writing your letter', style: 'border-cyan-500/40 text-cyan-300' },
@@ -25,7 +25,7 @@ export default function AgentClient({ applicationId }: { applicationId: string }
   useEffect(() => {
     async function loadLatestRun() {
       try {
-        const runs = await listAgentRuns(applicationId);
+        const runs = await listAgentRuns(applicationId, 'cover_letter');
         if (runs.length > 0) {
           setRun(await getAgentRun(applicationId, runs[0].id));
         }
@@ -42,7 +42,7 @@ export default function AgentClient({ applicationId }: { applicationId: string }
       setBusy('start');
       setError('');
       setEditing(false);
-      setRun(await startAgentRun(applicationId, instructions.trim()));
+      setRun(await startAgentRun(applicationId, 'cover_letter', instructions.trim()));
     } catch (err) {
       setError(err instanceof Error ? err.message : "We couldn't start the cover letter. Please try again.");
     } finally {
@@ -66,7 +66,7 @@ export default function AgentClient({ applicationId }: { applicationId: string }
     }
   }
 
-  const review = run?.status === 'AWAITING_REVIEW' ? run.review : null;
+  const review = run?.status === 'AWAITING_REVIEW' ? (run.review as CoverLetterReview | null) : null;
   const needsCheck = review ? Object.keys(review.unresolved).length > 0 : false;
   const canStart = !busy && run?.status !== 'AWAITING_REVIEW';
   const status = run ? STATUS_LABELS[run.status] : null;

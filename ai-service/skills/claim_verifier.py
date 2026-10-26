@@ -187,3 +187,49 @@ def unsupported_facts(text: str, evidence: list[str]) -> list[str]:
         f"number_not_in_evidence: {value}" for value in claimed_numbers(text) if number_key(value) not in evidence_numbers
     ]
     return problems
+
+
+# Words a rephrased resume line may introduce without adding a claim: common
+# action verbs and connectives. Anything else new is wording the original
+# does not support ("to support investor dashboards").
+REPHRASE_WORDS = set(
+    """
+    a an the and or of for to in on by with into from as at via per across over using while their its this that
+    these those through within also both each then than so
+    built build building engineered engineering developed developing designed designing implemented implementing
+    created creating delivered delivering deployed deploying shipped shipping improved improving led leading drove
+    launched scaled scaling reduced reducing increased increasing optimized optimizing converted converting pruned
+    pruning extracted extracting integrated integrating trained training hosted hosting enabled enabling
+    outperformed outperforming achieved achieving automated automating architected owned powered processed
+    processing produced supported used utilized applied applying combined combining ran running
+    """.split()
+)
+ADDED_WORDING_LIMIT = 3
+
+
+def _content_words(text: str) -> list[str]:
+    # Hyphenated compounds count as their parts: "high-significance" covers "significant".
+    return [word for word in re.findall(r"[a-z]+", text.lower()) if len(word) >= 4 and word not in REPHRASE_WORDS]
+
+
+def added_wording(rewrite: str, original: str) -> list[str]:
+    """Content words in a rewrite that its original line does not contain.
+    Words are compared by their first five letters so inflections match
+    ("deploy"/"deployed", "pipeline"/"pipelines")."""
+    known = {word[:5] for word in _content_words(original)}
+    novel = []
+    for word in _content_words(rewrite):
+        if word[:5] not in known and word not in novel:
+            novel.append(word)
+    return novel
+
+
+def rewrite_problems(rewrite: str, original: str) -> list[str]:
+    """Problems with a rewrite of one resume line, judged only against that line."""
+    if not rewrite.strip():
+        return ["empty_rewrite"]
+    problems = unsupported_facts(rewrite, [original])
+    novel = added_wording(rewrite, original)
+    if len(novel) >= ADDED_WORDING_LIMIT:
+        problems.append(f"adds_wording: {', '.join(novel)}")
+    return problems

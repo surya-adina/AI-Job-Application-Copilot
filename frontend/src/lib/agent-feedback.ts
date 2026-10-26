@@ -8,6 +8,8 @@ const RULES: [RegExp, (match: RegExpMatchArray) => string][] = [
   [/quote_is_hedged/g, () => 'Your resume describes this as something you are learning, not experience you have.'],
   [/quote_not_in_resume/g, () => "The resume line this relies on couldn't be found."],
   [/no_evidence/g, () => 'Nothing in your resume backs this statement.'],
+  [/adds_wording: ([^;"]+)/g, (m) => `Adds wording your original line doesn't contain (${m[1].trim()}). Check it's accurate.`],
+  [/empty_rewrite/g, () => 'No usable suggestion was produced for this line.'],
   [/unknown evidence id/g, () => "Part of this couldn't be matched to your resume."],
 ];
 

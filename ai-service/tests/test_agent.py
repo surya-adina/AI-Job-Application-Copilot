@@ -175,7 +175,7 @@ def http(monkeypatch):
     def use_graph(*script):
         holder["graph"] = make_graph(*script)
 
-    monkeypatch.setattr(agent_routes, "get_graph", lambda: holder["graph"])
+    monkeypatch.setattr(agent_routes, "get_graph", lambda task="cover_letter": holder["graph"])
     client = TestClient(main.app, headers={"X-Service-Token": TEST_SERVICE_TOKEN})
     return client, use_graph
 

@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 from llm import call_structured
 from prompt_loader import load_prompt
-from skills.claim_verifier import Claim, ClaimVerdict, verify_claims
+from skills.claim_verifier import Claim, ClaimVerdict, rewrite_problems, verify_claims
 from skills.llm_job_requirements import extract_job_requirements_llm_with_metadata
 from skills.safe_fetch import FetchError, fetch_page
 from skills.skill_matcher import SkillEvidence, match_skills
@@ -248,6 +248,69 @@ register(
         input_model=DraftSectionInput,
         output_model=DraftSectionOutput,
         handler=draft_section,
+    )
+)
+
+# ---------- rewrite_bullet ----------
+
+REWRITE_PROMPT_VERSION = "rewrite_bullet_v1"
+
+
+class RewriteBulletInput(BaseModel):
+    original: str = Field(..., min_length=10, max_length=1500, description="The resume line to tailor.")
+    goal: str = Field(..., min_length=3, max_length=500, description="What the line should emphasize for this job.")
+    job_description: str = Field(..., min_length=50)
+    feedback: list[str] = Field(default_factory=list, max_length=20, description="Fact-check problems to fix.")
+
+
+class RewriteBulletLLMOutput(BaseModel):
+    text: str
+
+
+class RewriteBulletOutput(BaseModel):
+    text: str
+    unchanged: bool
+    problems: list[str] = Field(
+        description="Skills, numbers or wording in the rewrite that the original line does not state."
+    )
+
+
+def rewrite_bullet(args: RewriteBulletInput, context: ToolContext):
+    result = call_structured(
+        endpoint="tool:rewrite_bullet",
+        prompt_version=REWRITE_PROMPT_VERSION,
+        system=load_prompt(REWRITE_PROMPT_VERSION),
+        user=json.dumps(
+            {
+                "original": args.original,
+                "goal": args.goal,
+                "job_description": args.job_description,
+                "fact_checker_feedback": args.feedback,
+            }
+        ),
+        schema=RewriteBulletLLMOutput,
+        temperature=0.3,
+        max_output_tokens=400,
+        **context.llm_kwargs,
+    )
+    text = result.parsed.text.strip().lstrip("•-*▪● ").strip()
+    problems = rewrite_problems(text, args.original)
+    output = RewriteBulletOutput(
+        text=text, unchanged=" ".join(text.split()) == " ".join(args.original.split()), problems=problems
+    )
+    return output, [result.metadata]
+
+
+register(
+    Tool(
+        name="rewrite_bullet",
+        description=(
+            "Rewrite one resume line in a job's terms without changing what it claims, and check the rewrite: any "
+            "skill, number or new wording the original line does not state is reported in problems."
+        ),
+        input_model=RewriteBulletInput,
+        output_model=RewriteBulletOutput,
+        handler=rewrite_bullet,
     )
 )
 

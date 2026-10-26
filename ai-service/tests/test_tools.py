@@ -200,7 +200,8 @@ def test_review_suggestion_using_go_as_a_word_is_left_alone():
 
 def test_every_tool_has_input_and_output_schemas():
     assert set(REGISTRY) == {
-        "fetch_job_posting", "extract_requirements", "match_skills", "search_resume_evidence", "draft_section", "verify_claims",
+        "fetch_job_posting", "extract_requirements", "match_skills", "search_resume_evidence", "draft_section",
+        "rewrite_bullet", "verify_claims",
     }
     for tool in REGISTRY.values():
         schema = tool.schema()
@@ -251,7 +252,7 @@ http = TestClient(main.app, headers={"X-Service-Token": TEST_SERVICE_TOKEN})
 def test_tools_route_lists_tools():
     response = http.get("/tools")
     assert response.status_code == 200
-    assert len(response.json()) == 6
+    assert len(response.json()) == len(REGISTRY)
 
 
 def test_tools_route_runs_verify_claims():
@@ -353,3 +354,15 @@ def test_equivalent_skill_names_match():
 
     evidence = ["Tech: Python, Mistral LLM, FAISS, LangChain"]
     assert unsupported_facts("I have experience with large language models like Mistral LLM.", evidence) == []
+
+
+def test_rewrite_bullet_reports_added_skills():
+    original = "Built FastAPI microservices handling 2M requests/day."
+    result = invoke(
+        "rewrite_bullet",
+        {"original": original, "goal": "Show scale.", "job_description": "Backend role building high-volume Python APIs with Kafka."},
+        ToolContext(llm_kwargs=dict(client=FakeClient(ok({"text": "• Scaled FastAPI and Kafka services to 3M requests/day."})), **LLM_KWARGS)),
+    )
+    assert result.output.text.startswith("Scaled")  # bullet marker stripped
+    assert result.output.problems == ["skill_not_in_evidence: Kafka", "number_not_in_evidence: 3M"]
+    assert result.output.unchanged is False
