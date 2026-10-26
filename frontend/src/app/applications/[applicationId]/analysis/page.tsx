@@ -91,8 +91,7 @@ export default async function ApplicationAnalysisPage({
             Resume Match Report
           </h1>
           <p className="mt-3 max-w-2xl text-slate-400">
-            Real analysis generated from your resume and the selected job
-            description.
+            Based on your resume and the selected job description.
           </p>
         </header>
 

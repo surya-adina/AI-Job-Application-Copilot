@@ -16,13 +16,13 @@ const actions = [
   },
   {
     title: 'Tailor Resume',
-    description: 'Reword your strongest bullets for this job without adding anything untrue, then save the result as a new resume.',
+    description: 'Reword your most relevant lines in the job\'s terms, review each change, and save the result as a new resume.',
     href: 'tailor',
     available: true,
   },
   {
     title: 'Cover Letter Assistant',
-    description: 'Get a cover letter drafted from your resume, with every statement checked against it. You approve, edit or discard it.',
+    description: 'Draft a cover letter from your resume, with skills and figures checked against it. You approve, edit or discard it.',
     href: 'agent',
     available: true,
   },
@@ -64,7 +64,7 @@ export default async function ApplicationPage({
   const progress = [
   { label: 'Resume Uploaded', done: workspace.progress.resumeUploaded },
   { label: 'Analysis Complete', done: workspace.progress.analysisComplete },
-  { label: 'Resume Review Complete', done: workspace.progress.resumeReviewComplete },
+  { label: 'Resume Tailored', done: workspace.progress.resumeTailored },
   { label: 'Cover Letter', done: workspace.progress.coverLetterComplete },
   { label: 'Interview Prep', done: workspace.progress.interviewPrepComplete },
 ];

@@ -83,10 +83,11 @@ export default function AgentClient({ applicationId }: { applicationId: string }
 
         <header>
           <p className="text-sm font-medium text-cyan-400">Cover Letter Assistant</p>
-          <h1 className="mt-3 text-4xl font-bold tracking-tight">A cover letter you can trust</h1>
+          <h1 className="mt-3 text-4xl font-bold tracking-tight">Draft a cover letter from your resume</h1>
           <p className="mt-3 max-w-2xl text-slate-400">
-            We draft your letter from your resume and check every statement against it before you see it.
-            Nothing is saved until you approve or edit it.
+            Each paragraph is written from lines in your resume, and every skill and figure it mentions is checked
+            against them. The check does not judge tone or how strongly experience is described, so read the draft
+            before approving it. Nothing is saved until you approve or edit it.
           </p>
         </header>
 
@@ -131,8 +132,9 @@ export default function AgentClient({ applicationId }: { applicationId: string }
                     Edit them if they aren&apos;t accurate before approving.
                   </p>
                 ) : (
-                  <p className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-4 text-sm text-emerald-200">
-                    Every statement in this draft matches your resume.
+                  <p className="rounded-xl border border-slate-700 bg-slate-950 p-4 text-sm text-slate-300">
+                    No skills or figures were found that your resume doesn&apos;t state. Review the wording before
+                    approving.
                   </p>
                 )}
 

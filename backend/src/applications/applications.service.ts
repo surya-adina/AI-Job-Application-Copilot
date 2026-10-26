@@ -161,6 +161,10 @@ export class ApplicationsService {
 
 
     const analysisComplete = Boolean(application.analysis);
+    const tailoredRun = await this.prisma.agentRun.findFirst({
+      where: { applicationId, task: 'resume_tailoring', status: 'COMPLETED' },
+      select: { id: true },
+    });
 
     return {
       application: {
@@ -190,6 +194,7 @@ export class ApplicationsService {
         resumeUploaded: true,
         analysisComplete,
         resumeReviewComplete: Boolean(application.resumeReview),
+        resumeTailored: Boolean(tailoredRun),
         coverLetterComplete: Boolean(application.coverLetter),
         interviewPrepComplete: Boolean(application.interviewPrep),
       },

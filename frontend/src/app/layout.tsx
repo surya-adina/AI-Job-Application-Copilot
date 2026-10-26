@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "AI Job Application Copilot",
   description:
-    "Match your resume to a job, see skill-by-skill evidence, and draft fact-checked cover letters and interview prep.",
+    "Match your resume to a job, see skill-by-skill evidence, tailor your resume with checked rewrites, and draft cover letters and interview prep.",
 };
 
 export default function RootLayout({

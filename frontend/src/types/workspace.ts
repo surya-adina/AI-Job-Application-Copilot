@@ -28,6 +28,7 @@ sourceUrl: string | null;
     resumeUploaded: boolean;
     analysisComplete: boolean;
     resumeReviewComplete: boolean;
+    resumeTailored: boolean;
     coverLetterComplete: boolean;
     interviewPrepComplete: boolean;
   };

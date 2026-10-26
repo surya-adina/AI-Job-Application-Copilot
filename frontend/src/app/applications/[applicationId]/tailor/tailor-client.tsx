@@ -135,9 +135,9 @@ export default function TailorClient({ applicationId }: { applicationId: string 
           <p className="text-sm font-medium text-cyan-400">Tailor Resume</p>
           <h1 className="mt-3 text-4xl font-bold tracking-tight">Reword your resume for this job</h1>
           <p className="mt-3 max-w-2xl text-slate-400">
-            We pick the lines that matter most for this job and reword them in the job&apos;s terms. Every suggestion
-            is checked so it says nothing your original line doesn&apos;t. You choose what to use, and the result is
-            saved as a new resume. Your original stays as it is.
+            The lines most relevant to this job are reworded in its terms. Each suggestion is checked against its
+            original line for new skills, figures and wording; the check is not exhaustive, so review each one before
+            using it. The result is saved as a new resume and your original stays as it is.
           </p>
         </header>
 
@@ -175,7 +175,7 @@ export default function TailorClient({ applicationId }: { applicationId: string 
                 <p className="font-medium text-slate-200">Skills this job asks for that your resume doesn&apos;t show</p>
                 <p className="mt-1 text-slate-400">{review.missingSkills.join(', ')}</p>
                 <p className="mt-2 text-slate-500">
-                  Tailoring never adds these. Add them yourself only if you genuinely have the experience.
+                  Suggestions that add one of these are flagged. Add them yourself only if you have the experience.
                 </p>
               </div>
             )}
